@@ -21,6 +21,8 @@ import requests
 
 
 URL = "https://quotes.toscrape.com/js/"
+# This user agent is attached to both the simple requests call and the browser
+# page. Keeping it consistent helps compare the two access routes.
 USER_AGENT = "methodsNET-VLOP-course/1.0 dynamic walkthrough"
 
 
@@ -33,26 +35,44 @@ static_response.raise_for_status()
 
 static_html = static_response.text
 print("Static HTML characters:", len(static_html))
+# This test searches the raw HTML for text that should appear after JavaScript
+# renders the quotes. If it prints False, requests did not receive the user-
+# visible quote text in the initial server response.
 print("Does static HTML contain quote text?", "The world as we have created it" in static_html)
 
 
 # %% 3. Define an async browser function
 
 async def collect_rendered_page(url: str):
+    # Playwright is imported inside the function so the rest of the file can be
+    # read even on machines where Playwright has not yet been installed.
     from playwright.async_api import async_playwright
 
     async with async_playwright() as p:
         # In live teaching, change headless=False to let students watch.
+        # chromium.launch() starts a browser process controlled by Python.
         browser = await p.chromium.launch(headless=True)
+        # new_page() opens a browser tab. user_agent makes the browser request
+        # identify itself with the same teaching string used above.
         page = await browser.new_page(user_agent=USER_AGENT)
 
         # Waiting is a methodological choice. Too short and data may be missing;
         # too long and the script becomes slow or brittle.
+        # wait_until="networkidle" waits until network activity has quieted down,
+        # which is often useful after JavaScript-driven loading.
         await page.goto(url, wait_until="networkidle")
 
         # Extract visible quote blocks after JavaScript has rendered them.
         quotes = await page.eval_on_selector_all(
+            # ".quote" selects all rendered elements with class="quote".
             ".quote",
+            # The string below is JavaScript executed inside the browser page.
+            # blocks is the list of .quote elements. For each block:
+            # - querySelector(".text") finds the quote text element;
+            # - querySelector(".author") finds the author element;
+            # - querySelectorAll(".tag") finds all tag elements;
+            # - ?. means "if this element exists, read from it; otherwise null";
+            # - ?? null replaces missing values with null for Python.
             """blocks => blocks.map(block => ({
                 quote: block.querySelector(".text")?.innerText ?? null,
                 author: block.querySelector(".author")?.innerText ?? null,
@@ -60,8 +80,14 @@ async def collect_rendered_page(url: str):
             }))""",
         )
 
+        # page.content() saves the rendered DOM after JavaScript execution, not
+        # just the original server HTML.
         html = await page.content()
+        # A full-page screenshot is visual evidence of what the automated browser
+        # saw. It can reveal cookie banners, failed rendering, or layout changes.
         screenshot = await page.screenshot(full_page=True)
+        # Always close automated browsers so scripts do not leave background
+        # browser processes running.
         await browser.close()
 
     return html, quotes, screenshot
@@ -73,6 +99,8 @@ rendered_html, quotes, screenshot = asyncio.run(collect_rendered_page(URL))
 
 print("Rendered HTML characters:", len(rendered_html))
 print("Quotes extracted:", len(quotes))
+# Converting quotes to a DataFrame is only for display here; the same conversion
+# is repeated below when saving the processed CSV.
 print(pd.DataFrame(quotes).head())
 
 
@@ -89,8 +117,12 @@ rendered_path = raw_dir / "walkthrough_rendered_quotes.html"
 screenshot_path = raw_dir / "walkthrough_rendered_quotes.png"
 quotes_path = processed_dir / "walkthrough_rendered_quotes.csv"
 
+# Rendered HTML and screenshot are raw evidence: they preserve what the browser
+# saw before our extraction code reduced it to a table.
 rendered_path.write_text(rendered_html, encoding="utf-8")
 screenshot_path.write_bytes(screenshot)
+# The CSV is processed data: convenient for analysis, but less complete than the
+# rendered HTML and screenshot.
 pd.DataFrame(quotes).to_csv(quotes_path, index=False)
 
 print("Saved rendered HTML:", rendered_path)
