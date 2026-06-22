@@ -41,9 +41,11 @@ params = {
     # governance" or "misinformation" changes the records that can enter the
     # dataset, just as changing a search term in a database search would.
     "srsearch": "digital services act",
-    # srlimit is the number of search results requested on this page of results.
-    # We use 5 so students can inspect the response by eye. Larger values collect
-    # more rows per request but make debugging harder.
+    # srlimit is the number of search results requested per API response, not the
+    # total number of results in the whole dataset. We use 5 only because this is
+    # a classroom inspection run: the response is small enough to read by eye.
+    # In a real project, page size should be chosen based on API limits,
+    # reliability, server load, and the research question.
     "srlimit": 5,
     # format="json" asks for machine-readable JSON rather than XML or another
     # response format. JSON is what response.json() expects below.
@@ -73,8 +75,15 @@ print(response.url)
 # 429, or 500-series codes would require different handling.
 print(response.status_code)
 
-
 # %% 3. Inspect the JSON response before flattening it
+
+print(response.headers.get("content-type"))
+
+# If content-type says text/html, use .text.
+# If it says application/json, use .json().
+
+# print(response.text)
+# payload = response.text
 
 payload = response.json()
 
@@ -115,11 +124,16 @@ for item in payload["query"]["search"]:
     }
     rows.append(row)
 
+pprint(rows)
+
+
 # pandas.DataFrame converts a list of row dictionaries into a table. Each
 # dictionary key becomes a column, and each dictionary becomes a row.
 df = pd.DataFrame(rows)
 print(df)
 
+for a in df.snippet:
+    print(a, '\n')
 
 # %% 5. Follow the continuation token for a second page
 
@@ -133,15 +147,63 @@ pprint(continuation)
 # {**params, **continuation} creates a new dictionary containing the original
 # query parameters plus the continuation fields returned by the API. If both
 # dictionaries contained the same key, the continuation value would win.
+#
+# Important: srlimit=5 still applies. The continuation fields do not increase
+# the page size; they tell MediaWiki to return the next slice of 5 results.
 params_page_2 = {**params, **continuation}
 response_2 = requests.get(API_URL, params=params_page_2, headers=headers, timeout=30)
 payload_2 = response_2.json()
 
 print(response_2.url)
-print("Number of results on page 2:", len(payload_2["query"]["search"]))
+
+# Printing only len(payload_2["query"]["search"]) is not very informative here:
+# if there are at least 5 more matches, it will be 5 because we set srlimit=5.
+# The more useful teaching check is whether page 2 contains different records.
+page_1_ids = [item["pageid"] for item in payload["query"]["search"]]
+page_2_ids = [item["pageid"] for item in payload_2["query"]["search"]]
+
+print("Page 1 IDs:", page_1_ids)
+print("Page 2 IDs:", page_2_ids)
+print("Overlap between page 1 and page 2:", set(page_1_ids) & set(page_2_ids))
+
+print("\nPage 1 titles:")
+for item in payload["query"]["search"]:
+    print("-", item["title"])
+
+print("\nPage 2 titles:")
+for item in payload_2["query"]["search"]:
+    print("-", item["title"])
 
 
-# %% 6. Collect several pages in a reusable function
+# %% 6. Scale the same idea for a real collection
+
+# The 5 + 5 example above is intentionally tiny. It is for understanding the
+# mechanics of pagination, not for producing a meaningful research dataset.
+#
+# A real collection would usually set:
+# - a larger page_size, if the API allows it;
+# - a deliberate max_pages value;
+# - stopping rules tied to the research question;
+# - logging for errors, rate limits, and empty pages.
+#
+# Example:
+#   page_size = 50
+#   max_pages = 20
+#   maximum requested results = 50 * 20 = 1000
+#
+# That still does not mean "all relevant Wikipedia pages." It means "up to 1000
+# API search results returned by this query under these API settings."
+real_run_example = {
+    "query": "digital services act",
+    "page_size": 50,
+    "max_pages": 20,
+    "maximum_requested_results": 50 * 20,
+}
+
+pprint(real_run_example)
+
+
+# %% 7. Collect several pages in a reusable function
 
 def collect_wikipedia_search(query: str, max_pages: int = 3, page_size: int = 10):
     """Return both processed rows and raw response pages.
@@ -221,7 +283,7 @@ df = pd.DataFrame(rows)
 print(df[["page_number", "title", "wordcount"]])
 
 
-# %% 7. Save raw, processed, and provenance files
+# %% 8. Save raw, processed, and provenance files
 
 outdir = Path("../data") if Path.cwd().name == "teaching_walkthroughs" else Path("data")
 # The conditional path above keeps the example usable whether students run it
@@ -269,7 +331,7 @@ print(processed_path)
 print(provenance_path)
 
 
-# %% 8. Teaching prompts
+# %% 9. Teaching prompts
 
 questions = [
     "What exactly is the population of records this API query can return?",
