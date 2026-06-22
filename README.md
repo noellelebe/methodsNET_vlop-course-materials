@@ -31,18 +31,7 @@ cd methodsNET_vlop-course-materials
 This creates a folder called `methodsNET_vlop-course-materials`, which is the
 local copy of the GitHub repository.
 
-### 2. Set Up Python
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python "scripts/runnable_workflows/00_setup_check.py"
-```
-
-Some scripts use live websites or APIs. They include polite defaults and explicit notes where credentials, platform approval, or local files are required.
-
-### 3. Update the Course Files Later
+### 2. Update the Course Files Later
 
 If the course materials change on GitHub, you can update your local folder from
 Terminal:
@@ -59,6 +48,17 @@ commit, working tree clean`, it is safe to run `git pull`.
 If `git status` lists files you changed, save a copy of your edits before
 pulling, or ask for help. Git may need you to decide how to combine your changes
 with the updated course files.
+
+### 3. Set Up Python
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python "scripts/runnable_workflows/00_setup_check.py"
+```
+
+Some scripts use live websites or APIs. They include polite defaults and explicit notes where credentials, platform approval, or local files are required.
 
 ## Directory Layout
 
