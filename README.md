@@ -3,19 +3,20 @@
 This pack contains two kinds of teaching material:
 
 - `book/textbook.md`: a textbook-style student reader for the one-week course.
-- `scripts/`: Python scripts for hands-on exercises in API collection, scraping, browser automation, DSA transparency data planning, data-quality auditing, AI-assisted collection, and reproducible workflow logging.
-- `teaching_walkthroughs/`: heavily annotated, cell-style Python scripts for live teaching. These are meant to be opened and run section by section while you explain the concepts.
+- `scripts/exercises and automation/`: Python scripts for hands-on exercises in API collection, scraping, browser automation, DSA transparency data planning, data-quality auditing, AI-assisted collection, and reproducible workflow logging.
+- `scripts/teaching_walkthroughs/`: heavily annotated, cell-style Python scripts for live teaching. These are meant to be opened and run section by section while you explain the concepts.
+- `examples/`: small configs, synthetic data, and templates for teaching exercises.
 
 The materials assume a one-week intensive course. They are designed to be modular: you can assign the book as preparatory reading, then use one or two scripts per day in class.
 
 ## Quick Start
 
 ```bash
-cd vlop_course_pack
+cd methodsNET
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python scripts/00_setup_check.py
+python "scripts/exercises and automation/00_setup_check.py"
 ```
 
 Some scripts use live websites or APIs. They include polite defaults and explicit notes where credentials, platform approval, or local files are required.
@@ -23,28 +24,33 @@ Some scripts use live websites or APIs. They include polite defaults and explici
 ## Directory Layout
 
 ```text
-vlop_course_pack/
+methodsNET/
   book/
     textbook.md
   scripts/
-    00_setup_check.py
-    01_api_wikipedia.py
-    02_api_youtube_template.py
-    03_static_scraper.py
-    04_dynamic_browser_playwright.py
-    05_dsa_transparency_workflow.py
-    06_data_quality_audit.py
-    07_ai_augmented_collection.py
-    08_reproducible_workflow.py
-    common.py
-  teaching_walkthroughs/
-    01_api_collection_walkthrough.py
-    02_static_scraping_walkthrough.py
-    03_dynamic_browser_walkthrough.py
-    04_dsa_transparency_walkthrough.py
-    05_data_quality_audit_walkthrough.py
-    06_ai_assisted_collection_walkthrough.py
-    07_reproducible_project_walkthrough.py
+    exercises and automation/
+      00_setup_check.py
+      01_api_wikipedia.py
+      02_api_youtube_template.py
+      03_static_scraper.py
+      04_dynamic_browser_playwright.py
+      05_dsa_transparency_workflow.py
+      06_data_quality_audit.py
+      07_ai_augmented_collection.py
+      08_reproducible_workflow.py
+      common.py
+    teaching_walkthroughs/
+      01_api_collection_walkthrough.py
+      02_static_scraping_walkthrough.py
+      03_dynamic_browser_walkthrough.py
+      04_dsa_transparency_walkthrough.py
+      05_data_quality_audit_walkthrough.py
+      06_ai_assisted_collection_walkthrough.py
+      07_reproducible_project_walkthrough.py
+  examples/
+    configs/
+    data/
+    templates/
   data/
     raw/
     processed/
@@ -62,19 +68,19 @@ Use these in class when you want to guide students through the logic line by lin
 Suggested sequence:
 
 ```bash
-python teaching_walkthroughs/01_api_collection_walkthrough.py
-python teaching_walkthroughs/02_static_scraping_walkthrough.py
-python teaching_walkthroughs/04_dsa_transparency_walkthrough.py
-python teaching_walkthroughs/05_data_quality_audit_walkthrough.py
-python teaching_walkthroughs/06_ai_assisted_collection_walkthrough.py
-python teaching_walkthroughs/07_reproducible_project_walkthrough.py
+python scripts/teaching_walkthroughs/01_api_collection_walkthrough.py
+python scripts/teaching_walkthroughs/02_static_scraping_walkthrough.py
+python scripts/teaching_walkthroughs/04_dsa_transparency_walkthrough.py
+python scripts/teaching_walkthroughs/05_data_quality_audit_walkthrough.py
+python scripts/teaching_walkthroughs/06_ai_assisted_collection_walkthrough.py
+python scripts/teaching_walkthroughs/07_reproducible_project_walkthrough.py
 ```
 
 The dynamic browser walkthrough is optional because it requires Playwright browser installation:
 
 ```bash
 playwright install chromium
-python teaching_walkthroughs/03_dynamic_browser_walkthrough.py
+python scripts/teaching_walkthroughs/03_dynamic_browser_walkthrough.py
 ```
 
 ### 2. Runnable Exercise Scripts
@@ -82,13 +88,37 @@ python teaching_walkthroughs/03_dynamic_browser_walkthrough.py
 Use these when students are ready to run more reusable command-line workflows:
 
 ```bash
-python scripts/01_api_wikipedia.py --query "digital services act" --pages 2
-python scripts/03_static_scraper.py --url https://quotes.toscrape.com/
-python scripts/05_dsa_transparency_workflow.py --start 2025-01-01 --end 2025-01-03
-python scripts/07_ai_augmented_collection.py
+python "scripts/exercises and automation/01_api_wikipedia.py" --query "digital services act" --pages 2
+python "scripts/exercises and automation/03_static_scraper.py" --url https://quotes.toscrape.com/
+python "scripts/exercises and automation/05_dsa_transparency_workflow.py" --start 2025-01-01 --end 2025-01-03
+python "scripts/exercises and automation/07_ai_augmented_collection.py"
 ```
 
 The runnable scripts are more compact than the walkthroughs, but they now include methodological comments explaining key design choices: pagination, raw vs processed data, robots checks, rendered DOMs, screenshots, provenance, and missingness.
+
+## Example Inputs
+
+The `examples/` folder contains small files for teaching and testing without
+depending on live platform access:
+
+- `examples/configs/`: YAML configuration examples for command-line workflows.
+- `examples/data/`: tiny synthetic CSVs for data-quality and DSA transparency exercises.
+- `examples/templates/`: DSA request, audit report, AI log, and codebook templates.
+
+Useful commands:
+
+```bash
+python "scripts/exercises and automation/06_data_quality_audit.py" \
+  --reference examples/data/platform_public_reference.csv \
+  --observed examples/data/platform_api_observed.csv \
+  --id-col post_id
+
+python "scripts/exercises and automation/05_dsa_transparency_workflow.py" \
+  --input examples/data/synthetic_dsa_tdb_extract.csv
+
+python "scripts/exercises and automation/08_reproducible_workflow.py" \
+  --config examples/configs/wikipedia_workflow.yml
+```
 
 ## Ethical Use
 

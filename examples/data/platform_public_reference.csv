@@ -1,0 +1,5 @@
+post_id,url,author,created_at,engagement,source
+a1,https://example.test/a1,u01,2026-01-01,10,public_interface
+a2,https://example.test/a2,u02,2026-01-01,5,public_interface
+a3,https://example.test/a3,u03,2026-01-02,22,public_interface
+a4,https://example.test/a4,u04,2026-01-02,1,public_interface

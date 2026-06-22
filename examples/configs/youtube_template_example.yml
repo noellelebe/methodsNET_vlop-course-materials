@@ -1,0 +1,9 @@
+query: digital services act
+pages: 1
+page_size: 10
+outdir: data
+environment_variables:
+  YOUTUBE_API_KEY: required
+teaching_note: >
+  This is a template for discussing authenticated APIs, quotas, and terms.
+  Students should not share API keys or commit credentials.

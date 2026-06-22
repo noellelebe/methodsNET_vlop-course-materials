@@ -1,0 +1,4 @@
+source_url,link_text,href
+https://quotes.toscrape.com/,Login,https://quotes.toscrape.com/login
+https://quotes.toscrape.com/,Next,https://quotes.toscrape.com/page/2/
+https://quotes.toscrape.com/,love,https://quotes.toscrape.com/tag/love/

@@ -1,0 +1,4 @@
+column_name,definition,source_field,transformation,missingness_meaning,privacy_sensitivity,analysis_caution
+post_id,Unique content identifier,platform record,id copied as string,missing means record cannot be joined,medium,IDs may be platform-specific or unstable
+created_at,Timestamp of content creation,platform timestamp,parsed to ISO date,missing limits time-series analysis,low,timezone must be documented
+author,Account or page identifier,platform metadata,copied or hashed,missing may indicate metadata stripping,high,avoid deanonymizing users

@@ -1,0 +1,7 @@
+url: https://quotes.toscrape.com/
+outdir: data
+ignore_robots: false
+teaching_note: >
+  Use this with scripts/03_static_scraper.py or the static scraping walkthrough.
+  The site is designed for scraping practice; do not treat that as permission
+  to scrape arbitrary platforms.

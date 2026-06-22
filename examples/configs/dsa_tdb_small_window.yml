@@ -1,0 +1,7 @@
+start_date: "2025-01-01"
+end_date: "2025-01-03"
+output_directory: data/dsa_tdb_example
+recommended_first_step: download-aggs
+teaching_note: >
+  The full DSA Transparency Database is large. Begin with aggregates or a very
+  small daily window, then inspect row counts and schema before expanding.
