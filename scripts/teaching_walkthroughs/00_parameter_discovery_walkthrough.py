@@ -48,6 +48,9 @@ import requests
 
 
 API_HELP_URL = "https://en.wikipedia.org/w/api.php"
+# MediaWiki asks API clients to identify themselves. Without a User-Agent,
+# Wikipedia may reject the request with a 403 Forbidden response.
+USER_AGENT = "methodsNET-VLOP-course/1.0 parameter discovery walkthrough"
 
 help_params = {
     # action=help asks MediaWiki for API help text.
@@ -57,7 +60,12 @@ help_params = {
     "modules": "query+search",
 }
 
-help_response = requests.get(API_HELP_URL, params=help_params, timeout=30)
+help_response = requests.get(
+    API_HELP_URL,
+    params=help_params,
+    headers={"User-Agent": USER_AGENT},
+    timeout=30,
+)
 help_response.raise_for_status()
 
 # The help response is text/html rather than JSON. We print a short excerpt so
