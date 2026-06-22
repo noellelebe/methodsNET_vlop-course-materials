@@ -42,6 +42,24 @@ python "scripts/runnable_workflows/00_setup_check.py"
 
 Some scripts use live websites or APIs. They include polite defaults and explicit notes where credentials, platform approval, or local files are required.
 
+### 3. Update the Course Files Later
+
+If the course materials change on GitHub, you can update your local folder from
+Terminal:
+
+```bash
+cd ~/Documents/methodsNET_vlop-course-materials
+git status
+git pull
+```
+
+`git status` tells you whether you have local changes. If it says `nothing to
+commit, working tree clean`, it is safe to run `git pull`.
+
+If `git status` lists files you changed, save a copy of your edits before
+pulling, or ask for help. Git may need you to decide how to combine your changes
+with the updated course files.
+
 ## Directory Layout
 
 ```text
