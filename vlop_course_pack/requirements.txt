@@ -1,0 +1,11 @@
+beautifulsoup4>=4.12
+pandas>=2.0
+pyyaml>=6.0
+requests>=2.31
+tqdm>=4.66
+
+# Optional, used by scripts/04_dynamic_browser_playwright.py:
+playwright>=1.44
+
+# Optional, useful for parquet DSA Transparency Database aggregates:
+pyarrow>=15.0

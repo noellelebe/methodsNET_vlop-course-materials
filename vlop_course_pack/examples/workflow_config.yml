@@ -1,0 +1,5 @@
+collector: wikipedia_search
+query: digital services act
+pages: 1
+page_size: 10
+outdir: data
