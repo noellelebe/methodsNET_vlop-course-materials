@@ -79,6 +79,7 @@ methodsNET_vlop-course-materials/
       08_reproducible_workflow.py
       common.py
     teaching_walkthroughs/
+      00_parameter_discovery_walkthrough.py
       01_api_collection_walkthrough.py
       02_static_scraping_walkthrough.py
       03_dynamic_browser_walkthrough.py
@@ -107,6 +108,7 @@ Use these in class when you want to guide students through the logic line by lin
 Suggested sequence:
 
 ```bash
+python scripts/teaching_walkthroughs/00_parameter_discovery_walkthrough.py
 python scripts/teaching_walkthroughs/01_api_collection_walkthrough.py
 python scripts/teaching_walkthroughs/02_static_scraping_walkthrough.py
 python scripts/teaching_walkthroughs/04_dsa_transparency_walkthrough.py
