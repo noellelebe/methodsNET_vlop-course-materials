@@ -14,7 +14,7 @@ scripts and walkthroughs concrete without requiring live platform access.
 Run the data-quality audit with bundled synthetic data:
 
 ```bash
-python "scripts/exercises and automation/06_data_quality_audit.py" \
+python "scripts/runnable_workflows/06_data_quality_audit.py" \
   --reference examples/data/platform_public_reference.csv \
   --observed examples/data/platform_api_observed.csv \
   --id-col post_id
@@ -23,14 +23,14 @@ python "scripts/exercises and automation/06_data_quality_audit.py" \
 Summarize the synthetic DSA transparency extract:
 
 ```bash
-python "scripts/exercises and automation/05_dsa_transparency_workflow.py" \
+python "scripts/runnable_workflows/05_dsa_transparency_workflow.py" \
   --input examples/data/synthetic_dsa_tdb_extract.csv
 ```
 
 Run the reproducible Wikipedia workflow:
 
 ```bash
-python "scripts/exercises and automation/08_reproducible_workflow.py" \
+python "scripts/runnable_workflows/08_reproducible_workflow.py" \
   --config examples/configs/wikipedia_workflow.yml
 ```
 

@@ -3,7 +3,7 @@
 This pack contains two kinds of teaching material:
 
 - `book/textbook.md`: a textbook-style student reader for the one-week course.
-- `scripts/exercises and automation/`: Python scripts for hands-on exercises in API collection, scraping, browser automation, DSA transparency data planning, data-quality auditing, AI-assisted collection, and reproducible workflow logging.
+- `scripts/runnable_workflows/`: Python scripts for hands-on exercises in API collection, scraping, browser automation, DSA transparency data planning, data-quality auditing, AI-assisted collection, and reproducible workflow logging.
 - `scripts/teaching_walkthroughs/`: heavily annotated, cell-style Python scripts for live teaching. These are meant to be opened and run section by section while you explain the concepts.
 - `examples/`: small configs, synthetic data, and templates for teaching exercises.
 
@@ -37,7 +37,7 @@ local copy of the GitHub repository.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python "scripts/exercises and automation/00_setup_check.py"
+python "scripts/runnable_workflows/00_setup_check.py"
 ```
 
 Some scripts use live websites or APIs. They include polite defaults and explicit notes where credentials, platform approval, or local files are required.
@@ -49,7 +49,7 @@ methodsNET_vlop-course-materials/
   book/
     textbook.md
   scripts/
-    exercises and automation/
+    runnable_workflows/
       00_setup_check.py
       01_api_wikipedia.py
       02_api_youtube_template.py
@@ -109,10 +109,10 @@ python scripts/teaching_walkthroughs/03_dynamic_browser_walkthrough.py
 Use these when students are ready to run more reusable command-line workflows:
 
 ```bash
-python "scripts/exercises and automation/01_api_wikipedia.py" --query "digital services act" --pages 2
-python "scripts/exercises and automation/03_static_scraper.py" --url https://quotes.toscrape.com/
-python "scripts/exercises and automation/05_dsa_transparency_workflow.py" --start 2025-01-01 --end 2025-01-03
-python "scripts/exercises and automation/07_ai_augmented_collection.py"
+python "scripts/runnable_workflows/01_api_wikipedia.py" --query "digital services act" --pages 2
+python "scripts/runnable_workflows/03_static_scraper.py" --url https://quotes.toscrape.com/
+python "scripts/runnable_workflows/05_dsa_transparency_workflow.py" --start 2025-01-01 --end 2025-01-03
+python "scripts/runnable_workflows/07_ai_augmented_collection.py"
 ```
 
 The runnable scripts are more compact than the walkthroughs, but they now include methodological comments explaining key design choices: pagination, raw vs processed data, robots checks, rendered DOMs, screenshots, provenance, and missingness.
@@ -129,15 +129,15 @@ depending on live platform access:
 Useful commands:
 
 ```bash
-python "scripts/exercises and automation/06_data_quality_audit.py" \
+python "scripts/runnable_workflows/06_data_quality_audit.py" \
   --reference examples/data/platform_public_reference.csv \
   --observed examples/data/platform_api_observed.csv \
   --id-col post_id
 
-python "scripts/exercises and automation/05_dsa_transparency_workflow.py" \
+python "scripts/runnable_workflows/05_dsa_transparency_workflow.py" \
   --input examples/data/synthetic_dsa_tdb_extract.csv
 
-python "scripts/exercises and automation/08_reproducible_workflow.py" \
+python "scripts/runnable_workflows/08_reproducible_workflow.py" \
   --config examples/configs/wikipedia_workflow.yml
 ```
 
