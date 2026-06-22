@@ -11,8 +11,29 @@ The materials assume a one-week intensive course. They are designed to be modula
 
 ## Quick Start
 
+### 1. Get the Course Files
+
+If you have never used Git before, install it first:
+
+- macOS: install Xcode Command Line Tools by opening Terminal and running `xcode-select --install`.
+- Windows: install Git from https://git-scm.com/downloads.
+- Linux: install Git with your package manager, for example `sudo apt install git`.
+
+Then open Terminal, choose where you want the course folder to live, and clone
+the repository:
+
 ```bash
-cd methodsNET
+cd ~/Documents
+git clone https://github.com/noellelebe/methodsNET_vlop-course-materials.git
+cd methodsNET_vlop-course-materials
+```
+
+This creates a folder called `methodsNET_vlop-course-materials`, which is the
+local copy of the GitHub repository.
+
+### 2. Set Up Python
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -24,7 +45,7 @@ Some scripts use live websites or APIs. They include polite defaults and explici
 ## Directory Layout
 
 ```text
-methodsNET/
+methodsNET_vlop-course-materials/
   book/
     textbook.md
   scripts/
