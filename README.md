@@ -3,6 +3,8 @@
 This pack contains two kinds of teaching material:
 
 - `book/textbook.md`: a textbook-style student reader for the one-week course.
+- `book/daily_textbook/`: expanded day-by-day textbook chapters matching the
+  five-day course schedule.
 - `scripts/runnable_workflows/`: Python scripts for hands-on exercises in API collection, scraping, browser automation, DSA transparency data planning, data-quality auditing, AI-assisted collection, and reproducible workflow logging.
 - `scripts/teaching_walkthroughs/`: heavily annotated, cell-style Python scripts for live teaching. These are meant to be opened and run section by section while you explain the concepts.
 - `examples/`: small configs, synthetic data, and templates for teaching exercises.
