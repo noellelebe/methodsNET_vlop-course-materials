@@ -24,10 +24,24 @@ The DSA matters methodologically because it changes the access landscape. It
 does not simply give researchers a download button. It creates structured
 mechanisms, eligibility conditions, oversight roles, and procedural pathways.
 
+This is why DSA access should be taught as infrastructure rather than as a
+single legal citation. Infrastructure includes forms, portals, authorities,
+data catalogues, review timelines, security requirements, access environments,
+and dispute points. Each part affects what research can be done. A brilliant
+research question may still fail if the requested data are not proportionate, if
+the security plan is weak, or if the access modality prevents the planned
+analysis.
+
 Researchers must connect their projects to systemic risks. These may include
 dissemination of illegal content, effects on fundamental rights, civic discourse
 and electoral processes, public health, protection of minors, gender-based
 violence, and other societal harms.
+
+The systemic-risk link matters because it narrows the purpose of access.
+Article 40 mechanisms are not general curiosity tools. A request should explain
+how the data are necessary for studying or detecting systemic risks in the EU.
+This requires translating a social-scientific research question into the
+language of risk, necessity, proportionality, and public interest.
 
 ## 2. Article 40(12) and Article 40(4)
 
@@ -78,6 +92,14 @@ Students should ask: what work can actually be done under this access modality?
 Can raw data be inspected? Can code be exported? Can results be reproduced? Can
 other researchers verify the analysis?
 
+A secure processing environment, for example, may protect sensitive data but
+restrict export of row-level records. That changes the analysis workflow. A
+researcher may need to bring code to the data rather than data to the code. An
+API modality may allow repeated queries but impose rate limits or field
+restrictions. A static export may be easier to analyze but harder to update.
+Access modality is therefore not an administrative detail; it is part of the
+method.
+
 ## 5. Drafting a Strong Request
 
 A strong Article 40 request begins with a research question, not a data wish
@@ -110,6 +132,14 @@ define visibility in ways that do not match user experience.
 
 Researchers should read eligibility rules, data dictionaries, query
 documentation, and known limitations before designing analysis.
+
+Platform research tools also raise an epistemic problem. They can appear more
+authoritative than scraped data because they are official. But official does not
+mean complete. The platform defines the searchable universe, the query language,
+the returned metadata, and sometimes the ranking or sampling logic. A researcher
+should ask: what public content can I observe that this tool does not return?
+What metadata do users see that the tool strips out? Which accounts, languages,
+regions, or media types are excluded?
 
 ## 7. DSA Transparency Database
 
@@ -146,6 +176,18 @@ Audit questions include:
 Missingness is not only a technical nuisance. Metadata stripping may make a
 research question impossible. Scope narrowing may exclude the most relevant
 content. Rate limits may bias time windows.
+
+Auditing should happen before substantive modeling or interpretation. A model
+cannot repair a dataset whose collection process excluded the core population of
+interest. A descriptive table can be misleading if categories are not comparable
+across platforms. A large N can create false confidence when the missingness is
+systematic.
+
+For DSA and platform-tool data, a useful audit report should include the access
+route, unit of analysis, schema version if known, time period, row counts,
+missing fields, duplicate identifiers, platform coverage, category coverage,
+rate-limit or query-limit notes, and a short interpretation of what the dataset
+cannot support.
 
 ## End-of-Day Questions
 

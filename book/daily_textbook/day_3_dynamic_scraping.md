@@ -23,6 +23,13 @@ response. For simple pages, that response contains the content of interest. For
 JavaScript-heavy pages, it may contain only an app shell: scripts, containers,
 and placeholders.
 
+This distinction is one of the most important technical ideas in scraping.
+`requests` is not a browser. It does not execute JavaScript, respond to clicks,
+maintain the same rendering state, or wait for client-side application logic.
+It asks the server for a resource and returns the response. A browser does much
+more: it parses HTML, applies CSS, executes JavaScript, makes follow-up network
+requests, stores cookies, manages sessions, and updates the DOM.
+
 The rendered DOM is what exists after the browser has executed JavaScript. It
 may contain elements that were not present in the initial HTML. A dynamic
 scraping workflow often needs to compare the static response with the rendered
@@ -31,6 +38,11 @@ page.
 A useful diagnostic is to search the static HTML for text that appears visibly
 in the browser. If the text is absent from the static HTML but visible in the
 browser, static scraping is not enough.
+
+The opposite is also possible. Some information may exist in the raw HTML but
+not be visible on screen. Hidden metadata, embedded JSON, accessibility labels,
+or structured data can appear in source. Researchers should not assume that
+"visible page" and "available HTML" are identical.
 
 ## 2. Browser Automation
 
@@ -48,6 +60,12 @@ size, scroll count, and selectors. Each parameter changes what the script sees.
 For example, `wait_until="networkidle"` waits until network activity quiets
 down. This may help dynamic content load, but it can also be slow or unreliable
 on pages that continuously poll servers.
+
+Browser automation therefore creates an observational protocol. It is closer to
+instructing a research assistant to open a browser, wait, scroll, click, and
+record what appears than to querying a clean database. The protocol should be
+written down. If two researchers use different viewport sizes, wait conditions,
+login states, or scroll depths, they may observe different pages.
 
 ## 3. Screenshots and Rendered HTML
 
@@ -93,6 +111,13 @@ Network inspection is a diagnostic method, not a permission slip.
 When network inspection suggests a more structured data route, researchers must
 ask whether it is documented, permitted, stable, and ethically appropriate.
 
+Network inspection is especially useful for teaching because it reveals that
+modern web pages are not single documents. They are sequences of requests and
+responses. A feed may first load a shell, then a configuration file, then a JSON
+batch of posts, then images, then more posts after scrolling. Understanding this
+sequence helps students see why dynamic scraping can fail and why APIs or
+official data exports are often preferable when available.
+
 ## 6. Debugging Dynamic Scrapers
 
 Dynamic scrapers fail in many ways. The page may load slowly. A selector may
@@ -136,6 +161,12 @@ controls, rate limits, terms, institutional review, and data protection rules.
 
 The ethical question is not only whether a script can collect data. It is
 whether the collection is justified, proportionate, and documented.
+
+Students should also distinguish between making a workflow robust and making it
+evasive. Robustness means logging, checking, waiting for legitimate content to
+load, and failing visibly. Evasion means disguising the client, bypassing access
+controls, defeating CAPTCHAs, or ignoring explicit restrictions. This course is
+about the first, not the second.
 
 ## End-of-Day Questions
 

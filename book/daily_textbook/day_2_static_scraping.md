@@ -20,6 +20,13 @@ JavaScript, images, and network requests. Static scraping begins with the HTML.
 The scraper sends an HTTP request, receives HTML text, parses it into a tree,
 and extracts selected elements.
 
+The phrase "static scraping" does not mean the website never changes. It means
+that, for the page and fields we care about, the relevant content is already in
+the HTML returned by the initial request. If the server sends the quote text,
+author name, link, or table value in the HTML, a static parser can usually
+extract it. If the server sends only a JavaScript application that later fills
+the page, static scraping will not see the final content.
+
 HTML consists of elements such as headings, links, paragraphs, tables, and
 containers. Elements can have attributes. For scraping, important attributes
 include `class`, `id`, `href`, `src`, and sometimes `data-*` attributes.
@@ -33,6 +40,13 @@ observations. On a practice page, one `.quote` block may correspond to one quote
 record. On a platform, one post card, comment block, advertisement, product
 listing, or moderation notice may correspond to one observation. That decision
 must be justified.
+
+Students should learn to describe this mapping explicitly. For example: "One
+row in the dataset corresponds to one HTML element with class `quote` at the
+time of collection." In a real platform study, the equivalent statement might
+be: "One row corresponds to one public post card visible in search results under
+these query and sorting conditions." That sentence is part of the method, not
+just code commentary.
 
 ## 2. CSS Selectors
 
@@ -48,6 +62,18 @@ Selectors are parameters. They decide what enters the dataset. A selector can be
 too broad, collecting navigation links and page furniture. It can be too narrow,
 missing records that use a slightly different layout. It can be brittle,
 breaking when a site changes class names.
+
+This is why selector discovery should be slow. Beginners often inspect one page,
+copy the first class name that works, and assume the scraper is done. A stronger
+workflow checks several records, verifies that the selector returns the expected
+count, and asks what is excluded. If some posts are promoted, pinned, hidden
+behind "read more" buttons, or rendered with a different layout, a selector may
+systematically miss them.
+
+Selectors can also capture fields that look similar but mean different things.
+For example, a page may have a visible publication date, an edit date, and a
+collection date. If the scraper selects the wrong timestamp element, the
+resulting time series will answer a different question than intended.
 
 Students should learn to connect selectors to visible page structure. Open the
 page in a browser, inspect one record, identify the repeated container, and only
@@ -71,6 +97,12 @@ The separation matters. A researcher should usually fetch once, save the raw
 HTML, and then develop parsing code locally. This avoids repeatedly hitting a
 website while experimenting with selectors. It also preserves evidence of what
 the page looked like at collection time.
+
+Fetching has its own parameters: the URL, headers, cookies if any, timeout,
+request method, and rate. Parsing has different parameters: selectors, field
+names, text-cleaning rules, and missing-value handling. Keeping those tasks
+separate makes debugging easier. If extraction fails, the researcher can ask:
+did the fetch fail, or did the parser fail?
 
 ## 4. Raw HTML as Evidence
 
@@ -138,6 +170,12 @@ Before scraping, ask whether an official API exists, whether the data are
 necessary, whether less intrusive data could answer the question, whether the
 collection could harm users, whether personal data are involved, and how server
 load will be controlled.
+
+There is also a difference between access and redistribution. A researcher may
+be able to view a page and even collect limited data for analysis, but may not
+be allowed or ethically justified in sharing raw HTML, usernames, profile URLs,
+or exact text excerpts. Scraping plans should distinguish collection, storage,
+analysis, publication, and sharing.
 
 ## 8. Robustness
 

@@ -32,6 +32,18 @@ AI is most useful as a supervised assistant. It can speed up routine work, but
 the researcher must verify every claim against official documentation, inspect
 generated code, and test outputs on small examples.
 
+In this course, AI should be presented as a tool for producing drafts and
+diagnostics, not as a source of authority. A useful AI interaction has a narrow
+task, clear context, and a verification plan. "Write a scraper for TikTok" is
+too broad and risky. "Given this small non-sensitive HTML excerpt, suggest two
+possible selectors and explain how to test them" is much safer and more
+teachable.
+
+Students should also learn that AI output is shaped by the prompt. If the
+prompt omits the official documentation, the model may fill gaps with plausible
+but false assumptions. If the prompt omits legal constraints, the model may
+suggest workflows that are technically possible but inappropriate.
+
 ## 2. Dangerous Roles for AI
 
 AI becomes dangerous when it is treated as an authority. It may invent API
@@ -48,6 +60,13 @@ Researchers should treat web content as data, not instructions.
 A third risk is privacy leakage. Pasting scraped content, user profiles, private
 metadata, or sensitive examples into an AI service may violate a data management
 plan or legal obligation.
+
+AI also creates reproducibility problems. The same prompt may produce different
+outputs across models, dates, or settings. A generated selector may work on the
+page shown in the prompt but fail on other pages. A generated API query may use
+an outdated parameter. For this reason, AI-generated code should be treated like
+untrusted draft code: read it, test it, document what was accepted, and discard
+what cannot be verified.
 
 ## 3. AI Provenance
 
@@ -82,6 +101,12 @@ than raw evidence.
 Reports include manifests, provenance files, audit summaries, logs, and
 codebooks. These files explain how to interpret the data.
 
+Reproducibility has two audiences. The first is another researcher who wants to
+understand or repeat the workflow. The second is the future version of the same
+researcher who will return to the project weeks or months later. Good structure
+is a kindness to both. A workflow that only runs in the author's memory is not a
+reproducible workflow.
+
 ## 5. Manifests and Codebooks
 
 A manifest describes a run. It should include creation time, script name,
@@ -108,6 +133,13 @@ drop unexpectedly? Did an API return errors or rate-limit responses?
 
 Breakage is normal. Silent breakage is the danger.
 
+For scheduled collectors, the absence of errors is not enough. A scraper can
+run successfully and collect zero records because a selector changed. An API
+collector can run successfully while receiving only partial data because a rate
+limit was reached. Monitoring should therefore include substantive checks:
+record counts, missingness, duplicate rates, date coverage, and examples of
+extracted records.
+
 ## 7. Combining Sources
 
 Combining API data, scraped data, and transparency data can be powerful, but it
@@ -120,6 +152,12 @@ should record matching rules, unmatched records, duplicates, and ambiguity.
 
 Students should avoid overclaiming. Combining partial views does not create a
 complete view. It creates a more complex partial view.
+
+Source integration should be documented as carefully as collection. If records
+are matched by URL, describe canonicalization rules. If records are matched by
+timestamp, describe time zones and tolerance windows. If records are matched by
+text, describe normalization and collision risks. Every join rule creates false
+positive and false negative possibilities.
 
 ## 8. Final Workflow Critique
 

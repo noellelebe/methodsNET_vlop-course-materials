@@ -59,6 +59,95 @@ An Application Programming Interface, or API, is a structured way for software
 to communicate with another system. For data collection, an API request usually
 has several parts.
 
+The word "interface" is important. An API is not the database, not the platform,
+and not the full internal system. It is a controlled surface through which one
+software system makes certain actions available to another. A platform may store
+far more information internally than its API exposes. The API defines which
+operations are allowed, which parameters can be used, which fields can be
+returned, how many results can be requested, and who is authorized to ask.
+
+This means that an API is both technical infrastructure and a methodological
+filter. If a platform API does not expose deleted content, private moderation
+metadata, impression counts, or recommender-system features, then an API-based
+study cannot directly analyze those things. The absence of a field in an API
+response does not mean the platform does not have that information. It means the
+information is not available through that interface.
+
+### 2.1 API vs. REST API
+
+API is the broad category. A REST API is one common kind of API.
+
+An API can be any structured interface for software interaction. The `pandas`
+function `read_csv()` is part of a library API: Python code calls a function
+provided by the pandas package. An operating system has APIs for file access,
+networking, windows, and permissions. A database driver has an API for sending
+queries. These are APIs, but they are not necessarily web APIs.
+
+A REST API is a web-based API style built around standard web concepts:
+
+- URLs identify resources or operations.
+- HTTP methods such as `GET`, `POST`, `PUT`, and `DELETE` describe the type of
+  action.
+- Parameters specify filters, query terms, formats, limits, or continuation
+  tokens.
+- Headers provide request metadata such as user agent, authentication, content
+  type, or rate-limit handling.
+- Responses usually return structured data such as JSON.
+- Each request is usually stateless, meaning the request should contain the
+  information needed for the server to interpret it.
+
+Many platform data APIs are REST or REST-like APIs. They may not follow every
+REST principle perfectly, but they usually use HTTP requests, URLs, parameters,
+headers, and JSON responses. For this course, when we say "API collection," we
+mostly mean REST-style web API collection.
+
+### 2.2 Client, Server, Database
+
+It helps to visualize an API workflow as three layers.
+
+The client is the program making the request. In this course, the client is
+usually your Python script. It builds a URL, attaches parameters and headers,
+and sends a request.
+
+The API server receives the request. It checks whether the request is valid,
+whether the client is allowed to make it, how many requests have already been
+made, what parameters were supplied, and which internal service or database
+query should be used. The API server is the gatekeeper.
+
+The database or internal platform system stores records. The client usually does
+not query this database directly. The API server queries it, transforms the
+result, removes or adds fields, applies limits, and returns a response.
+
+This is why a simple diagram of "client -> REST API -> database" is useful but
+also incomplete. It correctly shows that the client does not directly access the
+database. But it can make the API look like a transparent pipe. It is not. The
+API is an active translator and filter.
+
+### 2.3 HTTP Methods
+
+REST-style APIs often use HTTP methods. The most important method for this
+course is `GET`.
+
+`GET` requests retrieve data. A researcher using a public API to search for
+Wikipedia pages, retrieve video metadata, or list public records is usually
+making `GET` requests. GET requests are normally not supposed to change the
+server's data.
+
+`POST` requests send data to a server. They may create a record, submit a job,
+send a search body, or request a more complex operation. Some APIs use POST even
+for data retrieval when the query is complex or includes a long JSON body.
+
+`PUT` requests usually replace or update a resource. `PATCH` may partially
+update a resource. `DELETE` removes a resource. These methods are important in
+software engineering, but they are usually not what students should use for
+platform data collection unless they are working with their own systems.
+
+For platform research, the method matters ethically. A script that retrieves
+public metadata is very different from a script that creates, modifies, or
+deletes platform content. Students should know what method their code is using.
+
+### 2.4 Anatomy of an API Request
+
 The endpoint is the URL where the request is sent. In the MediaWiki example, the
 endpoint is:
 
@@ -86,6 +175,26 @@ The response is what the server sends back. APIs often return JSON, which Python
 turns into dictionaries and lists. A response also has a status code. A `200`
 usually means success. A `403` means forbidden. A `404` means not found. A `429`
 usually means rate limited. A `500`-level response means a server-side problem.
+
+### 2.5 API Responses Are Designed Objects
+
+An API response is not raw reality. It is a designed object. It may contain:
+
+- records that match the query;
+- metadata about the query;
+- pagination or continuation information;
+- warnings or error messages;
+- fields selected by the provider;
+- fields omitted for privacy, safety, business, legal, or technical reasons.
+
+The structure of a response should be studied before analysis. Which part of the
+response contains actual records? Which part contains metadata? Which field is a
+stable identifier? Which timestamp is being reported? Are snippets full text or
+search excerpts? Are counts exact or approximate?
+
+This is why the first API exercise asks students to inspect the JSON before
+turning it into a DataFrame. Premature flattening hides the structure of the
+response and makes it easier to misinterpret fields.
 
 ## 3. Parameter Discovery
 
