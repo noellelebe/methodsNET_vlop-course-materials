@@ -79,11 +79,9 @@ print(response.status_code)
 
 print(response.headers.get("content-type"))
 
-# If content-type says text/html, use .text.
-# If it says application/json, use .json().
-
-# print(response.text)
-# payload = response.text
+# If content-type is application/json, use .json().
+# payload = response.json()
+# If content-type is text, figure out what's wrong.. 
 
 payload = response.json()
 
@@ -99,6 +97,11 @@ pprint(payload)
 # %% 4. Flatten one page into rows
 
 rows = []
+
+for item in payload["query"]["search"]:
+    print(item)
+
+payload['query']['search']
 
 # payload["query"]["search"] is the list of search-result records returned by
 # MediaWiki. Each item is one search result, not one full Wikipedia article.
@@ -147,7 +150,7 @@ pprint(continuation)
 # {**params, **continuation} creates a new dictionary containing the original
 # query parameters plus the continuation fields returned by the API. If both
 # dictionaries contained the same key, the continuation value would win.
-#
+
 # Important: srlimit=5 still applies. The continuation fields do not increase
 # the page size; they tell MediaWiki to return the next slice of 5 results.
 params_page_2 = {**params, **continuation}
