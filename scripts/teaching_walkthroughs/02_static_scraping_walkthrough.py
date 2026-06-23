@@ -23,8 +23,10 @@ from bs4 import BeautifulSoup
 
 URL = "https://quotes.toscrape.com/"
 # USER_AGENT is sent in the HTTP request headers. It names this script instead
-# of making the request look like a completely anonymous Python process.
-USER_AGENT = "methodsNET-VLOP-course/1.0 static scraping walkthrough"
+# of making the request look like a completely anonymous Python process. 
+# Can be chosen randomly, yet meaningfully. 
+
+USER_AGENT = "methodsNET-VLOP-course/1.0_static_scraping_walkthrough"
 
 
 # %% 2. Check robots.txt as a first access signal
