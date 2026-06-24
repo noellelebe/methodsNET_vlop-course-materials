@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="360" viewBox="0 0 980 360">
+  <rect width="980" height="360" fill="#f7f7f2"/>
+  <text x="30" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#202020">CSS class selectors: same element vs nested element</text>
+
+  <rect x="30" y="75" width="280" height="220" rx="8" fill="#ffffff" stroke="#333333" stroke-width="2"/>
+  <text x="50" y="110" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;article class="result card"&gt;</text>
+  <text x="70" y="142" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;h2&gt;Record A&lt;/h2&gt;</text>
+  <text x="70" y="174" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;p&gt;...&lt;/p&gt;</text>
+  <text x="50" y="206" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;/article&gt;</text>
+  <rect x="42" y="84" width="248" height="135" rx="4" fill="none" stroke="#0b7fab" stroke-width="5"/>
+  <text x="50" y="270" font-family="Arial, sans-serif" font-size="16" fill="#0b4f6c">.result.card selects this element</text>
+
+  <rect x="355" y="75" width="280" height="220" rx="8" fill="#ffffff" stroke="#333333" stroke-width="2"/>
+  <text x="375" y="110" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;section class="result"&gt;</text>
+  <text x="395" y="142" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;div class="card"&gt;</text>
+  <text x="415" y="174" font-family="Menlo, monospace" font-size="16" fill="#111111">Record B</text>
+  <text x="395" y="206" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;/div&gt;</text>
+  <text x="375" y="238" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;/section&gt;</text>
+  <rect x="386" y="124" width="210" height="95" rx="4" fill="none" stroke="#b23a48" stroke-width="5"/>
+  <text x="375" y="270" font-family="Arial, sans-serif" font-size="16" fill="#7a1f2b">.result .card selects the nested card</text>
+
+  <rect x="680" y="75" width="260" height="220" rx="8" fill="#ffffff" stroke="#333333" stroke-width="2"/>
+  <text x="700" y="110" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;article class="result"&gt;</text>
+  <text x="720" y="142" font-family="Menlo, monospace" font-size="16" fill="#111111">Record C</text>
+  <text x="700" y="174" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;/article&gt;</text>
+  <text x="700" y="218" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;div class="card"&gt;Box&lt;/div&gt;</text>
+  <rect x="692" y="88" width="220" height="95" rx="4" fill="none" stroke="#5a7d2b" stroke-width="5"/>
+  <rect x="692" y="198" width="220" height="35" rx="4" fill="none" stroke="#5a7d2b" stroke-width="5"/>
+  <text x="700" y="270" font-family="Arial, sans-serif" font-size="16" fill="#40591f">.result, .card selects both kinds</text>
+</svg>

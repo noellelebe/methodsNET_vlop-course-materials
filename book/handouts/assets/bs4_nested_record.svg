@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="390" viewBox="0 0 980 390">
+  <rect width="980" height="390" fill="#f7f7f2"/>
+  <text x="30" y="42" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#202020">Nested extraction: one record container, fields inside it</text>
+
+  <rect x="55" y="80" width="850" height="245" rx="10" fill="#ffffff" stroke="#333333" stroke-width="2"/>
+  <text x="75" y="115" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;article class="result card" data-id="A17"&gt;</text>
+  <text x="105" y="150" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;h2&gt;&lt;a href="/items/a17"&gt;Digital Services Act explainer&lt;/a&gt;&lt;/h2&gt;</text>
+  <text x="105" y="185" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;p class="summary"&gt;Short summary text...&lt;/p&gt;</text>
+  <text x="105" y="220" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;span class="date"&gt;2026-06-24&lt;/span&gt;</text>
+  <text x="105" y="255" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;ul class="tags"&gt;&lt;li&gt;EU&lt;/li&gt;&lt;li&gt;platforms&lt;/li&gt;&lt;/ul&gt;</text>
+  <text x="75" y="290" font-family="Menlo, monospace" font-size="16" fill="#111111">&lt;/article&gt;</text>
+
+  <rect x="63" y="88" width="825" height="215" rx="6" fill="none" stroke="#0b7fab" stroke-width="5"/>
+  <text x="595" y="104" font-family="Arial, sans-serif" font-size="15" fill="#0b4f6c">card = one row</text>
+
+  <rect x="96" y="130" width="655" height="30" fill="none" stroke="#b23a48" stroke-width="4"/>
+  <text x="765" y="151" font-family="Arial, sans-serif" font-size="15" fill="#7a1f2b">title + href</text>
+  <rect x="96" y="166" width="345" height="28" fill="none" stroke="#5a7d2b" stroke-width="4"/>
+  <text x="455" y="187" font-family="Arial, sans-serif" font-size="15" fill="#40591f">summary</text>
+  <rect x="96" y="201" width="310" height="28" fill="none" stroke="#8a5a00" stroke-width="4"/>
+  <text x="420" y="222" font-family="Arial, sans-serif" font-size="15" fill="#704800">date</text>
+  <rect x="96" y="236" width="530" height="28" fill="none" stroke="#6a4c93" stroke-width="4"/>
+  <text x="640" y="257" font-family="Arial, sans-serif" font-size="15" fill="#4a326b">tags list</text>
+
+  <text x="65" y="360" font-family="Arial, sans-serif" font-size="17" fill="#202020">Loop over cards first. Then search inside each card, so fields from different records cannot get mixed.</text>
+</svg>
