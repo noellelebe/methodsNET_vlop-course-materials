@@ -48,7 +48,7 @@ params = {
     # a classroom inspection run: the response is small enough to read by eye.
     # In a real project, page size should be chosen based on API limits,
     # reliability, server load, and the research question.
-    "srlimit": 5,
+    # "srlimit": 5,
     # format="json" asks for machine-readable JSON rather than XML or another
     # response format. JSON is what response.json() expects below.
     "format": "json",
@@ -150,8 +150,8 @@ for a in df.snippet:
 # by the previous response. If we ignore this, we silently collect only the first
 # page of a larger result set.
 continuation = payload.get("continue", {})
-print("Continuation object:")
-pprint(continuation)
+print("Continuation object:", continuation)
+
 
 # {**params, **continuation} creates a new dictionary containing the original
 # query parameters plus the continuation fields returned by the API. If both
@@ -163,7 +163,7 @@ params_page_2 = {**params, **continuation}
 response_2 = requests.get(API_URL, params=params_page_2, headers=headers, timeout=30)
 payload_2 = response_2.json()
 
-print(response_2.url)
+print(response_2.url) # API request URL, NOT real wikipedia url
 
 # Printing only len(payload_2["query"]["search"]) is not very informative here:
 # if there are at least 5 more matches, it will be 5 because we set srlimit=5.
@@ -175,14 +175,24 @@ print("Page 1 IDs:", page_1_ids)
 print("Page 2 IDs:", page_2_ids)
 print("Overlap between page 1 and page 2:", set(page_1_ids) & set(page_2_ids))
 
-print("\nPage 1 titles:")
+print("\n Page 1 titles:")
 for item in payload["query"]["search"]:
     print("-", item["title"])
+    print("-", item["pageid"])
 
 print("\nPage 2 titles:")
 for item in payload_2["query"]["search"]:
     print("-", item["title"])
+    print("-", item["pageid"])
 
+# GET ARTICLE URLS:
+page_url = []
+
+for item in payload_2["query"]["search"]:
+    page_url.append(f"https://en.wikipedia.org/?curid={item['pageid']}")
+
+
+page_url = f"https://en.wikipedia.org/?curid={item['pageid']}"
 
 # %% 6. Scale the same idea for a real collection
 
@@ -292,59 +302,6 @@ print(page_record.get("fullurl"))
 
 print("\nLead extract from page-level API:")
 print(page_record.get("extract"))
-
-
-# %% 9. Scrape the individual page URL
-
-# Sometimes an API does not provide the field you need, or there is no API at
-# all. Then researchers may collect the HTML page itself. This is web scraping:
-# instead of asking for JSON, we download the browser-facing page and parse HTML.
-scrape_url = page_record.get("fullurl") or page_browser_url
-
-html_response = requests.get(scrape_url, headers=headers, timeout=30)
-html_response.raise_for_status()
-
-print("Scraped URL:", html_response.url)
-print("Content type:", html_response.headers.get("content-type"))
-
-# BeautifulSoup parses the HTML string into a searchable document tree. It does
-# not know what is substantively meaningful; we decide that with selectors.
-soup = BeautifulSoup(html_response.text, "html.parser")
-
-# h1 selects the main page heading. On Wikipedia, that is usually the article
-# title shown to readers.
-h1 = soup.select_one("h1")
-scraped_title = h1.get_text(" ", strip=True) if h1 else None
-
-# div.mw-parser-output > p selects paragraph elements that are direct children
-# of the main article content container. This is intentionally specific: it
-# avoids many navigation and footer paragraphs, but it may break if Wikipedia's
-# HTML structure changes.
-paragraph_tags = soup.select("div.mw-parser-output > p")
-
-# If the specific selector returns nothing, we fall back to all paragraphs. This
-# is useful in a live demo because page markup can vary, but the fallback is less
-# clean and should be documented in real collection work.
-if not paragraph_tags:
-    paragraph_tags = soup.select("p")
-
-paragraphs = []
-for tag in paragraph_tags:
-    text = tag.get_text(" ", strip=True)
-    # Empty paragraphs and citation-only fragments are not useful article text.
-    if text:
-        paragraphs.append(text)
-
-print("Scraped title:", scraped_title)
-print("Number of non-empty scraped paragraphs:", len(paragraphs))
-print("\nFirst scraped paragraph:")
-print(paragraphs[0] if paragraphs else "No paragraph text found.")
-
-# Teaching point:
-# The API extract and the scraped paragraph are related, but they are not the
-# same data source. The API may remove formatting and references; the HTML may
-# include navigation, citation markers, and layout artifacts. A reproducible
-# project should state which route was used and why.
 
 
 # %% 10. A second platform API example: YouTube Data API
