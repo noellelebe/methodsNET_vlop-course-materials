@@ -12,11 +12,13 @@ Teaching goals:
 
 # %% 1. Imports and the API endpoint
 
+import os
 from pathlib import Path
 from pprint import pprint
 
 import pandas as pd
 import requests
+from bs4 import BeautifulSoup
 
 
 # MediaWiki is a good teaching API because it is public, documented, and does
@@ -79,9 +81,10 @@ print(response.status_code)
 
 print(response.headers.get("content-type"))
 
-# If content-type is application/json, use .json().
-# payload = response.json()
-# If content-type is text, figure out what's wrong.. 
+# If content-type is application/json, use .json(). If content-type is text/html
+# or text/plain when you expected JSON, inspect response.text before continuing:
+# the server may be returning an error page, an authentication warning, or a
+# rate-limit message rather than data.
 
 payload = response.json()
 
@@ -93,15 +96,18 @@ pprint(payload)
 # What fields are metadata about the API response, and what fields describe
 # actual search results?
 
-
-# %% 4. Flatten one page into rows
-
-rows = []
+for item in payload["query"]["search"]:
+    # pprint(item)
+    pprint(item.keys())
 
 for item in payload["query"]["search"]:
-    print(item)
+    print(list(item))
 
-payload['query']['search']
+print(set().union(*(item.keys() for item in payload["query"]["search"])))
+
+# %% 4. Flatten one page of JSON search results into rows
+
+rows = []
 
 # payload["query"]["search"] is the list of search-result records returned by
 # MediaWiki. Each item is one search result, not one full Wikipedia article.
@@ -206,7 +212,335 @@ real_run_example = {
 pprint(real_run_example)
 
 
-# %% 7. Collect several pages in a reusable function
+# %% 7. From a search result to one individual Wikipedia page
+
+# Search results are useful discovery objects, but they are not the page itself.
+# Each search result gives us identifiers that can be used to ask for the full
+# page, a summary, metadata, or a browser URL.
+first_result = rows[0]
+
+# pageid is the safest bridge from the search result to a page-level request
+# because it is a stable numeric identifier. Titles are more readable, but they
+# can change when pages are renamed.
+page_id = first_result["pageid"]
+page_title = first_result["title"]
+
+print("First search result:")
+print("pageid:", page_id)
+print("title:", page_title)
+
+# The curid URL is a normal browser URL that opens the page identified by
+# pageid. This is useful for inspection and citation, but for reproducible data
+# collection we usually prefer an API request because its response structure is
+# more predictable than a web page's HTML.
+page_browser_url = f"https://en.wikipedia.org/?curid={page_id}"
+print("Browser URL:", page_browser_url)
+
+
+# %% 8. Retrieve page-level content through the API
+
+# Here we ask MediaWiki for information about the individual page, not for more
+# search results. The switch from list="search" to prop="info|extracts" changes
+# the meaning of the request:
+# - list="search" returns records matching a query;
+# - prop="info|extracts" returns properties of page(s) we already identified.
+page_params = {
+    # action="query" is still the general MediaWiki read-data action.
+    "action": "query",
+    # prop requests page properties instead of a list of search results.
+    # "info" gives metadata such as the canonical URL when paired with inprop.
+    # "extracts" gives a plain-text or limited-HTML summary of the page content.
+    "prop": "info|extracts",
+    # pageids tells the API exactly which page we want. Multiple page IDs can be
+    # requested as a pipe-separated string such as "123|456|789".
+    "pageids": page_id,
+    # inprop="url" asks the info module to include fullurl in the response.
+    # Without it, we would get metadata but not the canonical page URL.
+    "inprop": "url",
+    # exintro asks for the lead section only. This is usually enough for a
+    # classroom example and avoids pretending that a summary is the full article.
+    "exintro": 1,
+    # explaintext asks for plain text rather than HTML. This makes the result
+    # easier to read, but it removes links and formatting that may matter in some
+    # research designs.
+    "explaintext": 1,
+    # exchars limits the extract length. It is a teaching/debugging limit, not a
+    # substantive sampling rule.
+    "exchars": 1200,
+    "format": "json",
+    "formatversion": 2,
+}
+
+page_response = requests.get(API_URL, params=page_params, headers=headers, timeout=30)
+page_response.raise_for_status()
+page_payload = page_response.json()
+
+# With formatversion=2, pages are returned as a list. Because we requested one
+# pageid, the first list element is our page-level record.
+page_record = page_payload["query"]["pages"][0]
+
+print("Page-level API URL:")
+print(page_response.url)
+print("\nPage-level fields:")
+print(page_record.keys())
+
+print("\nTitle from page-level API:")
+print(page_record.get("title"))
+
+print("\nCanonical page URL from page-level API:")
+print(page_record.get("fullurl"))
+
+print("\nLead extract from page-level API:")
+print(page_record.get("extract"))
+
+
+# %% 9. Scrape the individual page URL
+
+# Sometimes an API does not provide the field you need, or there is no API at
+# all. Then researchers may collect the HTML page itself. This is web scraping:
+# instead of asking for JSON, we download the browser-facing page and parse HTML.
+scrape_url = page_record.get("fullurl") or page_browser_url
+
+html_response = requests.get(scrape_url, headers=headers, timeout=30)
+html_response.raise_for_status()
+
+print("Scraped URL:", html_response.url)
+print("Content type:", html_response.headers.get("content-type"))
+
+# BeautifulSoup parses the HTML string into a searchable document tree. It does
+# not know what is substantively meaningful; we decide that with selectors.
+soup = BeautifulSoup(html_response.text, "html.parser")
+
+# h1 selects the main page heading. On Wikipedia, that is usually the article
+# title shown to readers.
+h1 = soup.select_one("h1")
+scraped_title = h1.get_text(" ", strip=True) if h1 else None
+
+# div.mw-parser-output > p selects paragraph elements that are direct children
+# of the main article content container. This is intentionally specific: it
+# avoids many navigation and footer paragraphs, but it may break if Wikipedia's
+# HTML structure changes.
+paragraph_tags = soup.select("div.mw-parser-output > p")
+
+# If the specific selector returns nothing, we fall back to all paragraphs. This
+# is useful in a live demo because page markup can vary, but the fallback is less
+# clean and should be documented in real collection work.
+if not paragraph_tags:
+    paragraph_tags = soup.select("p")
+
+paragraphs = []
+for tag in paragraph_tags:
+    text = tag.get_text(" ", strip=True)
+    # Empty paragraphs and citation-only fragments are not useful article text.
+    if text:
+        paragraphs.append(text)
+
+print("Scraped title:", scraped_title)
+print("Number of non-empty scraped paragraphs:", len(paragraphs))
+print("\nFirst scraped paragraph:")
+print(paragraphs[0] if paragraphs else "No paragraph text found.")
+
+# Teaching point:
+# The API extract and the scraped paragraph are related, but they are not the
+# same data source. The API may remove formatting and references; the HTML may
+# include navigation, citation markers, and layout artifacts. A reproducible
+# project should state which route was used and why.
+
+
+# %% 10. A second platform API example: YouTube Data API
+
+# Wikipedia is unusually open. Many platform APIs require authentication, quota
+# management, and project registration. YouTube still offers an official Data
+# API, but students need an API key from a Google Cloud project to run this cell.
+YOUTUBE_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search"
+YOUTUBE_VIDEOS_URL = "https://www.googleapis.com/youtube/v3/videos"
+YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+
+youtube_params = {
+    # part="snippet" tells YouTube which section of the search resource to
+    # return. For search.list, snippet contains the title, description, channel,
+    # and publication time shown in search-result metadata.
+    "part": "snippet",
+    # q is the search query. As with Wikipedia's srsearch, this is a research
+    # design choice because it defines what can enter the dataset.
+    "q": "digital services act",
+    # type="video" excludes channel and playlist results. Without this, the
+    # endpoint can return a mixed set of resource types.
+    "type": "video",
+    # maxResults is YouTube's page size. The documented maximum is 50; a small
+    # value is better for classroom inspection.
+    "maxResults": 5,
+    # order controls ranking. "relevance" is the default; "date" would answer a
+    # different question and produce a different dataset.
+    "order": "relevance",
+    # key authenticates the request. We add it only if an environment variable is
+    # present so the script can be shared without exposing a private API key.
+    "key": YOUTUBE_API_KEY,
+}
+
+if YOUTUBE_API_KEY:
+    youtube_response = requests.get(
+        YOUTUBE_SEARCH_URL,
+        params=youtube_params,
+        timeout=30,
+    )
+    youtube_response.raise_for_status()
+    youtube_payload = youtube_response.json()
+
+    print("YouTube request URL:")
+    print(youtube_response.url)
+
+    youtube_rows = []
+    for item in youtube_payload.get("items", []):
+        video_id = item.get("id", {}).get("videoId")
+        snippet = item.get("snippet", {})
+
+        youtube_rows.append(
+            {
+                # video_id is the platform identifier needed to retrieve more
+                # video-level metadata later with videos.list.
+                "video_id": video_id,
+                # The watch URL is useful for inspection, citation, and manual
+                # validation, but it is not the same as an API data record.
+                "watch_url": f"https://www.youtube.com/watch?v={video_id}",
+                "title": snippet.get("title"),
+                "channel_id": snippet.get("channelId"),
+                "channel_title": snippet.get("channelTitle"),
+                "published_at": snippet.get("publishedAt"),
+                "description": snippet.get("description"),
+            }
+        )
+
+    youtube_df = pd.DataFrame(youtube_rows)
+    print(youtube_df[["video_id", "title", "channel_title", "published_at"]])
+
+    # YouTube pagination uses nextPageToken, not MediaWiki's "continue" object.
+    # The concept is the same: the API tells us which token to send next.
+    print("Next page token:", youtube_payload.get("nextPageToken"))
+
+    # Search results are not full video records. To move from search-result
+    # metadata to individual video-level metadata, we pass the video IDs into a
+    # second endpoint: videos.list.
+    video_ids = [row["video_id"] for row in youtube_rows if row["video_id"]]
+
+    video_params = {
+        # part selects which blocks of video-level metadata to return.
+        # snippet repeats descriptive metadata, statistics adds engagement counts,
+        # and contentDetails adds duration and other media-level information.
+        "part": "snippet,statistics,contentDetails",
+        # id accepts a comma-separated list of video IDs. This is the bridge from
+        # the search endpoint to the video endpoint.
+        "id": ",".join(video_ids),
+        "key": YOUTUBE_API_KEY,
+    }
+
+    video_response = requests.get(
+        YOUTUBE_VIDEOS_URL,
+        params=video_params,
+        timeout=30,
+    )
+    video_response.raise_for_status()
+    video_payload = video_response.json()
+
+    video_rows = []
+    for item in video_payload.get("items", []):
+        snippet = item.get("snippet", {})
+        statistics = item.get("statistics", {})
+        content_details = item.get("contentDetails", {})
+
+        video_rows.append(
+            {
+                "video_id": item.get("id"),
+                "title": snippet.get("title"),
+                "channel_id": snippet.get("channelId"),
+                "published_at": snippet.get("publishedAt"),
+                # viewCount, likeCount, and commentCount are returned as strings.
+                # Convert them later if you need numeric analysis.
+                "view_count": statistics.get("viewCount"),
+                "like_count": statistics.get("likeCount"),
+                "comment_count": statistics.get("commentCount"),
+                # duration is an ISO 8601 duration string such as PT3M12S, not a
+                # number of seconds. Parsing it is a separate cleaning step.
+                "duration": content_details.get("duration"),
+            }
+        )
+
+    video_df = pd.DataFrame(video_rows)
+    print("\nVideo-level metadata:")
+    print(video_df)
+else:
+    print("Skipping YouTube request because YOUTUBE_API_KEY is not set.")
+    print("In Terminal, set it before opening/running Python, for example:")
+    print("export YOUTUBE_API_KEY='paste-your-key-here'")
+
+
+# %% 11. A small OpenAI API example for later AI-assisted workflows
+
+# People often say "the ChatGPT API", but technically this is the OpenAI API.
+# ChatGPT is the consumer/product interface; API scripts call endpoints such as
+# /v1/responses and receive structured JSON back.
+OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# The OpenAI docs currently point learners toward the Responses API for general
+# model responses. We keep the model in an environment variable so the course can
+# update it without editing the script if model availability changes.
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.5")
+
+openai_body = {
+    # model selects which model should answer. This affects cost, latency,
+    # accuracy, and sometimes available features.
+    "model": OPENAI_MODEL,
+    # input is the user-facing task. In later course sessions this might be a
+    # prompt asking the model to classify text, draft API queries, or summarize
+    # collection logs.
+    "input": (
+        "In one sentence, explain why API search results should not be treated "
+        "as a complete sample of all relevant online content."
+    ),
+}
+
+if OPENAI_API_KEY:
+    openai_headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    openai_response = requests.post(
+        OPENAI_RESPONSES_URL,
+        headers=openai_headers,
+        json=openai_body,
+        timeout=60,
+    )
+    openai_response.raise_for_status()
+    openai_payload = openai_response.json()
+
+    print("OpenAI response id:", openai_payload.get("id"))
+    print("OpenAI response status:", openai_payload.get("status"))
+
+    # The full response object contains metadata, output items, token usage, and
+    # model information. Inspecting the full JSON is useful before deciding what
+    # to save in a research workflow.
+    pprint(openai_payload)
+
+    # The model's visible answer is nested inside output items. This small loop is
+    # deliberately defensive because response objects can contain tool calls or
+    # other output item types in addition to plain text.
+    text_parts = []
+    for output_item in openai_payload.get("output", []):
+        for content_item in output_item.get("content", []):
+            if content_item.get("type") == "output_text":
+                text_parts.append(content_item.get("text", ""))
+
+    print("\nModel text:")
+    print("\n".join(text_parts) if text_parts else "No plain text output found.")
+else:
+    print("Skipping OpenAI request because OPENAI_API_KEY is not set.")
+    print("In Terminal, set it before opening/running Python, for example:")
+    print("export OPENAI_API_KEY='paste-your-key-here'")
+    print("Optional: export OPENAI_MODEL='gpt-5.5'")
+
+
+# %% 12. Collect several pages in a reusable function
 
 def collect_wikipedia_search(query: str, max_pages: int = 3, page_size: int = 10):
     """Return both processed rows and raw response pages.
@@ -286,7 +620,7 @@ df = pd.DataFrame(rows)
 print(df[["page_number", "title", "wordcount"]])
 
 
-# %% 8. Save raw, processed, and provenance files
+# %% 13. Save raw, processed, and provenance files
 
 outdir = Path("../data") if Path.cwd().name == "teaching_walkthroughs" else Path("data")
 # The conditional path above keeps the example usable whether students run it
@@ -334,12 +668,15 @@ print(processed_path)
 print(provenance_path)
 
 
-# %% 9. Teaching prompts
+# %% 14. Teaching prompts
 
 questions = [
     "What exactly is the population of records this API query can return?",
     "What would change if we altered the query string or page size?",
     "Which fields did we drop when flattening JSON into a table?",
+    "When should we retrieve page-level data through an API, and when might scraping be necessary?",
+    "How does YouTube's pageToken pagination compare to MediaWiki's continuation object?",
+    "What extra risks appear when an API requires credentials or sends data to an AI model?",
     "How would rate limits or authentication change this workflow?",
     "What could this dataset not tell us about Wikipedia or the DSA?",
 ]
