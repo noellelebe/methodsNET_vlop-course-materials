@@ -13,6 +13,7 @@ Teaching goals:
 # %% 1. Imports and a classroom URL
 
 from pathlib import Path
+from pprint import pprint
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 
@@ -23,8 +24,9 @@ from bs4 import BeautifulSoup
 
 URL = "https://quotes.toscrape.com/"
 # USER_AGENT is sent in the HTTP request headers. It names this script instead
-# of making the request look like a completely anonymous Python process. 
-# Can be chosen randomly, yet meaningfully. 
+# of making the request look like a completely anonymous Python process.
+# It can be chosen by the researcher, but it should be meaningful rather than
+# pretending to be a normal browser or someone else.
 
 USER_AGENT = "methodsNET-VLOP-course/1.0_static_scraping_walkthrough"
 
@@ -69,6 +71,7 @@ html = response.text
 print("HTTP status:", response.status_code)
 print("Characters of HTML:", len(html))
 print(html[:500])
+pprint(html[:500])
 
 
 # %% 4. Save raw HTML before parsing
@@ -90,6 +93,11 @@ print("Saved raw HTML:", raw_html_path)
 
 soup = BeautifulSoup(html, "html.parser")
 
+# prettify() makes the nested HTML easier to read. Do not print the whole page
+# every time in a large project; it is useful here because this is a small
+# classroom page.
+print(soup.prettify()[:1500])
+
 # soup.title finds the <title> element in the HTML document. This is a quick
 # sanity check that we fetched the expected page.
 print("Page title:", soup.title.get_text(strip=True))
@@ -104,39 +112,53 @@ print("Number of quote blocks:", len(soup.select(".quote")))
 # structure to the .quote, .text, .author, and .tags selectors below.
 
 
-# %% 6. Extract repeated quote records
+# %% 6. Inspect one repeated record before looping
+
+# A good scraping workflow starts with one record. If we cannot correctly parse
+# one quote block, looping over all quote blocks will only repeat the mistake.
+first_quote = soup.select_one(".quote")
+
+print(first_quote.prettify())
+
+# These selectors are searched inside first_quote, not across the whole page.
+# That keeps the quote text, author, tags, and author link from the same record
+# together.
+print("Quote text element:", first_quote.select_one(".text"))
+print("Author element:", first_quote.select_one(".author"))
+print("Tag link elements:", first_quote.select(".tags a.tag"))
+print("Author profile link:", first_quote.select_one("span a[href]"))
+
+
+# %% 7. Extract repeated quote records
+
 
 rows = []
 
 for quote_block in soup.select(".quote"):
-    # quote_block is one repeated record container. Everything selected inside
-    # it belongs to that one quote, so we avoid mixing authors and texts from
+    # quote_block is one repeated record container. Everything selected inside it
+    # belongs to that one quote, so we avoid mixing authors and texts from
     # different records.
-    #
-    # .text selects the element containing the quote text. The dot means "class",
-    # not visible text.
     text = quote_block.select_one(".text")
-    # .author selects the author name inside the same quote block.
     author = quote_block.select_one(".author")
-    # .tags a.tag means: first look inside an element with class="tags", then
-    # select <a> elements with class="tag". This returns all tags for the quote.
     tag_links = quote_block.select(".tags a.tag")
+    author_link = quote_block.select_one("span a[href]")
 
-    rows.append(
-        {
-            # get_text(" ", strip=True) extracts visible text, joins internal
-            # whitespace with spaces, and removes leading/trailing whitespace.
-            # If text is missing, we store None so the missingness is visible.
-            "quote": text.get_text(" ", strip=True) if text else None,
-            "author": author.get_text(" ", strip=True) if author else None,
-            # Multiple tags are collapsed into one pipe-separated string so they
-            # fit in a simple CSV cell. A richer design could use one row per tag.
-            "tags": "|".join(tag.get_text(" ", strip=True) for tag in tag_links),
-            # tag_count is derived by our script, not collected directly from
-            # the page. Derived fields should be easy to recompute.
-            "tag_count": len(tag_links),
-        }
+    quote_text = text.get_text(" ", strip=True) if text else None
+    author_name = author.get_text(" ", strip=True) if author else None
+    tags = "|".join(tag.get_text(" ", strip=True) for tag in tag_links)
+    tag_count = len(tag_links)
+    author_href = author_link.get("href") if author_link else None
+
+    row = dict(
+        quote=quote_text,
+        author=author_name,
+        author_href_raw=author_href,
+        author_href_absolute=urljoin(URL, author_href) if author_href else None,
+        tags=tags,
+        tag_count=tag_count,
     )
+
+    rows.append(row)
 
 # The DataFrame is a structured table: each quote becomes one row, and each
 # extracted or derived field becomes one column.
@@ -144,7 +166,7 @@ df = pd.DataFrame(rows)
 print(df.head())
 
 
-# %% 7. Extract links and resolve relative URLs
+# %% 8. Extract links and resolve relative URLs
 
 links = []
 
@@ -166,28 +188,156 @@ links_df = pd.DataFrame(links)
 print(links_df.head(10))
 
 
-# %% 8. Save processed outputs
+# %% 9. Classify links by page role
+
+# A scraping task often needs to distinguish content links from navigation.
+# On this page, author links, tag links, and pagination links have different
+# meanings even though they are all <a href="..."> elements.
+classified_links = []
+
+for link in soup.select("a[href]"):
+    href_raw = link.get("href")
+    href_absolute = urljoin(URL, href_raw)
+
+    if href_raw.startswith("/author/"):
+        link_type = "author_profile"
+    elif href_raw.startswith("/tag/"):
+        link_type = "tag_page"
+    elif href_raw.startswith("/page/"):
+        link_type = "pagination"
+    else:
+        link_type = "other"
+
+    classified_links.append(
+        {
+            "link_text": link.get_text(" ", strip=True),
+            "href_raw": href_raw,
+            "href_absolute": href_absolute,
+            "link_type": link_type,
+        }
+    )
+
+classified_links_df = pd.DataFrame(classified_links)
+print(classified_links_df)
+
+
+# %% 10. Extract tags as a separate table
+
+# Earlier we stored tags as one pipe-separated string in the quote table. That is
+# convenient for a quick CSV, but sometimes tags should become their own table:
+# one row per quote-tag combination.
+tag_rows = []
+
+for quote_number, quote_block in enumerate(soup.select(".quote"), start=1):
+    text = quote_block.select_one(".text")
+    quote_text = text.get_text(" ", strip=True) if text else None
+
+    for tag_link in quote_block.select(".tags a.tag"):
+        tag_rows.append(
+            {
+                "quote_number": quote_number,
+                "quote": quote_text,
+                "tag": tag_link.get_text(" ", strip=True),
+                "tag_href": urljoin(URL, tag_link.get("href")),
+            }
+        )
+
+tags_df = pd.DataFrame(tag_rows)
+print(tags_df.head(15))
+
+
+# %% 11. Extract pagination links
+
+# Pagination links define how a scraper could move from this page to the next
+# page. We inspect them separately because following pagination changes the
+# collection scope.
+pagination_links = []
+
+for link in soup.select("li.next a[href], .pager a[href]"):
+    pagination_links.append(
+        {
+            "link_text": link.get_text(" ", strip=True),
+            "href_raw": link.get("href"),
+            "href_absolute": urljoin(URL, link.get("href")),
+        }
+    )
+
+pagination_df = pd.DataFrame(pagination_links)
+print(pagination_df)
+
+
+# %% 12. Extract page-level metadata, headings, and images
+
+# Not all useful data are repeated records. Sometimes we also want page-level
+# context: title, headings, metadata, or images.
+meta_description = soup.select_one("meta[name='description']")
+
+page_metadata = {
+    "url": URL,
+    "title": soup.title.get_text(" ", strip=True) if soup.title else None,
+    "description": meta_description.get("content") if meta_description else None,
+    "h1_text": " | ".join(h.get_text(" ", strip=True) for h in soup.select("h1")),
+    "quote_count": len(soup.select(".quote")),
+    "link_count": len(soup.select("a[href]")),
+}
+
+pprint(page_metadata)
+
+image_rows = []
+
+for image in soup.select("img[src]"):
+    image_rows.append(
+        {
+            "src_raw": image.get("src"),
+            "src_absolute": urljoin(URL, image.get("src")),
+            "alt": image.get("alt"),
+        }
+    )
+
+images_df = pd.DataFrame(image_rows)
+print(images_df)
+
+
+# %% 13. Save processed outputs
 
 processed_dir = outdir / "processed"
 processed_dir.mkdir(parents=True, exist_ok=True)
 
 quotes_path = processed_dir / "walkthrough_quotes.csv"
 links_path = processed_dir / "walkthrough_quotes_links.csv"
+classified_links_path = processed_dir / "walkthrough_quotes_classified_links.csv"
+tags_path = processed_dir / "walkthrough_quotes_tags.csv"
+pagination_path = processed_dir / "walkthrough_quotes_pagination.csv"
+metadata_path = processed_dir / "walkthrough_quotes_page_metadata.json"
+images_path = processed_dir / "walkthrough_quotes_images.csv"
 
 # index=False prevents pandas from writing its row number index as an extra CSV
 # column. For teaching data, that extra column usually creates confusion.
 df.to_csv(quotes_path, index=False)
 links_df.to_csv(links_path, index=False)
+classified_links_df.to_csv(classified_links_path, index=False)
+tags_df.to_csv(tags_path, index=False)
+pagination_df.to_csv(pagination_path, index=False)
+pd.Series(page_metadata).to_json(metadata_path, indent=2)
+images_df.to_csv(images_path, index=False)
 
 print("Saved processed quote table:", quotes_path)
 print("Saved link table:", links_path)
+print("Saved classified link table:", classified_links_path)
+print("Saved tag table:", tags_path)
+print("Saved pagination table:", pagination_path)
+print("Saved page metadata:", metadata_path)
+print("Saved image table:", images_path)
 
 
-# %% 9. Selector robustness discussion
+# %% 14. Selector robustness discussion
 
 questions = [
     "Which selectors depend on visible content and which depend on HTML classes?",
     "What would break if the site renamed class='quote' to class='quotation'?",
+    "Why did we extract tags both as one CSV cell and as a separate table?",
+    "Which links are content links, and which are navigation links?",
+    "How would following the pagination link change the dataset?",
     "Why did we save raw HTML before extracting rows?",
     "What would change if this page included user profiles or personal data?",
     "How would you limit the collection to what is necessary for a research question?",
