@@ -48,7 +48,7 @@ params = {
     # a classroom inspection run: the response is small enough to read by eye.
     # In a real project, page size should be chosen based on API limits,
     # reliability, server load, and the research question.
-    # "srlimit": 5,
+    "srlimit": 50,
     # format="json" asks for machine-readable JSON rather than XML or another
     # response format. JSON is what response.json() expects below.
     "format": "json",
@@ -57,6 +57,10 @@ params = {
     # removed. This is a reproducibility choice because it changes response shape.
     "formatversion": 2,
 }
+
+# srlimit/page_size = how many results per batch
+# sroffset = next starting point, provided by Wikipedia
+# pages = how many batches we choose to collect
 
 headers = {
     # A User-Agent identifies the script. Many APIs ask researchers to identify
@@ -163,7 +167,10 @@ params_page_2 = {**params, **continuation}
 response_2 = requests.get(API_URL, params=params_page_2, headers=headers, timeout=30)
 payload_2 = response_2.json()
 
+continuation_2 = payload_2.get("continue", {})
+print("Continuation object:", continuation_2)
 print(response_2.url) # API request URL, NOT real wikipedia url
+
 
 # Printing only len(payload_2["query"]["search"]) is not very informative here:
 # if there are at least 5 more matches, it will be 5 because we set srlimit=5.
@@ -260,7 +267,8 @@ page_params = {
     # prop requests page properties instead of a list of search results.
     # "info" gives metadata such as the canonical URL when paired with inprop.
     # "extracts" gives a plain-text or limited-HTML summary of the page content.
-    "prop": "info|extracts",
+    # "prop": "info|extracts",
+    "prop": "extlinks",
     # pageids tells the API exactly which page we want. Multiple page IDs can be
     # requested as a pipe-separated string such as "123|456|789".
     "pageids": page_id,
@@ -291,6 +299,7 @@ page_record = page_payload["query"]["pages"][0]
 
 print("Page-level API URL:")
 print(page_response.url)
+
 print("\nPage-level fields:")
 print(page_record.keys())
 
@@ -303,6 +312,226 @@ print(page_record.get("fullurl"))
 print("\nLead extract from page-level API:")
 print(page_record.get("extract"))
 
+for key in page_record.keys():
+    print(key)
+    print(page_record.get(str(key)))
+
+## Other content
+
+# 1. External links
+
+external_links_params = {
+    # This is still a read-only query request to the same MediaWiki endpoint.
+    "action": "query",
+    # prop="extlinks" asks for external links used on the page. These are URLs
+    # pointing away from Wikipedia, for example to EU institutions, news sites,
+    # PDFs, reports, or other web pages cited in the article.
+    "prop": "extlinks",
+    # We use the same page_id as above, so the unit of analysis is still the
+    # individual Wikipedia page selected from the search results.
+    "pageids": page_id,
+    # inprop belongs to prop="info", not prop="extlinks". Leaving it here does
+    # not help this request; it is useful to show students that parameters are
+    # module-specific and should be checked against the documentation.
+    "inprop": "url",
+    # ellimit controls how many external links MediaWiki returns. Without a
+    # limit, APIs often return only a default number of records.
+    "ellimit": "max",
+    "format": "json",
+    "formatversion": 2,
+}
+
+# This request returns page-level external-link metadata, not article text.
+external_links_response = requests.get(API_URL, params=external_links_params, headers=headers, timeout=30)
+external_links_response.raise_for_status()
+external_links_payload = external_links_response.json()
+
+# With formatversion=2, pages are a list of page dictionaries. Since we requested
+# one pageid, the first element is the page record we need.
+external_links_record = external_links_payload["query"]["pages"][0]
+external_links_record.keys()
+
+# extlinks is a list of dictionaries, usually one dictionary per external URL.
+print(external_links_record.get("extlinks"))
+
+# Use a default empty list so the code still works if a page has no external
+# links or if the API response does not include the extlinks field.
+external_links = external_links_record.get("extlinks", [])
+
+external_link_rows = []
+
+for link in external_links:
+    # This is the "long" table format: one row per external URL. It is good when
+    # you want to count, filter, or analyze links as separate observations.
+    external_link_rows.append({
+        "pageid": external_links_record.get("pageid"),
+        "page_title": external_links_record.get("title"),
+        "external_url": link.get("url"),
+    })
+
+external_links_df = pd.DataFrame(external_link_rows)
+
+print(external_links_df)
+
+# OR one entry with a list of links in the external_links column. This "wide"
+# format is useful when one row should represent one Wikipedia page.
+
+external_urls = [
+    # Keep only actual URL strings. If a malformed link record has no "url" key,
+    # the if condition below drops it instead of saving None.
+    link.get("url")
+    for link in external_links
+    if link.get("url")
+]
+
+external_links_row = {
+    # These fields identify which Wikipedia page the list belongs to.
+    "pageid": external_links_record.get("pageid"),
+    "page_title": external_links_record.get("title"),
+    # This column contains a Python list. That is convenient in memory and in
+    # JSON, but CSV will store it as a string representation of a list.
+    "external_links": external_urls,
+    # A count column is often useful for quick data-quality checks.
+    "external_link_count": len(external_urls),
+}
+
+external_links_df = pd.DataFrame([external_links_row])
+
+print(external_links_df)
+
+# 2. Images
+# 2.1. get image titles
+
+image_params = {
+    # This request asks which files/images are used on the article page.
+    "action": "query",
+    # prop="images" returns file titles such as "File:Example.jpg". It does not
+    # yet return the direct image URL; that requires a second imageinfo request.
+    "prop": "images",
+    "pageids": page_id,
+    # imlimit controls how many image/file records are returned, not image size.
+    # "max" asks the API for as many as it allows in one response.
+    "imlimit": "max",
+    "format": "json",
+    "formatversion": 2,
+}
+
+# First image request: pageid -> file titles.
+image_response = requests.get(API_URL, params=image_params, headers=headers, timeout=30)
+image_response.raise_for_status()
+image_payload = image_response.json()
+
+image_record = image_payload["query"]["pages"][0]
+image_record.keys()
+
+# If a page has no images, .get("images", []) returns an empty list so the next
+# line produces an empty list instead of a TypeError.
+images = image_record.get("images", [])
+image_titles = [image["title"] for image in images]
+
+# 2.2. get image info (i.e., url)
+
+image_info_params = {
+    # Second image request: file titles -> file URLs and file metadata.
+    "action": "query",
+    # prop="imageinfo" returns metadata about files, such as URL, dimensions, and
+    # MIME type.
+    "prop": "imageinfo",
+    # MediaWiki expects multiple titles as one string separated by |.
+    "titles": "|".join(image_titles),
+    # iiprop selects which image metadata fields to return. Here we ask for:
+    # - url: the direct file URL;
+    # - size: file size and dimensions;
+    # - mime: file type, such as image/jpeg or image/svg+xml.
+    "iiprop": "url|size|mime",
+    "format": "json",
+    "formatversion": 2,
+}
+
+image_info_response = requests.get(API_URL, params=image_info_params, headers=headers, timeout=30)
+image_info_response.raise_for_status()
+
+image_info_payload = image_info_response.json()
+
+image_rows = []
+
+for file_page in image_info_payload["query"]["pages"]:
+    # imageinfo is also a list because files can have multiple revisions. We take
+    # the first item returned by the API for this simple teaching example.
+    info = file_page.get("imageinfo", [{}])[0]
+    # print(file_page["title"])
+    # print(info.get("url"))
+    # print(info.get("mime"))
+    image_rows.append({
+        # file_title is the MediaWiki file-page title.
+        "file_title": file_page.get("title"),
+        # image_url is the direct downloadable file URL.
+        "image_url": info.get("url"),
+        # MIME type tells us whether this is a JPEG, PNG, SVG, etc.
+        "mime": info.get("mime"),
+        # Width, height, and size are useful for filtering and auditing images.
+        "width": info.get("width"),
+        "height": info.get("height"),
+        "size": info.get("size"),
+    })
+
+image_df = pd.DataFrame(image_rows)
+
+# Use the same data/processed convention as the rest of the course materials.
+outdir = Path("data")
+processed_dir = outdir / "processed"
+processed_dir.mkdir(parents=True, exist_ok=True)
+
+# Save image metadata separately from the actual image files. For many research
+# projects, URLs and metadata are enough; downloading files is a further choice.
+image_csv_path = processed_dir / "wikipedia_image_urls.csv"
+image_df.to_csv(image_csv_path, index=False)
+
+print("Saved image metadata to:", image_csv_path)
+
+# Save the external-link table as its own CSV. The variable currently contains
+# the wide one-row-per-page version created above.
+external_links_path = processed_dir / "external_links.csv"
+external_links_df.to_csv(external_links_path, index=False)
+
+print("Saved external links to:", external_links_path)
+
+
+# 2.3. Download the Actual Image Files
+
+from urllib.parse import urlparse
+import time
+
+# Downloading image bytes is a different step from collecting image metadata.
+# It creates larger files, may raise licensing questions, and should be done only
+# if the research question actually needs image content.
+image_dir = Path("data/raw/images")
+image_dir.mkdir(parents=True, exist_ok=True)
+
+for row in image_rows:
+    image_url = row["image_url"]
+
+    # Some file records may not have a direct URL. Skip those cleanly.
+    if not image_url:
+        continue
+
+    # The filename is taken from the URL path, for example something.jpg.
+    filename = Path(urlparse(image_url).path).name
+    output_path = image_dir / filename
+
+    # This request downloads the binary image content, not JSON.
+    image_response = requests.get(image_url, headers=headers, timeout=30)
+    image_response.raise_for_status()
+
+    # write_bytes is used for binary files such as images. write_text would be
+    # wrong here because image files are not plain text.
+    output_path.write_bytes(image_response.content)
+
+    print("Saved:", output_path)
+
+    # Pause between file downloads so the script does not make rapid-fire
+    # requests to Wikimedia file servers.
+    time.sleep(1)
 
 # %% 10. A second platform API example: YouTube Data API
 
