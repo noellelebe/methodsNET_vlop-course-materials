@@ -103,7 +103,41 @@ python scripts/runnable_workflows/03_static_scraper.py \
   --ignore-robots
 ```
 
-## 4. Dynamic Browser Collection with Playwright
+## 4. Dynamic Browser Collection with Selenium
+
+Run a small browser-automation collection:
+
+```bash
+python scripts/runnable_workflows/04_dynamic_browser_selenium.py \
+  --url https://quotes.toscrape.com/js/ \
+  --scrolls 2 \
+  --wait-seconds 1 \
+  --outdir data
+```
+
+To show the browser window during a live demo:
+
+```bash
+python scripts/runnable_workflows/04_dynamic_browser_selenium.py \
+  --url https://quotes.toscrape.com/js/ \
+  --scrolls 2 \
+  --wait-seconds 1 \
+  --outdir data \
+  --show-browser
+```
+
+With an explicit robots override for a controlled classroom example:
+
+```bash
+python scripts/runnable_workflows/04_dynamic_browser_selenium.py \
+  --url https://quotes.toscrape.com/js/ \
+  --scrolls 2 \
+  --wait-seconds 1 \
+  --outdir data \
+  --ignore-robots
+```
+
+## 4b. Optional Playwright Comparison
 
 Install the browser once before the first run:
 
@@ -217,4 +251,3 @@ Check whether running scripts changed tracked repository files:
 ```bash
 git status
 ```
-
