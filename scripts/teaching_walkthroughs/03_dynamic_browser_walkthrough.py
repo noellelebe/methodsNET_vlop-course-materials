@@ -1,19 +1,20 @@
-"""Teaching walkthrough: dynamic pages with Playwright.
+"""Teaching walkthrough: dynamic pages with Selenium.
 
-This script is optional because it requires Playwright and a browser install:
-    pip install playwright
-    playwright install chromium
+This script is optional because it requires Selenium and a local browser. Recent
+Selenium versions include Selenium Manager, which can often find or download the
+needed browser driver automatically.
 
 Teaching goals:
 1. Show why requests may miss JavaScript-rendered content.
-2. Use a real browser to collect rendered DOM.
-3. Save screenshots as visual audit evidence.
-4. Discuss waiting, scrolling, and automation ethics.
+2. Start with Selenium as the classic browser-automation tool.
+3. Use a real browser to collect rendered DOM.
+4. Save screenshots as visual audit evidence.
+5. Mention Playwright as a modern alternative with strong waiting and tracing.
 """
 
 # %% 1. Imports and classroom URL
 
-import asyncio
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -21,81 +22,116 @@ import requests
 
 
 URL = "https://quotes.toscrape.com/js/"
-# This user agent is attached to both the simple requests call and the browser
-# page. Keeping it consistent helps compare the two access routes.
+# This user agent is attached to both the simple requests call and the Selenium
+# browser. Keeping it consistent helps compare the two access routes.
 USER_AGENT = "methodsNET-VLOP-course/1.0 dynamic walkthrough"
 
 
 # %% 2. Fetch with requests first
 
-# This is the "static" view. For JavaScript-heavy pages, it may contain the app
-# shell but not the content users see after rendering.
+# This is the "static" view. requests asks the server for the HTML document, but
+# it does not execute JavaScript, click buttons, scroll, or wait for client-side
+# rendering. For JavaScript-heavy pages, the response may contain only an app
+# shell rather than the content users see in a browser.
 static_response = requests.get(URL, headers={"User-Agent": USER_AGENT}, timeout=30)
 static_response.raise_for_status()
 
 static_html = static_response.text
 print("Static HTML characters:", len(static_html))
-# This test searches the raw HTML for text that should appear after JavaScript
-# renders the quotes. If it prints False, requests did not receive the user-
-# visible quote text in the initial server response.
+
+# This test searches the raw HTML for text that appears visibly after JavaScript
+# renders the quotes. If it prints False, requests did not receive the quote text
+# in the initial server response.
 print("Does static HTML contain quote text?", "The world as we have created it" in static_html)
 
 
-# %% 3. Define an async browser function
+# %% 3. Define a Selenium browser function
 
-async def collect_rendered_page(url: str):
-    # Playwright is imported inside the function so the rest of the file can be
-    # read even on machines where Playwright has not yet been installed.
-    from playwright.async_api import async_playwright
+def collect_rendered_page_with_selenium(url: str, headless: bool = True):
+    """Open a page in Chrome, wait for rendered content, and extract quote rows."""
 
-    async with async_playwright() as p:
-        # In live teaching, change headless=False to let students watch.
-        # chromium.launch() starts a browser process controlled by Python.
-        browser = await p.chromium.launch(headless=True)
-        # new_page() opens a browser tab. user_agent makes the browser request
-        # identify itself with the same teaching string used above.
-        page = await browser.new_page(user_agent=USER_AGENT)
+    # Selenium imports live inside the function so students can still read the
+    # rest of the file even before Selenium is installed.
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.support.ui import WebDriverWait
+
+    options = Options()
+    options.add_argument(f"--user-agent={USER_AGENT}")
+
+    # headless=True runs the browser without a visible window. For live teaching,
+    # set headless=False so students can watch the browser open and render.
+    if headless:
+        options.add_argument("--headless=new")
+
+    # webdriver.Chrome() starts a Chrome browser controlled by Python. Selenium
+    # Manager usually handles the driver setup for current Selenium versions.
+    driver = webdriver.Chrome(options=options)
+
+    try:
+        # get() is the browser equivalent of opening a URL. Unlike requests, the
+        # browser will execute page JavaScript.
+        driver.get(url)
 
         # Waiting is a methodological choice. Too short and data may be missing;
-        # too long and the script becomes slow or brittle.
-        # wait_until="networkidle" waits until network activity has quieted down,
-        # which is often useful after JavaScript-driven loading.
-        await page.goto(url, wait_until="networkidle")
+        # too long and the script becomes slow. Here we wait until at least one
+        # rendered quote block exists in the DOM.
+        wait = WebDriverWait(driver, 15)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".quote")))
 
-        # Extract visible quote blocks after JavaScript has rendered them.
-        quotes = await page.eval_on_selector_all(
-            # ".quote" selects all rendered elements with class="quote".
-            ".quote",
-            # The string below is JavaScript executed inside the browser page.
-            # blocks is the list of .quote elements. For each block:
-            # - querySelector(".text") finds the quote text element;
-            # - querySelector(".author") finds the author element;
-            # - querySelectorAll(".tag") finds all tag elements;
-            # - ?. means "if this element exists, read from it; otherwise null";
-            # - ?? null replaces missing values with null for Python.
-            """blocks => blocks.map(block => ({
-                quote: block.querySelector(".text")?.innerText ?? null,
-                author: block.querySelector(".author")?.innerText ?? null,
-                tags: Array.from(block.querySelectorAll(".tag")).map(t => t.innerText)
-            }))""",
-        )
+        # A small scroll is included to show the pattern. On true infinite-scroll
+        # pages, this would be repeated with a stopping rule.
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(1)
 
-        # page.content() saves the rendered DOM after JavaScript execution, not
-        # just the original server HTML.
-        html = await page.content()
-        # A full-page screenshot is visual evidence of what the automated browser
-        # saw. It can reveal cookie banners, failed rendering, or layout changes.
-        screenshot = await page.screenshot(full_page=True)
+        # page_source is the rendered DOM after JavaScript execution, not just the
+        # original server HTML.
+        html = driver.page_source
+
+        quote_blocks = driver.find_elements(By.CSS_SELECTOR, ".quote")
+        quotes = []
+
+        for block in quote_blocks:
+            # CSS selectors work the same conceptually as in BeautifulSoup, but
+            # here Selenium searches the live browser DOM.
+            quote_text = block.find_element(By.CSS_SELECTOR, ".text").text
+            author = block.find_element(By.CSS_SELECTOR, ".author").text
+            tags = [
+                tag.text
+                for tag in block.find_elements(By.CSS_SELECTOR, ".tag")
+            ]
+
+            quotes.append(
+                {
+                    "quote": quote_text,
+                    "author": author,
+                    "tags": tags,
+                }
+            )
+
+        # A screenshot is visual evidence of what the automated browser saw. It
+        # can reveal cookie banners, failed rendering, or empty states that a CSV
+        # alone cannot show.
+        screenshot = driver.get_screenshot_as_png()
+
+    finally:
         # Always close automated browsers so scripts do not leave background
         # browser processes running.
-        await browser.close()
+        driver.quit()
 
     return html, quotes, screenshot
 
 
-# %% 4. Run the browser collection
+# %% 4. Run the Selenium browser collection
 
-rendered_html, quotes, screenshot = asyncio.run(collect_rendered_page(URL))
+rendered_html, quotes, screenshot = collect_rendered_page_with_selenium(
+    URL,
+    # Change this to False during live teaching if you want students to see the
+    # browser window.
+    headless=True,
+)
 
 print("Rendered HTML characters:", len(rendered_html))
 print("Quotes extracted:", len(quotes))
@@ -113,9 +149,9 @@ processed_dir = outdir / "processed"
 raw_dir.mkdir(parents=True, exist_ok=True)
 processed_dir.mkdir(parents=True, exist_ok=True)
 
-rendered_path = raw_dir / "walkthrough_rendered_quotes.html"
-screenshot_path = raw_dir / "walkthrough_rendered_quotes.png"
-quotes_path = processed_dir / "walkthrough_rendered_quotes.csv"
+rendered_path = raw_dir / "walkthrough_rendered_quotes_selenium.html"
+screenshot_path = raw_dir / "walkthrough_rendered_quotes_selenium.png"
+quotes_path = processed_dir / "walkthrough_rendered_quotes_selenium.csv"
 
 # Rendered HTML and screenshot are raw evidence: they preserve what the browser
 # saw before our extraction code reduced it to a table.
@@ -130,10 +166,26 @@ print("Saved screenshot:", screenshot_path)
 print("Saved quote table:", quotes_path)
 
 
-# %% 6. Teaching prompts
+# %% 6. Where Playwright fits
+
+# Selenium is a good starting point because many students have heard of it and it
+# makes the idea of "driving a browser" very concrete. Playwright is a newer
+# browser-automation library with strong auto-waiting, browser contexts, network
+# inspection, and tracing. For more complex modern web apps, Playwright can be
+# easier to debug and less flaky.
+#
+# In this course:
+# - start with Selenium to understand the browser-automation idea;
+# - mention Playwright as the modern alternative;
+# - use the runnable Playwright script if you want to compare APIs or show
+#   network-oriented debugging later.
+
+
+# %% 7. Teaching prompts
 
 questions = [
     "What did requests miss that the rendered browser could see?",
+    "Which waiting decision shaped what Selenium observed?",
     "What evidence does the screenshot provide that a CSV cannot?",
     "When is browser automation justified instead of an API?",
     "How could infinite scroll introduce missingness?",
