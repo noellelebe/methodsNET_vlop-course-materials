@@ -6,6 +6,7 @@ tqdm>=4.66
 
 # Optional, used by scripts/04_dynamic_browser_playwright.py:
 playwright>=1.44
+selenium>=4.20
 
 # Optional, useful for parquet DSA Transparency Database aggregates:
 pyarrow>=15.0

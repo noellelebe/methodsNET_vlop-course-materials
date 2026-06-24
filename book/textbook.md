@@ -186,8 +186,8 @@ Static scraping tools:
 
 Dynamic scraping tools:
 
-- Playwright;
 - Selenium;
+- Playwright;
 - browser developer tools;
 - network logs;
 - HAR files.
@@ -233,7 +233,7 @@ The goal is not to scrape a giant dataset. The goal is to understand the relatio
 
 Many platform pages are rendered by JavaScript. A simple `requests.get()` call may return a shell page while the real content is loaded later.
 
-Browser automation opens a real browser, waits for content, scrolls, clicks, and reads the rendered DOM. Playwright and Selenium are common tools. Playwright is especially useful for modern automation because it has strong waiting, browser context, and network-inspection features.
+Browser automation opens a real browser, waits for content, scrolls, clicks, and reads the rendered DOM. Selenium and Playwright are common tools. This course starts with Selenium because it makes the browser-control logic very explicit: open a page, wait for an element, find elements, read text, scroll, and take a screenshot. Playwright is introduced as a modern alternative with strong waiting, browser contexts, tracing, and network-inspection features.
 
 ## 4.1 When to Use Browser Automation
 

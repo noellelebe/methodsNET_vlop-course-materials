@@ -68,12 +68,15 @@ Some scripts use live websites or APIs. They include polite defaults and explici
 methodsNET_vlop-course-materials/
   book/
     textbook.md
+    handouts/
+      beautifulsoup_extraction_patterns.md
   scripts/
     runnable_workflows/
       00_setup_check.py
       01_api_wikipedia.py
       02_api_youtube_template.py
       03_static_scraper.py
+      04_dynamic_browser_selenium.py
       04_dynamic_browser_playwright.py
       05_dsa_transparency_workflow.py
       06_data_quality_audit.py
@@ -84,6 +87,7 @@ methodsNET_vlop-course-materials/
       00_parameter_discovery_walkthrough.py
       01_api_collection_walkthrough.py
       02_static_scraping_walkthrough.py
+      02b_beautifulsoup_extraction_patterns.py
       03_dynamic_browser_walkthrough.py
       04_dsa_transparency_walkthrough.py
       05_data_quality_audit_walkthrough.py
@@ -113,17 +117,19 @@ Suggested sequence:
 python scripts/teaching_walkthroughs/00_parameter_discovery_walkthrough.py
 python scripts/teaching_walkthroughs/01_api_collection_walkthrough.py
 python scripts/teaching_walkthroughs/02_static_scraping_walkthrough.py
+python scripts/teaching_walkthroughs/02b_beautifulsoup_extraction_patterns.py
+python scripts/teaching_walkthroughs/03_dynamic_browser_walkthrough.py
 python scripts/teaching_walkthroughs/04_dsa_transparency_walkthrough.py
 python scripts/teaching_walkthroughs/05_data_quality_audit_walkthrough.py
 python scripts/teaching_walkthroughs/06_ai_assisted_collection_walkthrough.py
 python scripts/teaching_walkthroughs/07_reproducible_project_walkthrough.py
 ```
 
-The dynamic browser walkthrough is optional because it requires Playwright browser installation:
+The dynamic browser walkthrough is optional because it requires Selenium and a local browser. The course starts with Selenium and mentions Playwright as a modern alternative. If you want to compare the Playwright version, install the browser once:
 
 ```bash
 playwright install chromium
-python scripts/teaching_walkthroughs/03_dynamic_browser_walkthrough.py
+python scripts/runnable_workflows/04_dynamic_browser_playwright.py --url https://quotes.toscrape.com/js/
 ```
 
 ### 2. Runnable Exercise Scripts
@@ -133,6 +139,7 @@ Use these when students are ready to run more reusable command-line workflows:
 ```bash
 python "scripts/runnable_workflows/01_api_wikipedia.py" --query "digital services act" --pages 2
 python "scripts/runnable_workflows/03_static_scraper.py" --url https://quotes.toscrape.com/
+python "scripts/runnable_workflows/04_dynamic_browser_selenium.py" --url https://quotes.toscrape.com/js/
 python "scripts/runnable_workflows/05_dsa_transparency_workflow.py" --start 2025-01-01 --end 2025-01-03
 python "scripts/runnable_workflows/07_ai_augmented_collection.py"
 ```
