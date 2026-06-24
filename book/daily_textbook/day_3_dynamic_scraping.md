@@ -46,9 +46,18 @@ or structured data can appear in source. Researchers should not assume that
 
 ## 2. Browser Automation
 
-Browser automation controls a real browser from code. Playwright and Selenium
+Browser automation controls a real browser from code. Selenium and Playwright
 can open pages, wait for loading, click buttons, scroll, extract rendered DOM,
-capture screenshots, and monitor network requests.
+capture screenshots, and, depending on the tool and setup, inspect network
+activity.
+
+We start with Selenium because it makes the basic idea of "driving a browser"
+very explicit and is widely known across applied research settings. Selenium
+objects map closely onto ordinary browser actions: open a URL, wait for an
+element, find elements, read text, click, scroll, and take a screenshot.
+Playwright is a newer alternative with strong auto-waiting, browser contexts,
+tracing, and network-oriented debugging. Once students understand Selenium, the
+conceptual move to Playwright is straightforward.
 
 Browser automation is powerful but slower and more fragile than API collection.
 It should be used when the research question requires the browser-visible state
@@ -57,9 +66,11 @@ controls, CAPTCHAs, or anti-bot systems.
 
 Important browser parameters include `headless`, `wait_until`, timeout, viewport
 size, scroll count, and selectors. Each parameter changes what the script sees.
-For example, `wait_until="networkidle"` waits until network activity quiets
-down. This may help dynamic content load, but it can also be slow or unreliable
-on pages that continuously poll servers.
+For example, a Selenium script might wait until a specific CSS selector appears
+in the rendered DOM. A Playwright script might use `wait_until="networkidle"` to
+wait until network activity quiets down. Both are methodological choices, and
+both can fail if the page loads slowly, continuously polls servers, or changes
+its interface.
 
 Browser automation therefore creates an observational protocol. It is closer to
 instructing a research assistant to open a browser, wait, scroll, click, and

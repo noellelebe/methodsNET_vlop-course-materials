@@ -53,6 +53,12 @@ Students should learn to connect selectors to visible page structure. Open the
 page in a browser, inspect one record, identify the repeated container, and only
 then write the extraction code.
 
+For additional selector examples, use the handout
+`book/handouts/beautifulsoup_extraction_patterns.md` and the companion script
+`scripts/teaching_walkthroughs/02b_beautifulsoup_extraction_patterns.py`. They
+cover multiple classes, nested records, attributes, direct children, siblings,
+tables, images, and metadata.
+
 ## 3. Fetching vs. Parsing
 
 Fetching and parsing are different tasks.

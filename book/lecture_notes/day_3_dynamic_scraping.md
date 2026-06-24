@@ -34,9 +34,15 @@ browser, static scraping is not enough.
 
 ## 2. Browser Automation
 
-Browser automation controls a real browser from code. Playwright and Selenium
+Browser automation controls a real browser from code. Selenium and Playwright
 can open pages, wait for loading, click buttons, scroll, extract rendered DOM,
-capture screenshots, and monitor network requests.
+capture screenshots, and inspect browser-visible page state.
+
+In this course, Selenium is the starting point because it makes the browser
+automation logic very concrete: open a URL, wait for an element, find elements,
+read text, scroll, and take a screenshot. Playwright is introduced as a modern
+alternative with strong auto-waiting, browser contexts, tracing, and
+network-oriented debugging.
 
 Browser automation is powerful but slower and more fragile than API collection.
 It should be used when the research question requires the browser-visible state
@@ -45,9 +51,9 @@ controls, CAPTCHAs, or anti-bot systems.
 
 Important browser parameters include `headless`, `wait_until`, timeout, viewport
 size, scroll count, and selectors. Each parameter changes what the script sees.
-For example, `wait_until="networkidle"` waits until network activity quiets
-down. This may help dynamic content load, but it can also be slow or unreliable
-on pages that continuously poll servers.
+For example, a Selenium script may wait until a specific CSS selector appears in
+the rendered DOM. A Playwright script may use `wait_until="networkidle"` to wait
+until network activity quiets down. Both choices affect what the scraper sees.
 
 ## 3. Screenshots and Rendered HTML
 
