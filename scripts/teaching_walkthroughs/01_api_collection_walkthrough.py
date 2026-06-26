@@ -1,8 +1,5 @@
 """Teaching walkthrough: API collection with pagination and provenance.
 
-Use this file in a live coding session. It is written as a cell-style script:
-many editors let you run one # %% section at a time.
-
 Teaching goals:
 1. Show that an API request is a research design choice.
 2. Show how pagination works.
