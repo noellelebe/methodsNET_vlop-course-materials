@@ -1,0 +1,189 @@
+---
+title: "BeautifulSoup Extraction Patterns"
+subtitle: "Selectors, nested HTML, attributes, and repeated records"
+author: "methodsNET course"
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: false
+  pdf:
+    toc: true
+    number-sections: true
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Why This Notebook Exists
+
+The first scraping walkthrough uses a clean practice page. Real pages are often
+messier: nested tags, multiple classes, attributes, tables, repeated cards, and
+navigation mixed with content.
+
+This notebook gives small, controlled examples.
+
+```{python}
+from bs4 import BeautifulSoup
+import pandas as pd
+```
+
+# Example HTML
+
+```{python}
+html = """
+<html>
+  <body>
+    <section id="results">
+      <article class="result card promoted" data-id="p1">
+        <h2><a href="/posts/p1">First post</a></h2>
+        <p class="summary">This is the first summary.</p>
+        <span class="author">Noelle</span>
+        <ul class="tags">
+          <li><a class="tag" href="/tags/api">api</a></li>
+          <li><a class="tag" href="/tags/platforms">platforms</a></li>
+        </ul>
+      </article>
+
+      <article class="result card" data-id="p2">
+        <h2><a href="/posts/p2">Second post</a></h2>
+        <p class="summary">This is the second summary.</p>
+        <span class="author">Alex</span>
+        <ul class="tags">
+          <li><a class="tag" href="/tags/scraping">scraping</a></li>
+        </ul>
+      </article>
+    </section>
+  </body>
+</html>
+"""
+
+soup = BeautifulSoup(html, "html.parser")
+```
+
+# `select_one()` vs `select()`
+
+`select_one()` returns the first matching element.
+
+```{python}
+first_card = soup.select_one(".result")
+print(first_card["data-id"])
+```
+
+`select()` returns a list of all matching elements.
+
+```{python}
+cards = soup.select(".result")
+print(len(cards))
+```
+
+# Multiple Classes
+
+This selector:
+
+```{python}
+soup.select(".result.card")
+```
+
+means: select elements that have both class `result` and class `card`.
+
+It does **not** mean a `.card` inside a `.result`.
+
+```{python}
+for card in soup.select(".result.card"):
+    print(card["data-id"], card.get("class"))
+```
+
+This selector:
+
+```{python}
+soup.select(".result .tag")
+```
+
+means: find `.tag` elements somewhere inside `.result` elements.
+
+```{python}
+for tag in soup.select(".result .tag"):
+    print(tag.get_text(strip=True))
+```
+
+# Attributes
+
+HTML attributes store information inside tags.
+
+```{python}
+first_link = soup.select_one("h2 a")
+
+print(first_link.get_text(strip=True))
+print(first_link["href"])
+```
+
+The `data-id` attribute is not visible text, but it may be a useful identifier.
+
+```{python}
+for card in soup.select(".result.card"):
+    print(card["data-id"])
+```
+
+# Repeated Record Extraction
+
+The safest pattern is:
+
+1. select repeated record containers
+2. loop over containers
+3. select fields inside each container
+
+```{python}
+rows = []
+
+for card in soup.select(".result.card"):
+    title_link = card.select_one("h2 a")
+    summary = card.select_one(".summary")
+    author = card.select_one(".author")
+    tag_links = card.select(".tags a.tag")
+
+    rows.append(
+        {
+            "post_id": card.get("data-id"),
+            "title": title_link.get_text(" ", strip=True) if title_link else None,
+            "url": title_link.get("href") if title_link else None,
+            "summary": summary.get_text(" ", strip=True) if summary else None,
+            "author": author.get_text(" ", strip=True) if author else None,
+            "tags": [tag.get_text(" ", strip=True) for tag in tag_links],
+        }
+    )
+
+df = pd.DataFrame(rows)
+df
+```
+
+# Direct Children vs Descendants
+
+A space means "descendant at any depth".
+
+```{python}
+print([x.name for x in soup.select("#results a")])
+```
+
+The `>` symbol means "direct child".
+
+```{python}
+print([x.name for x in soup.select("#results > article")])
+```
+
+# Exercise
+
+Using the example HTML:
+
+1. Extract one row per article.
+2. Add a Boolean column `is_promoted`.
+3. Create a separate table with one row per article-tag pair.
+4. Explain why `.result.card` and `.result .card` are different.
+
+# Key Takeaway
+
+Selectors are small, but they encode important assumptions about page structure.
+
+Always inspect one record before looping over all records.

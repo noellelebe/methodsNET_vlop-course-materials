@@ -1,0 +1,195 @@
+---
+title: "Day 3: Dynamic Pages with Selenium"
+subtitle: "When requests is not enough"
+author: "methodsNET course"
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: false
+  pdf:
+    toc: true
+    number-sections: true
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# What This Walkthrough Does
+
+Some websites do not put the visible data into the first HTML response. They
+load it later with JavaScript.
+
+This walkthrough compares:
+
+- `requests`: fetches the initial server HTML
+- Selenium: opens a real browser and observes the rendered DOM
+
+# Imports and URL
+
+```{python}
+import time
+from pathlib import Path
+
+import pandas as pd
+import requests
+```
+
+```{python}
+URL = "https://quotes.toscrape.com/js/"
+USER_AGENT = "methodsNET-VLOP-course/1.0 dynamic walkthrough"
+```
+
+# Fetch with requests First
+
+`requests` does not execute JavaScript.
+
+```{python}
+static_response = requests.get(URL, headers={"User-Agent": USER_AGENT}, timeout=30)
+static_response.raise_for_status()
+
+static_html = static_response.text
+
+print("Static HTML characters:", len(static_html))
+print("Does static HTML contain quote text?", "The world as we have created it" in static_html)
+```
+
+If this prints `False`, the visible quotes are not in the initial HTML returned
+to `requests`.
+
+# Define a Selenium Collection Function
+
+Selenium controls a browser from Python.
+
+```{python}
+def collect_rendered_page_with_selenium(url: str, headless: bool = True):
+    """Open a page in Chrome, wait for rendered content, and extract quote rows."""
+
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.support.ui import WebDriverWait
+
+    options = Options()
+    options.add_argument(f"--user-agent={USER_AGENT}")
+
+    if headless:
+        options.add_argument("--headless=new")
+
+    driver = webdriver.Chrome(options=options)
+
+    try:
+        driver.get(url)
+
+        wait = WebDriverWait(driver, 15)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".quote")))
+
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(1)
+
+        html = driver.page_source
+
+        quote_blocks = driver.find_elements(By.CSS_SELECTOR, ".quote")
+        quotes = []
+
+        for block in quote_blocks:
+            quote_text = block.find_element(By.CSS_SELECTOR, ".text").text
+            author = block.find_element(By.CSS_SELECTOR, ".author").text
+            tags = [
+                tag.text
+                for tag in block.find_elements(By.CSS_SELECTOR, ".tag")
+            ]
+
+            quotes.append(
+                {
+                    "quote": quote_text,
+                    "author": author,
+                    "tags": tags,
+                }
+            )
+
+        screenshot = driver.get_screenshot_as_png()
+
+    finally:
+        driver.quit()
+
+    return html, quotes, screenshot
+```
+
+::: {.callout-important}
+Waiting is part of the method. If the wait condition is wrong, the scraper may
+collect an empty or incomplete page state.
+:::
+
+# Run the Selenium Collection
+
+Set `headless=False` during live teaching if you want students to watch the
+browser window open.
+
+```{python}
+rendered_html, quotes, screenshot = collect_rendered_page_with_selenium(
+    URL,
+    headless=True,
+)
+
+print("Rendered HTML characters:", len(rendered_html))
+print("Quotes extracted:", len(quotes))
+pd.DataFrame(quotes).head()
+```
+
+# Save Evidence
+
+Rendered HTML and screenshots are raw evidence. A CSV is processed data.
+
+```{python}
+outdir = Path("data")
+raw_dir = outdir / "raw"
+processed_dir = outdir / "processed"
+
+raw_dir.mkdir(parents=True, exist_ok=True)
+processed_dir.mkdir(parents=True, exist_ok=True)
+
+rendered_path = raw_dir / "notebook_rendered_quotes_selenium.html"
+screenshot_path = raw_dir / "notebook_rendered_quotes_selenium.png"
+quotes_path = processed_dir / "notebook_rendered_quotes_selenium.csv"
+
+rendered_path.write_text(rendered_html, encoding="utf-8")
+screenshot_path.write_bytes(screenshot)
+pd.DataFrame(quotes).to_csv(quotes_path, index=False)
+
+print(rendered_path)
+print(screenshot_path)
+print(quotes_path)
+```
+
+# Where Playwright Fits
+
+Selenium is a classic browser automation tool and a good starting point.
+
+Playwright is a newer alternative with strong auto-waiting, browser contexts,
+network inspection, and tracing.
+
+In this course:
+
+- start with Selenium to understand browser automation
+- mention Playwright as a modern alternative
+- use Playwright later if network inspection or tracing becomes useful
+
+# Exercise
+
+Answer:
+
+- What did `requests` miss?
+- What did Selenium see?
+- What wait condition did we use?
+- What raw evidence did we save?
+- When would browser automation be justified instead of an API?
+
+# Key Takeaway
+
+Browser automation observes a rendered browser state. That can be necessary,
+but it also introduces new choices about waiting, scrolling, screenshots,
+browser settings, and compliance.

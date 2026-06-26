@@ -1,0 +1,156 @@
+---
+title: "Day 4: DSA Transparency Data Walkthrough"
+subtitle: "Thinking with statements of reasons"
+author: "methodsNET course"
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: false
+  pdf:
+    toc: true
+    number-sections: true
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# What This Walkthrough Does
+
+This notebook does not download the full DSA Transparency Database. Instead, it
+uses a tiny synthetic extract to teach the logic of working with statements of
+reasons.
+
+The goal is to understand units, fields, grouping, and limitations before
+working with large official files.
+
+```{python}
+from pathlib import Path
+import pandas as pd
+```
+
+# A Tiny Synthetic Extract
+
+```{python}
+records = [
+    {
+        "platform_name": "ExamplePlatform",
+        "content_date": "2026-01-01",
+        "category": "STATEMENT_CATEGORY_NEGATIVE_EFFECTS_ON_CIVIC_DISCOURSE_OR_ELECTIONS",
+        "decision_visibility": "DECISION_VISIBILITY_CONTENT_REMOVED",
+        "content_type": "CONTENT_TYPE_TEXT",
+        "automated_detection": "Yes",
+        "automated_decision": "AUTOMATED_DECISION_PARTIALLY",
+    },
+    {
+        "platform_name": "ExamplePlatform",
+        "content_date": "2026-01-01",
+        "category": "STATEMENT_CATEGORY_ILLEGAL_OR_HARMFUL_SPEECH",
+        "decision_visibility": "DECISION_VISIBILITY_CONTENT_LABELLED",
+        "content_type": "CONTENT_TYPE_VIDEO",
+        "automated_detection": "No",
+        "automated_decision": "AUTOMATED_DECISION_NO",
+    },
+    {
+        "platform_name": "AnotherPlatform",
+        "content_date": "2026-01-02",
+        "category": "STATEMENT_CATEGORY_CONSUMER_INFORMATION",
+        "decision_visibility": "DECISION_VISIBILITY_CONTENT_DISABLED",
+        "content_type": "CONTENT_TYPE_PRODUCT",
+        "automated_detection": "Yes",
+        "automated_decision": "AUTOMATED_DECISION_FULLY",
+    },
+]
+
+df = pd.DataFrame(records)
+df
+```
+
+::: {.callout-note}
+These are synthetic records, not real platform data.
+:::
+
+# Basic Counts
+
+```{python}
+print("Rows by platform:")
+print(df["platform_name"].value_counts())
+
+print("\nRows by category:")
+print(df["category"].value_counts())
+
+print("\nAutomation fields:")
+print(pd.crosstab(df["automated_detection"], df["automated_decision"]))
+```
+
+Counts describe the extract. They do not automatically describe all moderation
+activity on a platform.
+
+# What the Data Can and Cannot Mean
+
+```{python}
+method_notes = [
+    "A statement of reasons records a moderation decision explanation, not the full moderation pipeline.",
+    "Categories may not be comparable across platforms without checking reporting behavior.",
+    "Automated_detection and automated_decision are related but not identical concepts.",
+    "Missing or vague fields can limit downstream inference.",
+]
+
+for note in method_notes:
+    print("-", note)
+```
+
+# Save the Synthetic Extract and Notes
+
+```{python}
+outdir = Path("data")
+processed_dir = outdir / "processed"
+reports_dir = outdir / "reports"
+
+processed_dir.mkdir(parents=True, exist_ok=True)
+reports_dir.mkdir(parents=True, exist_ok=True)
+
+csv_path = processed_dir / "notebook_synthetic_dsa_tdb.csv"
+notes_path = reports_dir / "notebook_synthetic_dsa_tdb_notes.txt"
+
+df.to_csv(csv_path, index=False)
+notes_path.write_text("\n".join(method_notes), encoding="utf-8")
+
+print(csv_path)
+print(notes_path)
+```
+
+# Official Tooling Templates
+
+The full official data should be handled deliberately and with small test
+windows first.
+
+```{python}
+print("Install:")
+print(
+    "pip install dsa-tdb "
+    "--index-url https://code.europa.eu/api/v4/projects/943/packages/pypi/simple"
+)
+
+print("\nExample small aggregate download:")
+print("dsa-tdb-cli download-aggs -o data/dsa_tdb_aggs -i 2025-01-01 -f 2025-01-03")
+
+print("\nExample small daily parquet download:")
+print("dsa-tdb-cli download-pqts -o data/dsa_tdb_daily -i 2025-01-01 -f 2025-01-03 -d")
+```
+
+# Exercise
+
+Choose one field and explain:
+
+- what it appears to measure
+- what ambiguity it may contain
+- whether it is comparable across platforms
+- what you would check in the official schema
+
+# Key Takeaway
+
+Transparency data is not the same as complete platform behavior. It is a
+structured reporting artifact, and that structure must be part of the method.

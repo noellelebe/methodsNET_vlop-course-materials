@@ -1,0 +1,152 @@
+---
+title: "AI-Assisted Collection Workflows"
+subtitle: "Using AI as supervised support, not as an authority"
+author: "methodsNET course"
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: false
+  pdf:
+    toc: true
+    number-sections: true
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# What This Walkthrough Does
+
+This notebook does not call an AI system. It creates prompts and review
+checklists for a supervised teaching exercise.
+
+The goal is to use AI for bounded support tasks while keeping methodological
+control with the researcher.
+
+# Define a Research Scenario
+
+```{python}
+research_question = "How do VLOPs report election-related moderation decisions?"
+access_route = "DSA Transparency Database extract"
+known_docs = "https://transparency.dsa.ec.europa.eu/"
+```
+
+These variables make the prompt concrete. Better-specified scenarios usually
+produce more useful AI assistance.
+
+# Prompt for Query Planning
+
+```{python}
+api_prompt = f"""
+You are helping design a platform-data collection workflow.
+
+Research question:
+{research_question}
+
+Access route:
+{access_route}
+
+Known official documentation:
+{known_docs}
+
+Return:
+1. the minimum necessary fields;
+2. likely filters or grouping variables;
+3. pagination or download considerations;
+4. data-quality checks;
+5. assumptions that must be verified in the official documentation.
+
+Do not invent endpoints, permissions, or legal claims.
+"""
+
+print(api_prompt)
+```
+
+::: {.callout-important}
+The prompt tells the model not to invent endpoints, permissions, or legal
+claims. This does not guarantee correctness, but it helps frame the task.
+:::
+
+# Prompt for Scraper Debugging
+
+```{python}
+scraper_prompt = """
+You are helping debug a research scraper.
+
+Observed problem:
+The script finds zero records, but the browser visibly shows ten result cards.
+
+Evidence:
+- requests.get(url).text contains a JavaScript app shell.
+- Browser inspector shows cards under div.result-card after rendering.
+
+Return:
+1. likely cause;
+2. a safe debugging plan;
+3. validation checks;
+4. what raw evidence to save;
+5. ethical/legal checks before running at scale.
+
+Do not suggest bypassing access controls or anti-bot systems.
+"""
+
+print(scraper_prompt)
+```
+
+This prompt gives evidence. It does not merely say "fix my scraper".
+
+# Human Review Checklist
+
+```{python}
+review_checklist = [
+    "Did the AI invent a non-existent API endpoint or field?",
+    "Did it imply permission that must be checked elsewhere?",
+    "Did it suggest bypassing access controls, CAPTCHAs, or anti-bot systems?",
+    "Did it ask to paste personal or sensitive data into the model?",
+    "Did it generate code with network calls that need review before execution?",
+    "Did it include validation checks and provenance notes?",
+]
+
+for item in review_checklist:
+    print("-", item)
+```
+
+# Provenance Note Template
+
+If AI helped the workflow, document that help.
+
+```{python}
+provenance_note = {
+    "ai_tool_used": "[tool/model name]",
+    "date": "[YYYY-MM-DD]",
+    "task": "Generated candidate code/query plan/documentation text.",
+    "human_review": "All endpoints, fields, permissions, and code paths checked before execution.",
+    "sensitive_data_shared": False,
+    "final_status": "AI output treated as draft assistance, not authoritative method.",
+}
+
+print(provenance_note)
+```
+
+# Exercise
+
+Give an AI tool a bounded support task, for example:
+
+- explain a confusing API error message
+- suggest validation checks for a scraper
+- draft a parameter inventory
+- review code for missing rate-limit handling
+
+Then answer:
+
+- What did the AI help with?
+- What did you verify elsewhere?
+- What would you not delegate to AI?
+- What belongs in provenance?
+
+# Key Takeaway
+
+AI can support collection workflows, but it does not replace documentation,
+verification, legal/ethical judgment, or methodological responsibility.

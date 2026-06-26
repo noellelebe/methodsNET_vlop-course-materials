@@ -1,0 +1,280 @@
+---
+title: "Day 2: Static HTML Scraping Walkthrough"
+subtitle: "Fetching HTML, parsing records, and saving raw evidence"
+author: "methodsNET course"
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: false
+  pdf:
+    toc: true
+    number-sections: true
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# What This Walkthrough Does
+
+This walkthrough introduces static web scraping with `requests` and
+`BeautifulSoup`.
+
+By the end, you should understand how to:
+
+- check `robots.txt` as a first access signal
+- fetch raw HTML
+- save raw HTML before parsing
+- inspect page structure
+- use CSS selectors
+- extract repeated records
+- resolve relative URLs
+- save processed tables
+
+The classroom example is <https://quotes.toscrape.com/>, a practice site made
+for scraping exercises.
+
+# Imports and Classroom URL
+
+```{python}
+from pathlib import Path
+from pprint import pprint
+from urllib.parse import urljoin, urlparse
+from urllib.robotparser import RobotFileParser
+
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+```
+
+```{python}
+URL = "https://quotes.toscrape.com/"
+USER_AGENT = "methodsNET-VLOP-course/1.0_static_scraping_walkthrough"
+```
+
+The `User-Agent` identifies the script. It should be meaningful and honest.
+
+# Check robots.txt
+
+`robots.txt` is not full legal or ethical permission, but it is a first access
+signal.
+
+```{python}
+parsed = urlparse(URL)
+robots_url = f"{parsed.scheme}://{parsed.netloc}/robots.txt"
+
+rp = RobotFileParser()
+rp.set_url(robots_url)
+rp.read()
+
+allowed = rp.can_fetch(USER_AGENT, URL)
+
+print("robots.txt URL:", robots_url)
+print("Can fetch classroom URL?", allowed)
+```
+
+::: {.callout-question}
+Why is `robots.txt` not the same as full permission to collect data?
+:::
+
+# Fetch the Page
+
+`requests.get()` retrieves the raw HTML returned by the server. It does not
+click, scroll, or execute JavaScript.
+
+```{python}
+response = requests.get(URL, headers={"User-Agent": USER_AGENT}, timeout=30)
+response.raise_for_status()
+
+html = response.text
+
+print("HTTP status:", response.status_code)
+print("Characters of HTML:", len(html))
+print(html[:500])
+```
+
+# Save Raw HTML
+
+Save raw HTML before parsing. This lets us rerun extraction code without
+contacting the site again and preserves evidence of what the scraper saw.
+
+```{python}
+outdir = Path("data")
+raw_dir = outdir / "raw"
+raw_dir.mkdir(parents=True, exist_ok=True)
+
+raw_html_path = raw_dir / "notebook_quotes_raw.html"
+raw_html_path.write_text(html, encoding=response.encoding or "utf-8")
+
+print("Saved raw HTML:", raw_html_path)
+```
+
+# Parse and Inspect HTML
+
+```{python}
+soup = BeautifulSoup(html, "html.parser")
+
+print(soup.prettify()[:1500])
+```
+
+Quick sanity checks:
+
+```{python}
+print("Page title:", soup.title.get_text(strip=True))
+print("Number of links:", len(soup.select("a[href]")))
+print("Number of quote blocks:", len(soup.select(".quote")))
+```
+
+Open the same page in a browser and inspect one quote. Connect the HTML
+structure to the selectors `.quote`, `.text`, `.author`, and `.tags`.
+
+# Inspect One Record Before Looping
+
+A good scraper starts with one record. If one record is wrong, the loop will
+only repeat the mistake.
+
+```{python}
+first_quote = soup.select_one(".quote")
+
+print(first_quote.prettify())
+```
+
+Select fields inside that one record:
+
+```{python}
+print("Quote text element:", first_quote.select_one(".text"))
+print("Author element:", first_quote.select_one(".author"))
+print("Tag link elements:", first_quote.select(".tags a.tag"))
+print("Author profile link:", first_quote.select_one("span a[href]"))
+```
+
+# Extract Repeated Records
+
+Each `.quote` block is one repeated record container.
+
+```{python}
+rows = []
+
+for quote_block in soup.select(".quote"):
+    text = quote_block.select_one(".text")
+    author = quote_block.select_one(".author")
+    tag_links = quote_block.select(".tags a.tag")
+    author_link = quote_block.select_one("span a[href]")
+
+    row = {
+        "quote": text.get_text(" ", strip=True) if text else None,
+        "author": author.get_text(" ", strip=True) if author else None,
+        "author_href_raw": author_link.get("href") if author_link else None,
+        "author_href_absolute": (
+            urljoin(URL, author_link.get("href")) if author_link else None
+        ),
+        "tags": "|".join(tag.get_text(" ", strip=True) for tag in tag_links),
+        "tag_count": len(tag_links),
+    }
+
+    rows.append(row)
+
+quotes_df = pd.DataFrame(rows)
+quotes_df.head()
+```
+
+::: {.callout-important}
+The selector decides the unit of analysis. Here, `.quote` means one row is one
+quote block.
+:::
+
+# Extract and Classify Links
+
+All links are `<a>` elements with an `href` attribute.
+
+```{python}
+links = []
+
+for link in soup.select("a[href]"):
+    href_raw = link.get("href")
+    href_absolute = urljoin(URL, href_raw)
+
+    if href_raw.startswith("/author/"):
+        link_type = "author_profile"
+    elif href_raw.startswith("/tag/"):
+        link_type = "tag_page"
+    elif href_raw.startswith("/page/"):
+        link_type = "pagination"
+    else:
+        link_type = "other"
+
+    links.append(
+        {
+            "link_text": link.get_text(" ", strip=True),
+            "href_raw": href_raw,
+            "href_absolute": href_absolute,
+            "link_type": link_type,
+        }
+    )
+
+links_df = pd.DataFrame(links)
+links_df.head(10)
+```
+
+# Tags as a Separate Table
+
+Sometimes repeated fields should become their own table.
+
+```{python}
+tag_rows = []
+
+for quote_number, quote_block in enumerate(soup.select(".quote"), start=1):
+    text = quote_block.select_one(".text")
+    quote_text = text.get_text(" ", strip=True) if text else None
+
+    for tag_link in quote_block.select(".tags a.tag"):
+        tag_rows.append(
+            {
+                "quote_number": quote_number,
+                "quote": quote_text,
+                "tag": tag_link.get_text(" ", strip=True),
+                "tag_url": urljoin(URL, tag_link.get("href")),
+            }
+        )
+
+tags_df = pd.DataFrame(tag_rows)
+tags_df.head()
+```
+
+# Save Processed Tables
+
+```{python}
+processed_dir = outdir / "processed"
+processed_dir.mkdir(parents=True, exist_ok=True)
+
+quotes_path = processed_dir / "notebook_quotes.csv"
+links_path = processed_dir / "notebook_quote_links.csv"
+tags_path = processed_dir / "notebook_quote_tags.csv"
+
+quotes_df.to_csv(quotes_path, index=False)
+links_df.to_csv(links_path, index=False)
+tags_df.to_csv(tags_path, index=False)
+
+print(quotes_path)
+print(links_path)
+print(tags_path)
+```
+
+# Exercise
+
+Adapt the scraper in one way:
+
+1. Extract the author profile URLs.
+2. Extract the next-page URL.
+3. Create a separate table of tags.
+4. Add a column counting how many tags each quote has.
+5. Save a short provenance note explaining the URL, selectors, and date.
+
+# Key Takeaway
+
+Scraping is not just "getting what is on a page".
+
+It involves choices about access, selectors, units of analysis, missing data,
+raw evidence, and documentation.
