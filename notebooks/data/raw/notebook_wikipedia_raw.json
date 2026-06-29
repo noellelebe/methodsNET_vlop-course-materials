@@ -1,0 +1,490 @@
+[
+  {
+    "page_number":1,
+    "request_url":"https:\/\/en.wikipedia.org\/w\/api.php?action=query&list=search&srsearch=digital+services+act&srlimit=25&format=json&formatversion=2",
+    "status_code":200,
+    "payload":{
+      "batchcomplete":true,
+      "continue":{
+        "sroffset":25,
+        "continue":"-||"
+      },
+      "query":{
+        "searchinfo":{
+          "totalhits":40532
+        },
+        "search":[
+          {
+            "ns":0,
+            "title":"Digital Services Act",
+            "pageid":65193550,
+            "size":86121,
+            "wordcount":7420,
+            "snippet":"The <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> (DSA) is an EU regulation that entered into force in 2022, establishing a comprehensive legal framework for <span class=\"searchmatch\">digital<\/span> <span class=\"searchmatch\">services<\/span> accountability",
+            "timestamp":"2026-06-20T03:14:50Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital Markets Act",
+            "pageid":66230371,
+            "size":123787,
+            "wordcount":12016,
+            "snippet":"The <span class=\"searchmatch\">Digital<\/span> Markets <span class=\"searchmatch\">Act<\/span> (DMA) is an EU regulation that aims to make the <span class=\"searchmatch\">digital<\/span> economy fairer and more contestable. The regulation entered into force",
+            "timestamp":"2026-06-11T19:50:04Z"
+          },
+          {
+            "ns":0,
+            "title":"Content moderation",
+            "pageid":295668,
+            "size":33298,
+            "wordcount":3516,
+            "snippet":"<span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> (DSA)&quot;. European Commission. Retrieved 23 September 2025. &quot;Out-of-court dispute settlement bodies under the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>",
+            "timestamp":"2026-06-23T23:47:33Z"
+          },
+          {
+            "ns":0,
+            "title":"Online Safety Act 2023",
+            "pageid":67646530,
+            "size":64016,
+            "wordcount":5945,
+            "snippet":"through &quot;<span class=\"searchmatch\">service<\/span> restriction orders&quot;, requirements on ancillary <span class=\"searchmatch\">services<\/span> which facilitate the provision of the regulated <span class=\"searchmatch\">services<\/span>. The <span class=\"searchmatch\">act<\/span> lists in section",
+            "timestamp":"2026-06-24T12:39:02Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital Single Market",
+            "pageid":47652080,
+            "size":45948,
+            "wordcount":6123,
+            "snippet":"Market For <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> (<span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>) and amending Directive 2000\/31\/EC European Commission (16 April 2021). &quot;The <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> package&quot;",
+            "timestamp":"2026-06-22T19:07:06Z"
+          },
+          {
+            "ns":0,
+            "title":"Taxation of digital goods",
+            "pageid":25286840,
+            "size":49430,
+            "wordcount":5918,
+            "snippet":"for a fee. The taxation of <span class=\"searchmatch\">digital<\/span> goods and\/or <span class=\"searchmatch\">services<\/span>, sometimes referred to as <span class=\"searchmatch\">digital<\/span> tax and\/or a <span class=\"searchmatch\">digital<\/span> <span class=\"searchmatch\">services<\/span> tax, is gaining popularity across",
+            "timestamp":"2026-05-26T16:07:06Z"
+          },
+          {
+            "ns":0,
+            "title":"Censorship in the European Union",
+            "pageid":70137000,
+            "size":15306,
+            "wordcount":1603,
+            "snippet":"using automated content moderation to remove legal speech. The EU <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>, passed in 2022, compels online platforms to remove illegal content",
+            "timestamp":"2026-04-30T05:29:35Z"
+          },
+          {
+            "ns":0,
+            "title":"Shadow banning",
+            "pageid":34092671,
+            "size":30916,
+            "wordcount":3227,
+            "snippet":"platform denied a <span class=\"searchmatch\">service<\/span> for no disclosed reason, and hence being in breach of contract. In the European Union, the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> (DSA) contains",
+            "timestamp":"2026-06-25T20:12:47Z"
+          },
+          {
+            "ns":0,
+            "title":"Information technology law",
+            "pageid":18935388,
+            "size":39565,
+            "wordcount":4956,
+            "snippet":"Artificial Intelligence <span class=\"searchmatch\">Act<\/span> <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> <span class=\"searchmatch\">Digital<\/span> Markets <span class=\"searchmatch\">Act<\/span> Cyber Resilience <span class=\"searchmatch\">Act<\/span> Data Governance <span class=\"searchmatch\">Act<\/span> (proposed) <span class=\"searchmatch\">Digital<\/span> Fairness <span class=\"searchmatch\">Act<\/span> (proposed) As of",
+            "timestamp":"2025-12-08T10:04:58Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital marketing",
+            "pageid":9933471,
+            "size":52126,
+            "wordcount":5526,
+            "snippet":"products and <span class=\"searchmatch\">services<\/span>. It has significantly transformed how brands and businesses use technology for marketing since the 1990s and 2000s. As <span class=\"searchmatch\">digital<\/span> platforms",
+            "timestamp":"2026-06-05T02:06:43Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital Services Tax Act (Canada)",
+            "pageid":79397333,
+            "size":25458,
+            "wordcount":2412,
+            "snippet":"Canada&#039;s <span class=\"searchmatch\">digital<\/span> <span class=\"searchmatch\">services<\/span> tax (DST) was a 3% tax on Canadian-source <span class=\"searchmatch\">digital<\/span> <span class=\"searchmatch\">services<\/span> revenue (i.e., <span class=\"searchmatch\">services<\/span> that rely on engagement, data, and content",
+            "timestamp":"2026-05-21T21:47:04Z"
+          },
+          {
+            "ns":0,
+            "title":"Frances Haugen",
+            "pageid":68882246,
+            "size":49847,
+            "wordcount":4474,
+            "snippet":"(whistleblower) \u2013 former Facebook data analyst and whistleblower <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> Online Safety <span class=\"searchmatch\">Act<\/span> 2023 Mac, Ryan (October 5, 2021). &quot;Who is Frances Haugen",
+            "timestamp":"2026-06-18T03:44:52Z"
+          },
+          {
+            "ns":0,
+            "title":"Dark pattern",
+            "pageid":54174510,
+            "size":34177,
+            "wordcount":3455,
+            "snippet":"19 October 2022 on a Single Market For <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> and amending Directive 2000\/31\/EC (<span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>). OJ L 277, 27.10.2022, p. 1\u2013102. P\u00e1l,",
+            "timestamp":"2026-06-18T13:57:42Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital Millennium Copyright Act",
+            "pageid":20648089,
+            "size":117647,
+            "wordcount":12592,
+            "snippet":"The <span class=\"searchmatch\">Digital<\/span> Millennium Copyright <span class=\"searchmatch\">Act<\/span> (DMCA) is a 1998 United States copyright law that implements two 1996 treaties of the World Intellectual Property",
+            "timestamp":"2026-06-12T04:50:30Z"
+          },
+          {
+            "ns":0,
+            "title":"Transparency and Targeting of Political Advertising Regulation",
+            "pageid":80542801,
+            "size":8699,
+            "wordcount":779,
+            "snippet":"advertising across all EU member states. The regulation complements the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>, General Data Protection Regulation (GDPR), and the EU Code of Practice",
+            "timestamp":"2026-06-26T14:08:43Z"
+          },
+          {
+            "ns":0,
+            "title":"Interactive Gambling Act 2001",
+            "pageid":22757963,
+            "size":7903,
+            "wordcount":743,
+            "snippet":"Other Measures) <span class=\"searchmatch\">Act<\/span> 2023, which prohibited the use of credit cards, credit-related products and <span class=\"searchmatch\">digital<\/span> currency for online wagering. The <span class=\"searchmatch\">Act<\/span> is administered",
+            "timestamp":"2026-05-28T10:23:32Z"
+          },
+          {
+            "ns":0,
+            "title":"Vlog",
+            "pageid":1305348,
+            "size":39035,
+            "wordcount":4145,
+            "snippet":"Union enabled several strict internet regulations. For instance, the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> mandates greater transparency and accountability to platforms in",
+            "timestamp":"2026-05-22T23:28:54Z"
+          },
+          {
+            "ns":0,
+            "title":"Atria Convergence Technologies",
+            "pageid":39922603,
+            "size":8128,
+            "wordcount":638,
+            "snippet":"under the brand name &quot;<span class=\"searchmatch\">ACT<\/span> Fibernet&quot; and <span class=\"searchmatch\">digital<\/span> television <span class=\"searchmatch\">services<\/span> under the &quot;<span class=\"searchmatch\">ACT<\/span> <span class=\"searchmatch\">Digital<\/span>&quot; brand. The company provides <span class=\"searchmatch\">services<\/span> in Tamil Nadu, Telangana",
+            "timestamp":"2026-06-25T17:43:29Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital Fairness Act",
+            "pageid":77946617,
+            "size":10011,
+            "wordcount":763,
+            "snippet":"The <span class=\"searchmatch\">Digital<\/span> Fairness <span class=\"searchmatch\">Act<\/span> (DFA) is a legislative proposal by the European Commission. Michael McGrath, EU Commissioner for Democracy, Justice, the Rule",
+            "timestamp":"2026-02-01T20:17:49Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital Operational Resilience Act",
+            "pageid":76980362,
+            "size":6814,
+            "wordcount":553,
+            "snippet":"The <span class=\"searchmatch\">Digital<\/span> Operational Resilience <span class=\"searchmatch\">Act<\/span> (DORA), officially Regulation (EU) 2022\/2554 is a European Union regulation. It requires financial entities to improve",
+            "timestamp":"2025-11-18T14:12:23Z"
+          },
+          {
+            "ns":0,
+            "title":"Regulation (European Union)",
+            "pageid":708000,
+            "size":7686,
+            "wordcount":715,
+            "snippet":"the EU increasingly uses the term &quot;<span class=\"searchmatch\">Act<\/span>&quot; in the short titles of many of its Regulations (e.g. the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>). The description of regulations can",
+            "timestamp":"2026-04-10T21:35:29Z"
+          },
+          {
+            "ns":0,
+            "title":"EU Digital Identity Wallet",
+            "pageid":81103527,
+            "size":25320,
+            "wordcount":2460,
+            "snippet":"addition, Very Large Online Platforms under the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> and \u201cgatekeepers\u201d under the <span class=\"searchmatch\">Digital<\/span> Markets <span class=\"searchmatch\">Act<\/span> must recognise the wallet for user authentication",
+            "timestamp":"2026-02-14T16:23:02Z"
+          },
+          {
+            "ns":0,
+            "title":"Trade and Technology Council",
+            "pageid":68692470,
+            "size":30263,
+            "wordcount":2157,
+            "snippet":"the <span class=\"searchmatch\">digital<\/span> world, supply chain resilience, the global trade order and the EU&#039;s developing regulatory agenda like <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>, Data <span class=\"searchmatch\">Act<\/span> and Cloud",
+            "timestamp":"2026-06-16T08:16:38Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital platform (infrastructure)",
+            "pageid":67032801,
+            "size":13737,
+            "wordcount":1489,
+            "snippet":"these platforms have. Laws such as the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> have been put in place to regulate and ensure <span class=\"searchmatch\">digital<\/span> programmes are abiding by content moderation",
+            "timestamp":"2026-03-25T22:10:30Z"
+          },
+          {
+            "ns":0,
+            "title":"Data Act (European Union)",
+            "pageid":68294262,
+            "size":8830,
+            "wordcount":638,
+            "snippet":"data. Data Governance <span class=\"searchmatch\">Act<\/span> General Data Protection Regulation Artificial Intelligence <span class=\"searchmatch\">Act<\/span> <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> <span class=\"searchmatch\">Digital<\/span> Markets <span class=\"searchmatch\">Act<\/span> European Health Data",
+            "timestamp":"2026-02-01T20:13:21Z"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "page_number":2,
+    "request_url":"https:\/\/en.wikipedia.org\/w\/api.php?action=query&list=search&srsearch=digital+services+act&srlimit=25&format=json&formatversion=2&sroffset=25&continue=-%7C%7C",
+    "status_code":200,
+    "payload":{
+      "batchcomplete":true,
+      "continue":{
+        "sroffset":50,
+        "continue":"-||"
+      },
+      "query":{
+        "searchinfo":{
+          "totalhits":40532
+        },
+        "search":[
+          {
+            "ns":0,
+            "title":"Algorithmic amplification",
+            "pageid":82337203,
+            "size":71413,
+            "wordcount":7996,
+            "snippet":"1007\/s41109-024-00668-6. &quot;The <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> package&quot;. European Commission. Retrieved 4 March 2026. &quot;Action Recommended: How the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> Addresses Platform",
+            "timestamp":"2026-06-10T15:23:54Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital Copyright Act",
+            "pageid":67241140,
+            "size":2324,
+            "wordcount":209,
+            "snippet":"The <span class=\"searchmatch\">Digital<\/span> Copyright <span class=\"searchmatch\">Act<\/span> (DCA) is a proposed United States copyright law that amends revision of <span class=\"searchmatch\">Digital<\/span> Millennium Copyright <span class=\"searchmatch\">Act<\/span> (DMCA). The proposed",
+            "timestamp":"2025-06-05T06:01:55Z"
+          },
+          {
+            "ns":0,
+            "title":"Social media",
+            "pageid":5897742,
+            "size":195590,
+            "wordcount":22455,
+            "snippet":"the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>&quot;. Politics and Governance. 11 (3). doi:10.17645\/pag.v11i3.6735. &quot;The <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> package | Shaping Europe&#039;s <span class=\"searchmatch\">digital<\/span> future&quot;",
+            "timestamp":"2026-06-23T01:01:11Z"
+          },
+          {
+            "ns":0,
+            "title":"European Union\u2013United States relations",
+            "pageid":4075736,
+            "size":92302,
+            "wordcount":8960,
+            "snippet":"to Big Tech on <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>&quot; (PDF). FCC.gov. Mukherjee, Supantha (March 3, 2025). &quot;US FCC chair says EU <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> is threat to free",
+            "timestamp":"2026-06-25T19:16:00Z"
+          },
+          {
+            "ns":0,
+            "title":"Big Tech",
+            "pageid":57174306,
+            "size":143967,
+            "wordcount":12910,
+            "snippet":"targeting gender, race, religion, and childhood. Both the <span class=\"searchmatch\">Digital<\/span> Markets <span class=\"searchmatch\">Act<\/span> and <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> were enacted by the EU in July 2022. The EU defined Alphabet",
+            "timestamp":"2026-06-25T07:44:08Z"
+          },
+          {
+            "ns":0,
+            "title":"Payment Services Act 2019",
+            "pageid":61481948,
+            "size":4721,
+            "wordcount":229,
+            "snippet":"transfer <span class=\"searchmatch\">services<\/span>, (4) merchant acquisition, (5) electronic money issuance, (6) <span class=\"searchmatch\">digital<\/span> payment token <span class=\"searchmatch\">services<\/span> and (7) money-changing <span class=\"searchmatch\">services<\/span>. The PS <span class=\"searchmatch\">Act<\/span> does",
+            "timestamp":"2025-09-18T15:40:35Z"
+          },
+          {
+            "ns":0,
+            "title":"DSA",
+            "pageid":59463,
+            "size":2871,
+            "wordcount":417,
+            "snippet":"Nevada, United States <span class=\"searchmatch\">Digital<\/span> Security <span class=\"searchmatch\">Act<\/span>, 2018 (Bangladesh) <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>, a European Union regulation on <span class=\"searchmatch\">digital<\/span> content <span class=\"searchmatch\">Digital<\/span> subtraction angiography",
+            "timestamp":"2026-06-17T06:01:31Z"
+          },
+          {
+            "ns":0,
+            "title":"Electronic Commerce Directive 2000",
+            "pageid":17728747,
+            "size":34947,
+            "wordcount":3949,
+            "snippet":"revise this directive which finally happened with the adoption of the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> 2022. In the 1990s, when the general public started using the internet",
+            "timestamp":"2026-03-20T22:08:18Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital Economy Act 2017",
+            "pageid":51024759,
+            "size":36102,
+            "wordcount":3205,
+            "snippet":"<span class=\"searchmatch\">Digital<\/span> Economy <span class=\"searchmatch\">Act<\/span> 2017 (c. 30) is an <span class=\"searchmatch\">act<\/span> of the Parliament of the United Kingdom. It is substantially different from, and shorter than, the <span class=\"searchmatch\">Digital<\/span>",
+            "timestamp":"2026-05-02T22:38:34Z"
+          },
+          {
+            "ns":0,
+            "title":"Coimisi\u00fan na Me\u00e1n",
+            "pageid":73295318,
+            "size":9725,
+            "wordcount":762,
+            "snippet":"as <span class=\"searchmatch\">digital<\/span> <span class=\"searchmatch\">services<\/span> commissioner Coimisi\u00fan na Me\u00e1n is the designated <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> Coordinator for Ireland under the EU&#039;s <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>. On",
+            "timestamp":"2026-06-26T11:57:45Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital library",
+            "pageid":18934863,
+            "size":54378,
+            "wordcount":6268,
+            "snippet":"A <span class=\"searchmatch\">digital<\/span> library, also referred to as an online library, an internet library, a <span class=\"searchmatch\">digital<\/span> repository, a library without walls, or a <span class=\"searchmatch\">digital<\/span> collection,",
+            "timestamp":"2026-06-25T13:28:06Z"
+          },
+          {
+            "ns":0,
+            "title":"Regulation of artificial intelligence",
+            "pageid":63451675,
+            "size":176174,
+            "wordcount":17038,
+            "snippet":"of <span class=\"searchmatch\">digital<\/span> technology through the GDPR, <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>, and the <span class=\"searchmatch\">Digital<\/span> Markets <span class=\"searchmatch\">Act<\/span>. For AI in particular, the Artificial intelligence <span class=\"searchmatch\">Act<\/span> was",
+            "timestamp":"2026-06-26T09:49:31Z"
+          },
+          {
+            "ns":0,
+            "title":"Platform economy",
+            "pageid":56846326,
+            "size":48011,
+            "wordcount":5003,
+            "snippet":" the Commission proposed two key regulations: the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> and the <span class=\"searchmatch\">Digital<\/span> Markets <span class=\"searchmatch\">Act<\/span>, aimed at increasing accountability and competition",
+            "timestamp":"2026-05-20T12:26:50Z"
+          },
+          {
+            "ns":0,
+            "title":"Solid (web decentralization project)",
+            "pageid":57837019,
+            "size":11895,
+            "wordcount":1093,
+            "snippet":"presentations. ActivityPub AT Protocol Dat Distributed social network <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> IndieWeb InterPlanetary File System Urbit David Weinberber (10 August",
+            "timestamp":"2025-12-12T23:24:25Z"
+          },
+          {
+            "ns":0,
+            "title":"Trust and safety",
+            "pageid":73236747,
+            "size":35919,
+            "wordcount":3313,
+            "snippet":"requests under laws like the <span class=\"searchmatch\">Digital<\/span> Millennium Copyright <span class=\"searchmatch\">Act<\/span> (DMCA), implementing requirements under the EU&#039;s <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> (DSA), and responding to",
+            "timestamp":"2026-06-23T09:11:59Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital Personal Data Protection Act, 2023",
+            "pageid":74540504,
+            "size":33660,
+            "wordcount":2840,
+            "snippet":"The <span class=\"searchmatch\">Digital<\/span> Personal Data Protection <span class=\"searchmatch\">Act<\/span>, 2023 (also known as DPDP <span class=\"searchmatch\">Act<\/span> or DPDPA-2023) is an <span class=\"searchmatch\">act<\/span> of the Parliament of India to provide for the processing",
+            "timestamp":"2026-05-26T22:41:58Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital and Intelligence Service",
+            "pageid":70232481,
+            "size":12592,
+            "wordcount":929,
+            "snippet":"The <span class=\"searchmatch\">Digital<\/span> and Intelligence <span class=\"searchmatch\">Service<\/span> (DIS) is the <span class=\"searchmatch\">digital<\/span> <span class=\"searchmatch\">service<\/span> branch of the Singapore Armed Forces (SAF) responsible for providing military intelligence",
+            "timestamp":"2026-04-05T04:50:01Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital identity",
+            "pageid":1649105,
+            "size":53512,
+            "wordcount":6126,
+            "snippet":"facilitating automated access to <span class=\"searchmatch\">digital<\/span> <span class=\"searchmatch\">services<\/span>, confirming one&#039;s identity on the internet, and allowing <span class=\"searchmatch\">digital<\/span> systems to manage interactions between",
+            "timestamp":"2026-06-22T19:36:18Z"
+          },
+          {
+            "ns":0,
+            "title":"United States Department of Health and Human Services",
+            "pageid":58250,
+            "size":52676,
+            "wordcount":4733,
+            "snippet":"Planning and <span class=\"searchmatch\">Service<\/span> <span class=\"searchmatch\">Act<\/span> PL 89-749 1970: Community Mental Health <span class=\"searchmatch\">Service<\/span> <span class=\"searchmatch\">Act<\/span> PL 91-211 1970: Family Planning <span class=\"searchmatch\">Services<\/span> and Population Research <span class=\"searchmatch\">Act<\/span> PL 91-572",
+            "timestamp":"2026-06-01T14:52:58Z"
+          },
+          {
+            "ns":0,
+            "title":"Consumer Rights Act 2015",
+            "pageid":47262459,
+            "size":16823,
+            "wordcount":1751,
+            "snippet":"purchase of <span class=\"searchmatch\">digital<\/span> content. The <span class=\"searchmatch\">Act<\/span> is split into three parts: Part 1 concerns consumer contracts for goods, <span class=\"searchmatch\">digital<\/span> content and <span class=\"searchmatch\">services<\/span>. Part 2 concerns",
+            "timestamp":"2026-06-23T17:30:29Z"
+          },
+          {
+            "ns":0,
+            "title":"Digital India",
+            "pageid":43921488,
+            "size":30216,
+            "wordcount":2963,
+            "snippet":"knowledge economy&quot; by expanding <span class=\"searchmatch\">digital<\/span> infrastructure, promoting e\u2011governance, and enabling <span class=\"searchmatch\">digital<\/span> delivery of public <span class=\"searchmatch\">services<\/span>. The programme was launched",
+            "timestamp":"2026-05-26T08:28:32Z"
+          },
+          {
+            "ns":0,
+            "title":"Telegram (software)",
+            "pageid":41501305,
+            "size":205567,
+            "wordcount":17990,
+            "snippet":"Telegram launched Telegram Stars to facilitate in-app purchases of <span class=\"searchmatch\">digital<\/span> goods and <span class=\"searchmatch\">services<\/span>, in compliance with policies from the App Store and Play Store",
+            "timestamp":"2026-06-27T06:39:21Z"
+          },
+          {
+            "ns":0,
+            "title":"General Data Protection Regulation",
+            "pageid":38104075,
+            "size":138409,
+            "wordcount":13757,
+            "snippet":"legislation 2024. Data <span class=\"searchmatch\">Act<\/span>, proposed EU law from 2022 Data Governance <span class=\"searchmatch\">Act<\/span>, proposed EU law from 2020 <span class=\"searchmatch\">Digital<\/span> Markets <span class=\"searchmatch\">Act<\/span> <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span> EU\u2013US Privacy Shield",
+            "timestamp":"2026-06-22T23:13:14Z"
+          },
+          {
+            "ns":0,
+            "title":"Immigration and Nationality Act of 1965",
+            "pageid":331302,
+            "size":64297,
+            "wordcount":6323,
+            "snippet":"Immigration and Nationality <span class=\"searchmatch\">Act<\/span> of 1965, also known as the Hart\u2013Celler <span class=\"searchmatch\">Act<\/span> and more recently as the 1965 Immigration <span class=\"searchmatch\">Act<\/span>, was a federal law passed by",
+            "timestamp":"2026-06-23T00:59:15Z"
+          },
+          {
+            "ns":0,
+            "title":"Regulation (EU) 2024\/1183",
+            "pageid":83149340,
+            "size":19384,
+            "wordcount":1887,
+            "snippet":"public <span class=\"searchmatch\">service<\/span> must accept the EUDI Wallet as a valid means of identification. Very Large Online Platforms designated under the <span class=\"searchmatch\">Digital<\/span> <span class=\"searchmatch\">Services<\/span> <span class=\"searchmatch\">Act<\/span>, such",
+            "timestamp":"2026-05-18T03:46:55Z"
+          }
+        ]
+      }
+    }
+  }
+]

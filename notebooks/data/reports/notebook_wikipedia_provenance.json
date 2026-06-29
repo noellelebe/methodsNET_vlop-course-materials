@@ -1,0 +1,11 @@
+{
+  "source":"MediaWiki API",
+  "endpoint":"https:\/\/en.wikipedia.org\/w\/api.php",
+  "query":"digital services act",
+  "page_size":25,
+  "max_pages":2,
+  "raw_output":"data\/raw\/notebook_wikipedia_raw.json",
+  "search_results_output":"data\/processed\/notebook_wikipedia_search_results.csv",
+  "page_extracts_output":"data\/processed\/notebook_wikipedia_page_extracts.csv",
+  "method_note":"Search API results are not a complete measure of platform attention, public importance, or article relevance."
+}

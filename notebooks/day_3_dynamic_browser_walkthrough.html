@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>python_basics_for_course_scripts</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>day_3_dynamic_browser_walkthrough</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7510,639 +7510,233 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=81c30d34">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8e111c3e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Python-Basics-for-Understanding-the-Course-Scripts">Python Basics for Understanding the Course Scripts<a class="anchor-link" href="#Python-Basics-for-Understanding-the-Course-Scripts">¶</a></h1><p>This notebook is a compact Python refresher for the methodsNET course on collecting data from online platforms.</p>
-<p>It does <strong>not</strong> try to teach all of Python. It focuses on the Python ideas that appear again and again in the course scripts:</p>
+<h1 id="Day-3:-Dynamic-Pages,-Selenium,-Debugging,-and-Robust-Scraping">Day 3: Dynamic Pages, Selenium, Debugging, and Robust Scraping<a class="anchor-link" href="#Day-3:-Dynamic-Pages,-Selenium,-Debugging,-and-Robust-Scraping">¶</a></h1><p>Some websites do not put the visible data into the first HTML response. They load content later with JavaScript, after the browser has opened the page.</p>
+<p>This notebook teaches how to diagnose and handle that situation responsibly.</p>
+<p>By the end, you should understand:</p>
 <ul>
-<li>variables and objects</li>
-<li>functions and arguments</li>
-<li>lists and dictionaries</li>
-<li>loops and indentation</li>
-<li>imports and packages</li>
-<li>file paths</li>
-<li>pandas DataFrames</li>
-<li>API responses and JSON</li>
-<li>BeautifulSoup selectors</li>
-<li>common error messages</li>
+<li>why <code>requests</code> may miss JavaScript-rendered content</li>
+<li>how Selenium observes a rendered browser DOM</li>
+<li>how wait conditions shape collected data</li>
+<li>how scrolling and infinite-scroll stopping rules work</li>
+<li>why screenshots and rendered HTML are raw evidence</li>
+<li>how to debug empty or broken scrapers</li>
+<li>what bot-compliance boundaries should not be crossed</li>
 </ul>
-<p>Use this as a reference when reading the walkthrough scripts.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d39a48e5">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=688bc14f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="How-to-Use-This-Notebook">How to Use This Notebook<a class="anchor-link" href="#How-to-Use-This-Notebook">¶</a></h2><p>Run cells from top to bottom.</p>
-<p>In Jupyter or VS Code:</p>
+<h2 id="Packages-Used-in-This-Notebook">Packages Used in This Notebook<a class="anchor-link" href="#Packages-Used-in-This-Notebook">¶</a></h2><p>This notebook uses:</p>
 <ul>
-<li>click a code cell</li>
-<li>run it with the play button or <code>Shift + Enter</code></li>
-<li>read the output below the cell</li>
+<li><code>requests</code> to fetch the initial server HTML without JavaScript</li>
+<li>Selenium inside functions to control a real browser</li>
+<li><code>pandas</code> to turn extracted records into a table</li>
+<li><code>Path</code> to save rendered HTML, screenshots, CSVs, and diagnostics</li>
+<li><code>time</code> to pause after browser actions such as scrolling</li>
 </ul>
-<p>If the notebook starts behaving strangely, restart the kernel and run cells again from the top.</p>
+<p>The core contrast is:</p>
+<div class="highlight"><pre><span></span>requests -&gt; initial HTML from the server
+Selenium  -&gt; rendered DOM after the browser runs JavaScript
+</pre></div>
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=94568e7d">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1.-Python-Files,-Notebooks,-and-Scripts">1. Python Files, Notebooks, and Scripts<a class="anchor-link" href="#1.-Python-Files,-Notebooks,-and-Scripts">¶</a></h2><p>In this course you will see three kinds of Python material:</p>
-<table>
-<thead>
-<tr>
-<th>Format</th>
-<th>What it is good for</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>.ipynb</code> notebook</td>
-<td>reading explanations and running code cell by cell</td>
-</tr>
-<tr>
-<td><code>.py</code> walkthrough</td>
-<td>live coding and teaching step by step with <code># %%</code> cells</td>
-</tr>
-<tr>
-<td>runnable <code>.py</code> workflow</td>
-<td>running a full workflow from the command line</td>
-</tr>
-</tbody>
-</table>
-<p>The same Python ideas appear in all three formats.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a9f80265">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="2.-Comments-and-Docstrings">2. Comments and Docstrings<a class="anchor-link" href="#2.-Comments-and-Docstrings">¶</a></h2><p>Python ignores comments. Comments explain the code to humans.</p>
-<p>A line starting with <code>#</code> is a comment.</p>
-<p>Triple quotes can create a longer text block. At the top of a file, this is often used as a docstring explaining what the script does.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=0db1e76e">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=fb86e619">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># This is a comment. Python ignores it.</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># time lets us pause after browser actions such as scrolling.</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="c1"># Path helps create output folders and file paths.</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
-<span class="sd">"""</span>
-<span class="sd">This is a longer text block.</span>
-<span class="sd">At the top of a script, it often explains the script's purpose.</span>
-<span class="sd">"""</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Comments are for humans; print() creates output."</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3f486429">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3.-Assignment-and-Variables">3. Assignment and Variables<a class="anchor-link" href="#3.-Assignment-and-Variables">¶</a></h2><p>A variable is a name that points to a value.</p>
-<p>The <code>=</code> sign means assignment: store the value on the right under the name on the left.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f8183e66">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"digital services act"</span>
-<span class="n">page_size</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="n">source</span> <span class="o">=</span> <span class="s2">"MediaWiki API"</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">page_size</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8f8091ca">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Variable names should be meaningful. In the course scripts, names such as <code>API_URL</code>, <code>params</code>, <code>headers</code>, <code>response</code>, and <code>payload</code> tell you what role the object plays.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=afc8cd17">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">API_URL</span> <span class="o">=</span> <span class="s2">"https://en.wikipedia.org/w/api.php"</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">API_URL</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=bb010dc2">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="4.-Basic-Data-Types">4. Basic Data Types<a class="anchor-link" href="#4.-Basic-Data-Types">¶</a></h2><p>Python objects have types. The most common ones in the course scripts are:</p>
-<table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Example</th>
-<th>Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>string</td>
-<td><code>"digital services act"</code></td>
-<td>text</td>
-</tr>
-<tr>
-<td>integer</td>
-<td><code>50</code></td>
-<td>whole number</td>
-</tr>
-<tr>
-<td>float</td>
-<td><code>1.5</code></td>
-<td>decimal number</td>
-</tr>
-<tr>
-<td>boolean</td>
-<td><code>True</code> / <code>False</code></td>
-<td>yes/no value</td>
-</tr>
-<tr>
-<td>None</td>
-<td><code>None</code></td>
-<td>missing/no value</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c3701e23">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">text_value</span> <span class="o">=</span> <span class="s2">"digital services act"</span>
-<span class="n">number_value</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="n">pause_seconds</span> <span class="o">=</span> <span class="mf">1.5</span>
-<span class="n">allowed</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="n">missing_value</span> <span class="o">=</span> <span class="kc">None</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">text_value</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">number_value</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">pause_seconds</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">allowed</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">missing_value</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b3fac01c">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="5.-Functions">5. Functions<a class="anchor-link" href="#5.-Functions">¶</a></h2><p>A function is reusable code that does something.</p>
-<p>You call a function with parentheses.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d5a5350b">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Hello"</span><span class="p">)</span>
-<span class="nb">len</span><span class="p">(</span><span class="s2">"digital services act"</span><span class="p">)</span>
-<span class="nb">type</span><span class="p">(</span><span class="s2">"digital services act"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5fac347b">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Functions can take arguments. Some arguments are positional; others are named keyword arguments.</p>
-<p>In the course scripts you often see keyword arguments such as <code>timeout=30</code>, <code>index=False</code>, or <code>strip=True</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=4f5b88a3">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">text</span> <span class="o">=</span> <span class="s2">"   digital services act   "</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=994b471b">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="6.-Lists">6. Lists<a class="anchor-link" href="#6.-Lists">¶</a></h2><p>A list stores multiple items in order.</p>
-<p>Lists use square brackets: <code>[]</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=dc02e08f">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Digital Services Act"</span><span class="p">,</span> <span class="s2">"Online platform"</span><span class="p">,</span> <span class="s2">"Content moderation"</span><span class="p">]</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">titles</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">titles</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">titles</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">titles</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e1395dd6">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Python starts counting at zero. So <code>titles[0]</code> means the first item.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=95b4efe8">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"First item:"</span><span class="p">,</span> <span class="n">titles</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Last item:"</span><span class="p">,</span> <span class="n">titles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"First two items:"</span><span class="p">,</span> <span class="n">titles</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c57dbf03">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="7.-Dictionaries">7. Dictionaries<a class="anchor-link" href="#7.-Dictionaries">¶</a></h2><p>A dictionary stores key-value pairs.</p>
-<p>Dictionaries use curly braces: <code>{}</code>.</p>
-<p>In API work, dictionaries are everywhere: parameters, headers, JSON payloads, and rows for tables.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d6572ee4">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"action"</span><span class="p">:</span> <span class="s2">"query"</span><span class="p">,</span>
-    <span class="s2">"list"</span><span class="p">:</span> <span class="s2">"search"</span><span class="p">,</span>
-    <span class="s2">"srsearch"</span><span class="p">:</span> <span class="s2">"digital services act"</span><span class="p">,</span>
-    <span class="s2">"srlimit"</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
-    <span class="s2">"format"</span><span class="p">:</span> <span class="s2">"json"</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">"srsearch"</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2a690c66">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Use square brackets when the key must exist. Use <code>.get()</code> when the key might be missing.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=37f1b28f">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">"format"</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"format"</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"missing_parameter"</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"missing_parameter"</span><span class="p">,</span> <span class="s2">"default value"</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4a931328">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="8.-Nested-Dictionaries-and-Lists">8. Nested Dictionaries and Lists<a class="anchor-link" href="#8.-Nested-Dictionaries-and-Lists">¶</a></h2><p>API responses are often nested: dictionaries inside dictionaries, lists inside dictionaries, dictionaries inside lists.</p>
-<p>This is why you see code like:</p>
-<div class="highlight"><pre><span></span><span class="n">payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"search"</span><span class="p">]</span>
-</pre></div>
-<p>That means: go into <code>payload</code>, then into <code>"query"</code>, then into <code>"search"</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=6ed88297">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"batchcomplete"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="s2">"query"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"search"</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">{</span><span class="s2">"pageid"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Digital Services Act"</span><span class="p">,</span> <span class="s2">"wordcount"</span><span class="p">:</span> <span class="mi">1200</span><span class="p">},</span>
-            <span class="p">{</span><span class="s2">"pageid"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Online platform"</span><span class="p">,</span> <span class="s2">"wordcount"</span><span class="p">:</span> <span class="mi">900</span><span class="p">},</span>
-        <span class="p">]</span>
-    <span class="p">},</span>
-<span class="p">}</span>
-
-<span class="n">search_results</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"search"</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">search_results</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">search_results</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">search_results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"title"</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f97cfb1a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="9.-Loops">9. Loops<a class="anchor-link" href="#9.-Loops">¶</a></h2><p>A loop repeats code for each item in a sequence.</p>
-<p>Loops are used throughout the course scripts to process search results, links, pages, images, and records.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=4048ff11">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">title</span> <span class="ow">in</span> <span class="n">titles</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9f4e657b">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Indentation matters. The indented lines belong to the loop.</p>
-<p>This is different from R, where braces often mark blocks. In Python, spaces do that job.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=45af5851">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">search_results</span><span class="p">:</span>
-    <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">"pageid"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pageid"</span><span class="p">),</span>
-        <span class="s2">"title"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">),</span>
-        <span class="s2">"wordcount"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"wordcount"</span><span class="p">),</span>
-    <span class="p">}</span>
-    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=300e851c">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="10.-If-Statements">10. If Statements<a class="anchor-link" href="#10.-If-Statements">¶</a></h2><p><code>if</code> lets code take different paths depending on a condition.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=040012df">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">status_code</span> <span class="o">=</span> <span class="mi">200</span>
-
-<span class="k">if</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Request succeeded"</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Something went wrong"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=9201bf31">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">wordcount</span> <span class="o">=</span> <span class="mi">1200</span>
-
-<span class="k">if</span> <span class="n">wordcount</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Long page"</span><span class="p">)</span>
-<span class="k">elif</span> <span class="n">wordcount</span> <span class="o">&gt;</span> <span class="mi">500</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Medium page"</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Short page"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=52966e9b">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="11.-Imports-and-Packages">11. Imports and Packages<a class="anchor-link" href="#11.-Imports-and-Packages">¶</a></h2><p>Python has a standard library, but many useful tools come from packages.</p>
-<p>In the course scripts, you often see imports like these:</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=9dd3cd08">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
-
+<span class="c1"># pandas turns extracted browser records into tables.</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="c1"># requests fetches the initial server HTML without running JavaScript.</span>
 <span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a7654236">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a1fca95e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><code>import pandas as pd</code> means: load the pandas package and refer to it as <code>pd</code>.</p>
-<p>If you get <code>ModuleNotFoundError</code>, Python is saying the package is not installed in the environment you are currently using.</p>
+<h2 id="Classroom-URL">Classroom URL<a class="anchor-link" href="#Classroom-URL">¶</a></h2><p><code>quotes.toscrape.com/js/</code> is a teaching page where the visible quotes are rendered by JavaScript.</p>
+<p>That makes it useful for comparing what <code>requests</code> sees with what a browser sees.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=7959871f">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">URL</span> <span class="o">=</span> <span class="s2">"https://quotes.toscrape.com/js/"</span>
+<span class="n">USER_AGENT</span> <span class="o">=</span> <span class="s2">"methodsNET-VLOP-course/1.0 dynamic walkthrough"</span>
+</pre></div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=37f9103a">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dc51216d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="12.-File-Paths-with-Path">12. File Paths with <code>Path</code><a class="anchor-link" href="#12.-File-Paths-with-Path">¶</a></h2><p>The course scripts use <code>pathlib.Path</code> for file and folder paths.</p>
-<p>This is more robust than manually pasting strings together.</p>
+<h2 id="1.-Fetch-with-requests-First">1. Fetch with <code>requests</code> First<a class="anchor-link" href="#1.-Fetch-with-requests-First">¶</a></h2><p>Always start by checking the simple route.</p>
+<p><code>requests.get()</code> asks the server for the HTML document, but it does not execute JavaScript, click buttons, scroll, or wait for client-side rendering.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=9092fba5">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=9f495724">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># requests.get() sends a normal HTTP GET request.</span>
+<span class="n">static_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">URL</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"User-Agent"</span><span class="p">:</span> <span class="n">USER_AGENT</span><span class="p">},</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+<span class="c1"># raise_for_status() turns HTTP error statuses into visible Python errors.</span>
+<span class="n">static_response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+<span class="c1"># response.text is the initial HTML returned by the server.</span>
+<span class="n">static_html</span> <span class="o">=</span> <span class="n">static_response</span><span class="o">.</span><span class="n">text</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Static HTML characters:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">static_html</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Does static HTML contain quote text?"</span><span class="p">,</span> <span class="s2">"The world as we have created it"</span> <span class="ow">in</span> <span class="n">static_html</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Static HTML characters: 5806
+Does static HTML contain quote text? True
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=717d0def">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="2.-Diagnose:-Rendering-Problem-or-Access-Problem?">2. Diagnose: Rendering Problem or Access Problem?<a class="anchor-link" href="#2.-Diagnose:-Rendering-Problem-or-Access-Problem?">¶</a></h2><p>A missing record can mean different things.</p>
+<p>It might be a rendering problem:</p>
+<ul>
+<li>the server returned HTML</li>
+<li>the browser later adds content with JavaScript</li>
+<li>Selenium may be appropriate</li>
+</ul>
+<p>Or it might be an access/compliance problem:</p>
+<ul>
+<li><code>403 Forbidden</code></li>
+<li><code>429 Too Many Requests</code></li>
+<li>login wall</li>
+<li>paywall</li>
+<li>CAPTCHA / prove-you-are-human page</li>
+<li>consent wall that changes access conditions</li>
+</ul>
+<p>Browser automation is for observing rendered public content. It should not be used to bypass access controls.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1cf7c89b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">diagnosis</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"status_code"</span><span class="p">:</span> <span class="n">static_response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+    <span class="s2">"content_type"</span><span class="p">:</span> <span class="n">static_response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"content-type"</span><span class="p">),</span>
+    <span class="s2">"static_html_characters"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">static_html</span><span class="p">),</span>
+    <span class="s2">"contains_expected_quote_text"</span><span class="p">:</span> <span class="s2">"The world as we have created it"</span> <span class="ow">in</span> <span class="n">static_html</span><span class="p">,</span>
+    <span class="s2">"contains_captcha_word"</span><span class="p">:</span> <span class="s2">"captcha"</span> <span class="ow">in</span> <span class="n">static_html</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+    <span class="s2">"contains_login_word"</span><span class="p">:</span> <span class="s2">"login"</span> <span class="ow">in</span> <span class="n">static_html</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+<span class="p">}</span>
+
+<span class="n">diagnosis</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>{'status_code': 200,
+ 'content_type': 'text/html; charset=utf-8',
+ 'static_html_characters': 5806,
+ 'contains_expected_quote_text': True,
+ 'contains_captcha_word': False,
+ 'contains_login_word': True}</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e706f1f7">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="3.-Browser-Helper-Functions">3. Browser Helper Functions<a class="anchor-link" href="#3.-Browser-Helper-Functions">¶</a></h2><p>Selenium controls a real browser from Python.</p>
+<p>We define helpers for three reasons:</p>
+<ol>
+<li>keep the browser workflow readable</li>
+<li>make diagnostics reproducible</li>
+<li>make scrolling use an explicit stopping rule</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=bc0de6bc">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8150,59 +7744,247 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">describe_browser_state</span><span class="p">(</span><span class="n">driver</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return small diagnostics about what the browser currently sees."""</span>
 
-<span class="n">outdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"data"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"current_url"</span><span class="p">:</span> <span class="n">driver</span><span class="o">.</span><span class="n">current_url</span><span class="p">,</span>
+        <span class="s2">"title"</span><span class="p">:</span> <span class="n">driver</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+        <span class="s2">"html_characters"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">page_source</span><span class="p">),</span>
+        <span class="s2">"quote_count"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="s2">"css selector"</span><span class="p">,</span> <span class="s2">".quote"</span><span class="p">)),</span>
+        <span class="s2">"link_count"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="s2">"css selector"</span><span class="p">,</span> <span class="s2">"a[href]"</span><span class="p">)),</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">scroll_until_stable</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">record_selector</span><span class="p">,</span> <span class="n">max_scrolls</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">wait_seconds</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Scroll until record count stops changing or max_scrolls is reached."""</span>
+
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">previous_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="s2">"css selector"</span><span class="p">,</span> <span class="n">record_selector</span><span class="p">))</span>
+    <span class="n">counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">previous_count</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">scroll_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_scrolls</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">driver</span><span class="o">.</span><span class="n">execute_script</span><span class="p">(</span><span class="s2">"window.scrollTo(0, document.body.scrollHeight);"</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">wait_seconds</span><span class="p">)</span>
+
+        <span class="n">current_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="s2">"css selector"</span><span class="p">,</span> <span class="n">record_selector</span><span class="p">))</span>
+        <span class="n">counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_count</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Scroll </span><span class="si">{</span><span class="n">scroll_number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">current_count</span><span class="si">}</span><span class="s2"> records"</span><span class="p">)</span>
+
+        <span class="c1"># Stop when scrolling no longer reveals additional records.</span>
+        <span class="k">if</span> <span class="n">current_count</span> <span class="o">==</span> <span class="n">previous_count</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">previous_count</span> <span class="o">=</span> <span class="n">current_count</span>
+
+    <span class="k">return</span> <span class="n">counts</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4768bdee">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="4.-Selenium-Collection-Function">4. Selenium Collection Function<a class="anchor-link" href="#4.-Selenium-Collection-Function">¶</a></h2><p>This function opens a browser, waits for rendered quote blocks, scrolls with a stopping rule, extracts records, and takes a screenshot.</p>
+<p>Important methodological choices:</p>
+<ul>
+<li><code>headless</code>: whether the browser is visible</li>
+<li>wait selector: here <code>.quote</code></li>
+<li>scroll stopping rule: stop when record count stops increasing</li>
+<li>raw evidence: rendered HTML and screenshot</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f2fc52ed">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">collect_rendered_page_with_selenium</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">headless</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_scrolls</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">wait_seconds</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Open a page in Chrome, wait for rendered content, and extract quote rows."""</span>
+
+    <span class="c1"># Selenium imports live inside the function so the notebook can be read even</span>
+    <span class="c1"># before Selenium/browser dependencies are installed.</span>
+    <span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+    <span class="kn">from</span> <span class="nn">selenium.webdriver.chrome.options</span> <span class="kn">import</span> <span class="n">Options</span>
+    <span class="kn">from</span> <span class="nn">selenium.webdriver.common.by</span> <span class="kn">import</span> <span class="n">By</span>
+    <span class="kn">from</span> <span class="nn">selenium.webdriver.support</span> <span class="kn">import</span> <span class="n">expected_conditions</span> <span class="k">as</span> <span class="n">EC</span>
+    <span class="kn">from</span> <span class="nn">selenium.webdriver.support.ui</span> <span class="kn">import</span> <span class="n">WebDriverWait</span>
+
+    <span class="n">options</span> <span class="o">=</span> <span class="n">Options</span><span class="p">()</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="sa">f</span><span class="s2">"--user-agent=</span><span class="si">{</span><span class="n">USER_AGENT</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="c1"># headless=True runs without a visible browser window.</span>
+    <span class="c1"># During live teaching, set headless=False so students can watch the browser.</span>
+    <span class="k">if</span> <span class="n">headless</span><span class="p">:</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--headless=new"</span><span class="p">)</span>
+
+    <span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Chrome</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># driver.get() opens the page in the automated browser.</span>
+        <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+        <span class="c1"># Wait until at least one rendered quote block exists.</span>
+        <span class="c1"># This is stronger than waiting for the body alone.</span>
+        <span class="n">wait</span> <span class="o">=</span> <span class="n">WebDriverWait</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+        <span class="n">wait</span><span class="o">.</span><span class="n">until</span><span class="p">(</span><span class="n">EC</span><span class="o">.</span><span class="n">presence_of_element_located</span><span class="p">((</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="s2">".quote"</span><span class="p">)))</span>
+
+        <span class="n">before_scroll</span> <span class="o">=</span> <span class="n">describe_browser_state</span><span class="p">(</span><span class="n">driver</span><span class="p">)</span>
+
+        <span class="c1"># Scroll with a record-count stopping rule.</span>
+        <span class="n">scroll_counts</span> <span class="o">=</span> <span class="n">scroll_until_stable</span><span class="p">(</span>
+            <span class="n">driver</span><span class="p">,</span>
+            <span class="n">record_selector</span><span class="o">=</span><span class="s2">".quote"</span><span class="p">,</span>
+            <span class="n">max_scrolls</span><span class="o">=</span><span class="n">max_scrolls</span><span class="p">,</span>
+            <span class="n">wait_seconds</span><span class="o">=</span><span class="n">wait_seconds</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">after_scroll</span> <span class="o">=</span> <span class="n">describe_browser_state</span><span class="p">(</span><span class="n">driver</span><span class="p">)</span>
+
+        <span class="c1"># page_source is rendered DOM after JavaScript execution.</span>
+        <span class="n">rendered_html</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">page_source</span>
+
+        <span class="n">quote_blocks</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="s2">".quote"</span><span class="p">)</span>
+        <span class="n">quotes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">quote_blocks</span><span class="p">:</span>
+            <span class="n">quote_text</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="s2">".text"</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">author</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="s2">".author"</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">block</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="s2">".tag"</span><span class="p">)]</span>
+
+            <span class="n">quotes</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"quote"</span><span class="p">:</span> <span class="n">quote_text</span><span class="p">,</span> <span class="s2">"author"</span><span class="p">:</span> <span class="n">author</span><span class="p">,</span> <span class="s2">"tags"</span><span class="p">:</span> <span class="n">tags</span><span class="p">})</span>
+
+        <span class="c1"># Screenshot is visual audit evidence.</span>
+        <span class="n">screenshot</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">get_screenshot_as_png</span><span class="p">()</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># Always close automated browsers.</span>
+        <span class="n">driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+
+    <span class="n">diagnostics</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"before_scroll"</span><span class="p">:</span> <span class="n">before_scroll</span><span class="p">,</span>
+        <span class="s2">"after_scroll"</span><span class="p">:</span> <span class="n">after_scroll</span><span class="p">,</span>
+        <span class="s2">"scroll_counts"</span><span class="p">:</span> <span class="n">scroll_counts</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">rendered_html</span><span class="p">,</span> <span class="n">quotes</span><span class="p">,</span> <span class="n">screenshot</span><span class="p">,</span> <span class="n">diagnostics</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ed04c0db">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="5.-Run-the-Browser-Collection">5. Run the Browser Collection<a class="anchor-link" href="#5.-Run-the-Browser-Collection">¶</a></h2><p>For class, consider setting <code>headless=False</code> once so students can see the browser open and render.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=b7ba96e7">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">rendered_html</span><span class="p">,</span> <span class="n">quotes</span><span class="p">,</span> <span class="n">screenshot</span><span class="p">,</span> <span class="n">diagnostics</span> <span class="o">=</span> <span class="n">collect_rendered_page_with_selenium</span><span class="p">(</span>
+    <span class="n">URL</span><span class="p">,</span>
+    <span class="n">headless</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">max_scrolls</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">wait_seconds</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Rendered HTML characters:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rendered_html</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Quotes extracted:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">quotes</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Diagnostics:"</span><span class="p">,</span> <span class="n">diagnostics</span><span class="p">)</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">quotes</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=75c3e28c">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="6.-Save-Evidence">6. Save Evidence<a class="anchor-link" href="#6.-Save-Evidence">¶</a></h2><p>For dynamic pages, a CSV alone is not enough.</p>
+<p>Save:</p>
+<ul>
+<li>rendered HTML: what the browser saw after JavaScript</li>
+<li>screenshot: visual audit of page state</li>
+<li>processed CSV: extracted table</li>
+<li>diagnostics JSON: counts, scroll history, and other checks</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=53a596e5">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">outdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"data"</span><span class="p">)</span>
 <span class="n">raw_dir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="s2">"raw"</span>
 <span class="n">processed_dir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="s2">"processed"</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">processed_dir</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=6c208a95">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># mkdir creates folders.</span>
-<span class="c1"># parents=True creates missing parent folders.</span>
-<span class="c1"># exist_ok=True means it is okay if the folder already exists.</span>
+<span class="n">reports_dir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="s2">"reports"</span>
 
 <span class="n">raw_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">processed_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">reports_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">raw_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">processed_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span>
+<span class="n">rendered_path</span> <span class="o">=</span> <span class="n">raw_dir</span> <span class="o">/</span> <span class="s2">"notebook_rendered_quotes_selenium.html"</span>
+<span class="n">screenshot_path</span> <span class="o">=</span> <span class="n">raw_dir</span> <span class="o">/</span> <span class="s2">"notebook_rendered_quotes_selenium.png"</span>
+<span class="n">quotes_path</span> <span class="o">=</span> <span class="n">processed_dir</span> <span class="o">/</span> <span class="s2">"notebook_rendered_quotes_selenium.csv"</span>
+<span class="n">diagnostics_path</span> <span class="o">=</span> <span class="n">reports_dir</span> <span class="o">/</span> <span class="s2">"notebook_rendered_quotes_selenium_diagnostics.json"</span>
+
+<span class="n">rendered_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">rendered_html</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+<span class="n">screenshot_path</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">screenshot</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">quotes</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">quotes_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">diagnostics</span><span class="p">)</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">diagnostics_path</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">rendered_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">screenshot_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">quotes_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">diagnostics_path</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7ca85830">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e5fa2871">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="13.-pandas-DataFrames">13. pandas DataFrames<a class="anchor-link" href="#13.-pandas-DataFrames">¶</a></h2><p>A DataFrame is a table.</p>
-<p>A common pattern in the course scripts is:</p>
-<ol>
-<li>collect rows as dictionaries</li>
-<li>put those dictionaries in a list</li>
-<li>convert the list into a DataFrame</li>
-</ol>
+<h2 id="7.-Debugging-Checklist">7. Debugging Checklist<a class="anchor-link" href="#7.-Debugging-Checklist">¶</a></h2><p>When a scraper returns zero records or strange records, debug in layers.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=b4e7db0e">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=22dab318">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8210,48 +7992,37 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-
-<span class="n">rows</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span><span class="s2">"pageid"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Digital Services Act"</span><span class="p">,</span> <span class="s2">"wordcount"</span><span class="p">:</span> <span class="mi">1200</span><span class="p">},</span>
-    <span class="p">{</span><span class="s2">"pageid"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Online platform"</span><span class="p">,</span> <span class="s2">"wordcount"</span><span class="p">:</span> <span class="mi">900</span><span class="p">},</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">debugging_checklist</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"Check response.status_code before parsing anything."</span><span class="p">,</span>
+    <span class="s2">"Compare response.text with what the browser visibly shows."</span><span class="p">,</span>
+    <span class="s2">"Save raw static HTML and rendered HTML for comparison."</span><span class="p">,</span>
+    <span class="s2">"Inspect one record container before looping over all records."</span><span class="p">,</span>
+    <span class="s2">"Use explicit waits for content-specific selectors, not only fixed sleep times."</span><span class="p">,</span>
+    <span class="s2">"Save a screenshot to catch cookie banners, empty states, or blocked pages."</span><span class="p">,</span>
+    <span class="s2">"Count records before and after scrolling; define a stopping rule."</span><span class="p">,</span>
+    <span class="s2">"If selectors return zero, inspect whether markup changed."</span><span class="p">,</span>
+    <span class="s2">"If you see login, paywall, CAPTCHA, or prove-you-are-human pages, stop and document."</span><span class="p">,</span>
 <span class="p">]</span>
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
-<span class="n">df</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=deb4000e">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">"title"</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">"title"</span><span class="p">,</span> <span class="s2">"wordcount"</span><span class="p">]])</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">debugging_checklist</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=88092e02">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0522294f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Save a DataFrame as a CSV file:</p>
+<h2 id="8.-Anti-Fragile-Patterns-and-Anti-Patterns">8. Anti-Fragile Patterns and Anti-Patterns<a class="anchor-link" href="#8.-Anti-Fragile-Patterns-and-Anti-Patterns">¶</a></h2><p>Anti-fragile does not mean impossible to break. It means the scraper is designed so breakage is visible, documented, and easier to repair.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=6f809070">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=eba9905e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8259,27 +8030,47 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">output_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"data/processed/python_basics_example.csv"</span><span class="p">)</span>
-<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">patterns</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"good_patterns"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"Wait for a content-specific selector."</span><span class="p">,</span>
+        <span class="s2">"Save raw/rendered evidence and screenshots."</span><span class="p">,</span>
+        <span class="s2">"Use small test runs before scaling."</span><span class="p">,</span>
+        <span class="s2">"Keep selectors close to the record container."</span><span class="p">,</span>
+        <span class="s2">"Log counts, URLs, status codes, and output paths."</span><span class="p">,</span>
+        <span class="s2">"Stop when scroll counts no longer increase."</span><span class="p">,</span>
+        <span class="s2">"Prefer official APIs or data downloads when available."</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="s2">"anti_patterns"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"Using time.sleep() as the only waiting strategy."</span><span class="p">,</span>
+        <span class="s2">"Looping forever on infinite scroll without a stopping rule."</span><span class="p">,</span>
+        <span class="s2">"Ignoring empty outputs because the script did not crash."</span><span class="p">,</span>
+        <span class="s2">"Treating a CAPTCHA or login wall as a technical obstacle to bypass."</span><span class="p">,</span>
+        <span class="s2">"Collecting rapidly without rate limits or documentation."</span><span class="p">,</span>
+        <span class="s2">"Saving only the final CSV and no raw evidence."</span><span class="p">,</span>
+    <span class="p">],</span>
+<span class="p">}</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">items</span> <span class="ow">in</span> <span class="n">patterns</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c9ddb15d">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5dd9dbe5">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Read it back:</p>
+<h2 id="9.-Bot-Compliance-Decision-Tree">9. Bot-Compliance Decision Tree<a class="anchor-link" href="#9.-Bot-Compliance-Decision-Tree">¶</a></h2><p>This course teaches browser automation as a way to observe rendered public pages, not as a way to evade restrictions.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=ee0d65d5">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=23621bb2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8287,1062 +8078,64 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">df_read</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
-<span class="n">df_read</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">bot_compliance_decision_tree</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"If content is missing because JavaScript renders it: browser automation may be appropriate."</span><span class="p">,</span>
+    <span class="s2">"If a public API or bulk download exists: prefer that route when it fits the research question."</span><span class="p">,</span>
+    <span class="s2">"If the site returns 429: pause and respect retry/rate-limit information."</span><span class="p">,</span>
+    <span class="s2">"If the site returns 403: do not force access; check documentation and permissions."</span><span class="p">,</span>
+    <span class="s2">"If the site shows CAPTCHA or human verification: stop; do not automate around it."</span><span class="p">,</span>
+    <span class="s2">"If login, paywall, or terms restrict access: request permission or redesign the data source."</span><span class="p">,</span>
+    <span class="s2">"Always document blocks, exclusions, and access limitations in provenance."</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">bot_compliance_decision_tree</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f76b5237">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=96279540">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="14.-API-Responses:-response-vs-payload">14. API Responses: <code>response</code> vs <code>payload</code><a class="anchor-link" href="#14.-API-Responses:-response-vs-payload">¶</a></h2><p>In the API scripts, this distinction is crucial:</p>
+<h2 id="10.-Where-Playwright-Fits">10. Where Playwright Fits<a class="anchor-link" href="#10.-Where-Playwright-Fits">¶</a></h2><p>Selenium is a good starting point because it makes the idea of controlling a browser concrete.</p>
+<p>Playwright is a newer browser-automation library with strong auto-waiting, browser contexts, network inspection, and tracing. For more complex modern web apps, Playwright can be easier to debug.</p>
+<p>In this course:</p>
 <ul>
-<li><code>response</code> is the HTTP response object</li>
-<li><code>payload</code> is the parsed JSON data</li>
+<li>start with Selenium to understand browser automation</li>
+<li>mention Playwright as a modern alternative</li>
+<li>use the runnable Playwright script if you want to compare tools or show network-oriented debugging</li>
 </ul>
-<p>Typical pattern:</p>
-<div class="highlight"><pre><span></span><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">API_URL</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-<span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
-<span class="n">payload</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-</pre></div>
-<p>The response object has things like status code, URL, headers, and text. The payload is usually dictionaries and lists.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=dc5be5f3">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># This is a tiny fake payload shaped like an API response.</span>
-<span class="c1"># It lets us practice JSON-style access without sending a live request.</span>
-
-<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"query"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"search"</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">{</span><span class="s2">"pageid"</span><span class="p">:</span> <span class="mi">101</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"First result"</span><span class="p">},</span>
-            <span class="p">{</span><span class="s2">"pageid"</span><span class="p">:</span> <span class="mi">102</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Second result"</span><span class="p">},</span>
-        <span class="p">]</span>
-    <span class="p">},</span>
-    <span class="s2">"continue"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"sroffset"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="s2">"continue"</span><span class="p">:</span> <span class="s2">"-||"</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">}</span>
-
-<span class="n">pprint</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-</pre></div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=ff7a2c4a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"search"</span><span class="p">]</span>
-<span class="n">continuation</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"continue"</span><span class="p">,</span> <span class="p">{})</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">continuation</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=95585eb0">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=674f6f9e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="15.-Dictionary-Unpacking-with-**">15. Dictionary Unpacking with <code>**</code><a class="anchor-link" href="#15.-Dictionary-Unpacking-with-**">¶</a></h2><p>In the API pagination code you see:</p>
-<div class="highlight"><pre><span></span><span class="n">request_params</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">params</span><span class="p">,</span> <span class="o">**</span><span class="n">continuation</span><span class="p">}</span>
-</pre></div>
-<p>This creates a new dictionary by combining two dictionaries.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f5644d19">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"action"</span><span class="p">:</span> <span class="s2">"query"</span><span class="p">,</span>
-    <span class="s2">"list"</span><span class="p">:</span> <span class="s2">"search"</span><span class="p">,</span>
-    <span class="s2">"srsearch"</span><span class="p">:</span> <span class="s2">"digital services act"</span><span class="p">,</span>
-    <span class="s2">"srlimit"</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">continuation</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"sroffset"</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
-    <span class="s2">"continue"</span><span class="p">:</span> <span class="s2">"-||"</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">request_params</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">params</span><span class="p">,</span> <span class="o">**</span><span class="n">continuation</span><span class="p">}</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">request_params</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ab165e9e">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>This is used because the first request has no continuation fields, but later requests need the continuation values returned by the API.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=781076b4">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="16.-From-HTML-Text-to-Data">16. From HTML Text to Data<a class="anchor-link" href="#16.-From-HTML-Text-to-Data">¶</a></h2><p>The scraping scripts use a repeated workflow:</p>
+<h2 id="Exercise">Exercise<a class="anchor-link" href="#Exercise">¶</a></h2><p>Choose one debugging scenario and write what you would check:</p>
 <ol>
-<li>request a web page</li>
-<li>receive HTML text</li>
-<li>parse the HTML into a searchable structure</li>
-<li>use selectors to find elements</li>
-<li>extract text or attributes</li>
-<li>store the extracted values in rows</li>
-<li>turn rows into a table</li>
+<li><code>requests</code> returns HTML, but the target records are missing.</li>
+<li>Selenium opens the page, but extracts zero records.</li>
+<li>Scrolling does not increase the record count.</li>
+<li>The screenshot shows a cookie/consent banner covering the page.</li>
+<li>The page shows a CAPTCHA or login wall.</li>
 </ol>
-<p>The jump from "HTML text" to "data table" is where many scraping mistakes happen, so we will slow it down here.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1783fa08">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="16.1-What-Is-HTML?">16.1 What Is HTML?<a class="anchor-link" href="#16.1-What-Is-HTML?">¶</a></h3><p>HTML is the markup language used to structure web pages.</p>
-<p>A web page is not just the text you see in the browser. Underneath, it contains tags such as:</p>
-<table>
-<thead>
-<tr>
-<th>HTML piece</th>
-<th>Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>&lt;div&gt;...&lt;/div&gt;</code></td>
-<td>generic container</td>
-</tr>
-<tr>
-<td><code>&lt;span&gt;...&lt;/span&gt;</code></td>
-<td>small inline container</td>
-</tr>
-<tr>
-<td><code>&lt;a href="..."&gt;...&lt;/a&gt;</code></td>
-<td>link</td>
-</tr>
-<tr>
-<td><code>&lt;p&gt;...&lt;/p&gt;</code></td>
-<td>paragraph</td>
-</tr>
-<tr>
-<td><code>&lt;h1&gt;...&lt;/h1&gt;</code></td>
-<td>heading</td>
-</tr>
-<tr>
-<td><code>class="quote"</code></td>
-<td>class attribute used for styling and selection</td>
-</tr>
-<tr>
-<td><code>href="/author/Ada"</code></td>
-<td>link destination attribute</td>
-</tr>
-</tbody>
-</table>
-<p>A scraper usually does not "read the page" like a human. It searches this underlying structure.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=58e293ae">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># This is a tiny artificial HTML page.</span>
-<span class="c1"># In a real scraper, this text would usually come from response.text after requests.get().</span>
-<span class="n">html</span> <span class="o">=</span> <span class="s2">"""</span>
-<span class="s2">&lt;html&gt;</span>
-<span class="s2">  &lt;body&gt;</span>
-<span class="s2">    &lt;div class="quote" data-id="q1"&gt;</span>
-<span class="s2">      &lt;span class="text"&gt;A short quote.&lt;/span&gt;</span>
-<span class="s2">      &lt;small class="author"&gt;Ada&lt;/small&gt;</span>
-<span class="s2">      &lt;div class="tags"&gt;</span>
-<span class="s2">        &lt;a class="tag" href="/tag/api"&gt;api&lt;/a&gt;</span>
-<span class="s2">        &lt;a class="tag" href="/tag/python"&gt;python&lt;/a&gt;</span>
-<span class="s2">      &lt;/div&gt;</span>
-<span class="s2">      &lt;a class="author-link" href="/author/Ada"&gt;about Ada&lt;/a&gt;</span>
-<span class="s2">    &lt;/div&gt;</span>
-<span class="s2">  &lt;/body&gt;</span>
-<span class="s2">&lt;/html&gt;</span>
-<span class="s2">"""</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0eac39cb">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>At this stage, <code>html</code> is only a Python string. Python does not yet understand it as a page structure.</p>
-<p>We can check that with <code>type()</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=8668906d">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">html</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2cabf8bb">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="16.2-What-BeautifulSoup-Does">16.2 What BeautifulSoup Does<a class="anchor-link" href="#16.2-What-BeautifulSoup-Does">¶</a></h3><p><code>BeautifulSoup</code> is a parser. A parser takes structured text and turns it into an object Python can search.</p>
-<p>In the course scripts, this line appears often:</p>
-<div class="highlight"><pre><span></span><span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s2">"html.parser"</span><span class="p">)</span>
-</pre></div>
-<p>That means:</p>
+<p>For each scenario, answer:</p>
 <ul>
-<li>take the HTML text stored in <code>html</code></li>
-<li>parse it with Python's built-in HTML parser</li>
-<li>store the searchable result in an object called <code>soup</code></li>
+<li>Is this a rendering issue, selector issue, timing issue, or access/compliance boundary?</li>
+<li>What evidence would you save?</li>
+<li>What would you try next?</li>
+<li>What would you not do?</li>
 </ul>
-<p>The name <code>soup</code> is conventional. It is not magic; we could call it <code>parsed_page</code>, but most Python scraping examples use <code>soup</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=0fc45ce7">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
-
-<span class="c1"># BeautifulSoup turns HTML text into a searchable parse tree.</span>
-<span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s2">"html.parser"</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">soup</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a7a1f164">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><code>prettify()</code> is useful for inspection. It prints the nested HTML with indentation so we can see which elements are inside which other elements.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2971324f">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># prettify() is not extraction. It is just a readable view of the parsed HTML.</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">soup</span><span class="o">.</span><span class="n">prettify</span><span class="p">())</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=29eb0ec8">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="16.3-Tags,-Text,-and-Attributes">16.3 Tags, Text, and Attributes<a class="anchor-link" href="#16.3-Tags,-Text,-and-Attributes">¶</a></h3><p>An HTML element usually has three things we care about:</p>
-<ol>
-<li>the tag name, such as <code>a</code>, <code>div</code>, <code>span</code></li>
-<li>visible text, such as <code>A short quote.</code></li>
-<li>attributes, such as <code>class</code>, <code>href</code>, or <code>data-id</code></li>
-</ol>
-<p>For example:</p>
-<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"tag"</span> <span class="na">href</span><span class="o">=</span><span class="s">"/tag/api"</span><span class="p">&gt;</span>api<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-</pre></div>
-<p>Here:</p>
-<ul>
-<li>tag name: <code>a</code></li>
-<li>visible text: <code>api</code></li>
-<li>class attribute: <code>tag</code></li>
-<li>href attribute: <code>/tag/api</code></li>
-</ul>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=33d24247">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Find the first link element on the page.</span>
-<span class="n">first_link</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">"a"</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Whole element:"</span><span class="p">,</span> <span class="n">first_link</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Tag name:"</span><span class="p">,</span> <span class="n">first_link</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Visible text:"</span><span class="p">,</span> <span class="n">first_link</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"href attribute:"</span><span class="p">,</span> <span class="n">first_link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"href"</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"class attribute:"</span><span class="p">,</span> <span class="n">first_link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"class"</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5496e2b2">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="16.4-What-Selectors-Are">16.4 What Selectors Are<a class="anchor-link" href="#16.4-What-Selectors-Are">¶</a></h3><p>A selector is a small query that tells BeautifulSoup which HTML elements to find.</p>
-<p>The course scripts use CSS selectors because they are concise and mirror what browser developer tools show.</p>
-<p>Common selector patterns:</p>
-<table>
-<thead>
-<tr>
-<th>Selector</th>
-<th>Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>a</code></td>
-<td>all <code>&lt;a&gt;</code> link elements</td>
-</tr>
-<tr>
-<td><code>a[href]</code></td>
-<td>all <code>&lt;a&gt;</code> elements that have an <code>href</code> attribute</td>
-</tr>
-<tr>
-<td><code>.quote</code></td>
-<td>all elements with class <code>quote</code></td>
-</tr>
-<tr>
-<td><code>.text</code></td>
-<td>all elements with class <code>text</code></td>
-</tr>
-<tr>
-<td><code>.tags a.tag</code></td>
-<td>all <code>&lt;a class="tag"&gt;</code> links inside an element with class <code>tags</code></td>
-</tr>
-<tr>
-<td><code>.quote .author</code></td>
-<td>an element with class <code>author</code> somewhere inside an element with class <code>quote</code></td>
-</tr>
-<tr>
-<td><code>.result.card</code></td>
-<td>one element that has both classes <code>result</code> and <code>card</code></td>
-</tr>
-<tr>
-<td><code>.result .card</code></td>
-<td>an element with class <code>card</code> inside an element with class <code>result</code></td>
-</tr>
-</tbody>
-</table>
-<p>Important: the dot in <code>.quote</code> means "class", not visible text.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=5b39478a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># select_one() returns the first matching element.</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">soup</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".quote"</span><span class="p">))</span>
-
-<span class="c1"># select() returns a list of all matching elements.</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"a"</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=37b9a90c">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Use <code>select_one()</code> when you expect one element, such as the author inside one quote block.</p>
-<p>Use <code>select()</code> when you expect several elements, such as all tag links.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f6085d33">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">quote_block</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".quote"</span><span class="p">)</span>
-
-<span class="c1"># These searches happen inside quote_block, not across the whole page.</span>
-<span class="c1"># This keeps fields from the same record together.</span>
-<span class="n">text_element</span> <span class="o">=</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".text"</span><span class="p">)</span>
-<span class="n">author_element</span> <span class="o">=</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".author"</span><span class="p">)</span>
-<span class="n">tag_elements</span> <span class="o">=</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">".tags a.tag"</span><span class="p">)</span>
-<span class="n">author_link</span> <span class="o">=</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".author-link"</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">text_element</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">author_element</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">tag_elements</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">author_link</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=42ab12ee">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="16.5-Extracting-Visible-Text">16.5 Extracting Visible Text<a class="anchor-link" href="#16.5-Extracting-Visible-Text">¶</a></h3><p><code>get_text()</code> extracts the visible text from an HTML element.</p>
-<p>In the course scripts, you often see:</p>
-<div class="highlight"><pre><span></span><span class="n">element</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-<p>This means:</p>
-<ul>
-<li>get the visible text inside the element</li>
-<li>if there are nested pieces of text, join them with a space</li>
-<li>remove extra whitespace at the beginning and end</li>
-</ul>
-<p>This is useful because HTML often contains line breaks and indentation that are not meaningful data.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=063c40e3">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># get_text(" ", strip=True) extracts visible text, joins nested text with spaces,</span>
-<span class="c1"># and removes leading/trailing whitespace.</span>
-<span class="n">quote_text</span> <span class="o">=</span> <span class="n">text_element</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">author_name</span> <span class="o">=</span> <span class="n">author_element</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">quote_text</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">author_name</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a3bd9ff3">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>The <code>strip=True</code> part is small but important. Without it, extracted text often contains unwanted spaces or line breaks.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2f6bc094">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">messy_html</span> <span class="o">=</span> <span class="s2">"&lt;p&gt;</span><span class="se">\n</span><span class="s2">    Lots of space around me    </span><span class="se">\n</span><span class="s2">&lt;/p&gt;"</span>
-<span class="n">messy_soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">messy_html</span><span class="p">,</span> <span class="s2">"html.parser"</span><span class="p">)</span>
-<span class="n">p</span> <span class="o">=</span> <span class="n">messy_soup</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">"p"</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Without strip:"</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get_text</span><span class="p">()))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"With strip:"</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fa2c1534">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="16.6-Extracting-Attributes">16.6 Extracting Attributes<a class="anchor-link" href="#16.6-Extracting-Attributes">¶</a></h3><p>Not all useful data is visible text.</p>
-<p>Links, image URLs, IDs, and metadata are often stored in attributes.</p>
-<p>Use <code>.get("attribute_name")</code> to extract an attribute.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=11190fce">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># .get("href") asks for the href attribute.</span>
-<span class="c1"># If the attribute is missing, .get() returns None instead of crashing.</span>
-<span class="n">author_href</span> <span class="o">=</span> <span class="n">author_link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"href"</span><span class="p">)</span>
-<span class="n">quote_id</span> <span class="o">=</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"data-id"</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">author_href</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">quote_id</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7ac8f88e">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><code>.get()</code> is safer than square brackets when something might be missing.</p>
-<p>Compare:</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=8ecb8978">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">author_link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"href"</span><span class="p">))</span>       <span class="c1"># works</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">author_link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"missing"</span><span class="p">))</span>    <span class="c1"># returns None</span>
-
-<span class="c1"># This would raise a KeyError if uncommented, because the attribute does not exist:</span>
-<span class="c1"># author_link["missing"]</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=abe23e42">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="16.7-Relative-and-Absolute-URLs">16.7 Relative and Absolute URLs<a class="anchor-link" href="#16.7-Relative-and-Absolute-URLs">¶</a></h3><p>HTML often stores links as relative paths:</p>
-<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">"/author/Ada"</span><span class="p">&gt;</span>about Ada<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-</pre></div>
-<p>The browser knows how to combine this with the current site. Python needs us to do that explicitly.</p>
-<p><code>urljoin()</code> combines the page URL and the relative path.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=cbf435b8">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urljoin</span>
-
-<span class="n">page_url</span> <span class="o">=</span> <span class="s2">"https://quotes.toscrape.com/"</span>
-<span class="n">relative_href</span> <span class="o">=</span> <span class="n">author_link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"href"</span><span class="p">)</span>
-<span class="n">absolute_href</span> <span class="o">=</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">page_url</span><span class="p">,</span> <span class="n">relative_href</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">relative_href</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">absolute_href</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=25e3a141">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="16.8-From-One-Record-to-a-Row">16.8 From One Record to a Row<a class="anchor-link" href="#16.8-From-One-Record-to-a-Row">¶</a></h3><p>Before looping over many records, extract one record carefully.</p>
-<p>A row in a table is often just a dictionary where keys become column names.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=8823efec">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"quote_id"</span><span class="p">:</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"data-id"</span><span class="p">),</span>
-    <span class="s2">"quote"</span><span class="p">:</span> <span class="n">text_element</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-    <span class="s2">"author"</span><span class="p">:</span> <span class="n">author_element</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-    <span class="s2">"author_url"</span><span class="p">:</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">page_url</span><span class="p">,</span> <span class="n">author_link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"href"</span><span class="p">)),</span>
-    <span class="s2">"tags"</span><span class="p">:</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tag_elements</span><span class="p">],</span>
-<span class="p">}</span>
-
-<span class="n">row</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=56017518">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>This row contains different kinds of extracted information:</p>
-<ul>
-<li><code>quote_id</code>: an attribute from the quote container</li>
-<li><code>quote</code>: visible text from <code>.text</code></li>
-<li><code>author</code>: visible text from <code>.author</code></li>
-<li><code>author_url</code>: an attribute converted into an absolute URL</li>
-<li><code>tags</code>: several visible text values collected into a list</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ccda04ea">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="16.9-From-Many-Records-to-a-DataFrame">16.9 From Many Records to a DataFrame<a class="anchor-link" href="#16.9-From-Many-Records-to-a-DataFrame">¶</a></h3><p>Real pages usually contain repeated record containers: posts, search results, comments, products, videos, quotes, etc.</p>
-<p>The standard pattern is:</p>
-<ol>
-<li>create an empty list called <code>rows</code></li>
-<li>loop over repeated containers</li>
-<li>extract fields from each container</li>
-<li>append one dictionary per record</li>
-<li>turn the list into a DataFrame</li>
-</ol>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=9473031b">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># A slightly larger HTML example with two repeated quote records.</span>
-<span class="n">html_many</span> <span class="o">=</span> <span class="s2">"""</span>
-<span class="s2">&lt;html&gt;</span>
-<span class="s2">  &lt;body&gt;</span>
-<span class="s2">    &lt;div class="quote" data-id="q1"&gt;</span>
-<span class="s2">      &lt;span class="text"&gt;A short quote.&lt;/span&gt;</span>
-<span class="s2">      &lt;small class="author"&gt;Ada&lt;/small&gt;</span>
-<span class="s2">      &lt;div class="tags"&gt;</span>
-<span class="s2">        &lt;a class="tag" href="/tag/api"&gt;api&lt;/a&gt;</span>
-<span class="s2">        &lt;a class="tag" href="/tag/python"&gt;python&lt;/a&gt;</span>
-<span class="s2">      &lt;/div&gt;</span>
-<span class="s2">      &lt;a class="author-link" href="/author/Ada"&gt;about Ada&lt;/a&gt;</span>
-<span class="s2">    &lt;/div&gt;</span>
-
-<span class="s2">    &lt;div class="quote" data-id="q2"&gt;</span>
-<span class="s2">      &lt;span class="text"&gt;Another short quote.&lt;/span&gt;</span>
-<span class="s2">      &lt;small class="author"&gt;Grace&lt;/small&gt;</span>
-<span class="s2">      &lt;div class="tags"&gt;</span>
-<span class="s2">        &lt;a class="tag" href="/tag/data"&gt;data&lt;/a&gt;</span>
-<span class="s2">      &lt;/div&gt;</span>
-<span class="s2">      &lt;a class="author-link" href="/author/Grace"&gt;about Grace&lt;/a&gt;</span>
-<span class="s2">    &lt;/div&gt;</span>
-<span class="s2">  &lt;/body&gt;</span>
-<span class="s2">&lt;/html&gt;</span>
-<span class="s2">"""</span>
-
-<span class="n">soup_many</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html_many</span><span class="p">,</span> <span class="s2">"html.parser"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c0a6d740">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-
-<span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="c1"># .quote selects the repeated record containers.</span>
-<span class="k">for</span> <span class="n">quote_block</span> <span class="ow">in</span> <span class="n">soup_many</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">".quote"</span><span class="p">):</span>
-    <span class="c1"># Search inside the current record container.</span>
-    <span class="c1"># This avoids mixing the author from one record with the quote from another.</span>
-    <span class="n">text_element</span> <span class="o">=</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".text"</span><span class="p">)</span>
-    <span class="n">author_element</span> <span class="o">=</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".author"</span><span class="p">)</span>
-    <span class="n">tag_elements</span> <span class="o">=</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">".tags a.tag"</span><span class="p">)</span>
-    <span class="n">author_link</span> <span class="o">=</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".author-link"</span><span class="p">)</span>
-
-    <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">"quote_id"</span><span class="p">:</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"data-id"</span><span class="p">),</span>
-        <span class="s2">"quote"</span><span class="p">:</span> <span class="n">text_element</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">text_element</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s2">"author"</span><span class="p">:</span> <span class="n">author_element</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">author_element</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s2">"author_url"</span><span class="p">:</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">page_url</span><span class="p">,</span> <span class="n">author_link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"href"</span><span class="p">))</span> <span class="k">if</span> <span class="n">author_link</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s2">"tags"</span><span class="p">:</span> <span class="s2">"|"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tag_elements</span><span class="p">),</span>
-        <span class="s2">"tag_count"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tag_elements</span><span class="p">),</span>
-    <span class="p">}</span>
-
-    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-
-<span class="c1"># pd.DataFrame(...) turns a list of row dictionaries into a rectangular table.</span>
-<span class="n">quotes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
-<span class="n">quotes_df</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ff71e7bc">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>The <code>if text_element else None</code> pattern is defensive.</p>
-<p>It means: if the element exists, extract the text; otherwise store <code>None</code> so missingness is visible instead of crashing the script.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=90ea5ce6">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="16.10-Why-This-Is-Useful-for-the-Course-Scripts">16.10 Why This Is Useful for the Course Scripts<a class="anchor-link" href="#16.10-Why-This-Is-Useful-for-the-Course-Scripts">¶</a></h3><p>When you see this in the static scraping walkthrough:</p>
-<div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">quote_block</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">".quote"</span><span class="p">):</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".text"</span><span class="p">)</span>
-    <span class="n">author</span> <span class="o">=</span> <span class="n">quote_block</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".author"</span><span class="p">)</span>
-</pre></div>
-<p>read it as:</p>
-<ul>
-<li>find every repeated quote container</li>
-<li>handle one quote container at a time</li>
-<li>find the text field inside that quote</li>
-<li>find the author field inside that quote</li>
-<li>extract the values into one row</li>
-</ul>
-<p>The exact same logic applies to less friendly pages:</p>
-<ul>
-<li>one search result card</li>
-<li>one post</li>
-<li>one video item</li>
-<li>one table row</li>
-<li>one moderation record</li>
-</ul>
-<p>The hard part is identifying the correct repeated container and stable selectors.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=60c351c3">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="16.11-Mini-Exercise:-Selector-Reading">16.11 Mini Exercise: Selector Reading<a class="anchor-link" href="#16.11-Mini-Exercise:-Selector-Reading">¶</a></h3><p>Using the two-record HTML above, answer:</p>
-<ul>
-<li>What does <code>.quote</code> select?</li>
-<li>What does <code>.tags a.tag</code> select?</li>
-<li>Why do we search inside <code>quote_block</code> rather than inside <code>soup_many</code> every time?</li>
-<li>Which extracted values come from visible text?</li>
-<li>Which extracted values come from attributes?</li>
-<li>What would happen if one quote had no author link?</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3aaff628">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="17.-Functions-You-Define-Yourself">17. Functions You Define Yourself<a class="anchor-link" href="#17.-Functions-You-Define-Yourself">¶</a></h2><p>The runnable workflow scripts define functions so code can be reused.</p>
-<p>A function definition starts with <code>def</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=4d38922b">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_page_url</span><span class="p">(</span><span class="n">pageid</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Return a browser URL for a Wikipedia page ID."""</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">"https://en.wikipedia.org/?curid=</span><span class="si">{</span><span class="n">pageid</span><span class="si">}</span><span class="s2">"</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">make_page_url</span><span class="p">(</span><span class="mi">101</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">make_page_url</span><span class="p">(</span><span class="mi">102</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e71b4c88">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Functions can have default arguments.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c352a10a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">describe_collection</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">max_pages</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="n">maximum</span> <span class="o">=</span> <span class="n">page_size</span> <span class="o">*</span> <span class="n">max_pages</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">"query"</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
-        <span class="s2">"page_size"</span><span class="p">:</span> <span class="n">page_size</span><span class="p">,</span>
-        <span class="s2">"max_pages"</span><span class="p">:</span> <span class="n">max_pages</span><span class="p">,</span>
-        <span class="s2">"maximum_requested_results"</span><span class="p">:</span> <span class="n">maximum</span><span class="p">,</span>
-    <span class="p">}</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">describe_collection</span><span class="p">(</span><span class="s2">"digital services act"</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">describe_collection</span><span class="p">(</span><span class="s2">"platform governance"</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">max_pages</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c3b5bb58">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="18.-Common-Error-Messages">18. Common Error Messages<a class="anchor-link" href="#18.-Common-Error-Messages">¶</a></h2><p>These errors are not signs that you are bad at Python. They are normal signals that something needs checking.</p>
-<h3 id="ModuleNotFoundError"><code>ModuleNotFoundError</code><a class="anchor-link" href="#ModuleNotFoundError">¶</a></h3><p>Python cannot find a package in the current environment.</p>
-<p>Common fix: install the package in the environment you are actually using.</p>
-<h3 id="KeyError"><code>KeyError</code><a class="anchor-link" href="#KeyError">¶</a></h3><p>You asked for a dictionary key that does not exist.</p>
-<p>Common fix: inspect <code>.keys()</code> or use <code>.get()</code>.</p>
-<h3 id="TypeError:-string-indices-must-be-integers"><code>TypeError: string indices must be integers</code><a class="anchor-link" href="#TypeError:-string-indices-must-be-integers">¶</a></h3><p>You are treating a string like a dictionary.</p>
-<p>Common situation: using <code>response.text</code> when you meant <code>response.json()</code>.</p>
-<h3 id="JSONDecodeError"><code>JSONDecodeError</code><a class="anchor-link" href="#JSONDecodeError">¶</a></h3><p>You tried to parse JSON, but the response was not valid JSON.</p>
-<p>Common fix: inspect <code>response.status_code</code>, <code>response.headers</code>, and <code>response.text</code>.</p>
-<h3 id="IndentationError"><code>IndentationError</code><a class="anchor-link" href="#IndentationError">¶</a></h3><p>Python expected indentation to match the block structure.</p>
-<p>Common situation: pasting a multi-line loop into the interactive prompt in pieces.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=322c133b">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Example of checking dictionary keys before extracting fields:</span>
-
-<span class="n">record</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"pageid"</span><span class="p">:</span> <span class="mi">101</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"First result"</span><span class="p">}</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">))</span>       <span class="c1"># returns None instead of crashing</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">,</span> <span class="s2">"not available"</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8d2491c0">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="19.-Mini-Exercise:-Read-a-Course-Script-Pattern">19. Mini Exercise: Read a Course-Script Pattern<a class="anchor-link" href="#19.-Mini-Exercise:-Read-a-Course-Script-Pattern">¶</a></h2><p>Read this pattern and explain what each object is:</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=866c0789">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"action"</span><span class="p">:</span> <span class="s2">"query"</span><span class="p">,</span>
-    <span class="s2">"list"</span><span class="p">:</span> <span class="s2">"search"</span><span class="p">,</span>
-    <span class="s2">"srsearch"</span><span class="p">:</span> <span class="s2">"digital services act"</span><span class="p">,</span>
-    <span class="s2">"srlimit"</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
-    <span class="s2">"format"</span><span class="p">:</span> <span class="s2">"json"</span><span class="p">,</span>
-    <span class="s2">"formatversion"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"search"</span><span class="p">]:</span>
-    <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">"pageid"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pageid"</span><span class="p">),</span>
-        <span class="s2">"title"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">),</span>
-    <span class="p">}</span>
-    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-
-<span class="n">example_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
-<span class="n">example_df</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5ae3f30f">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Questions:</p>
-<ul>
-<li>What type of object is <code>params</code>?</li>
-<li>What type of object is <code>rows</code> at the start?</li>
-<li>What does the loop iterate over?</li>
-<li>What type of object is <code>row</code>?</li>
-<li>What does <code>rows.append(row)</code> do?</li>
-<li>What does <code>pd.DataFrame(rows)</code> create?</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cc3cfb2a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="20.-Key-Takeaways">20. Key Takeaways<a class="anchor-link" href="#20.-Key-Takeaways">¶</a></h2><p>For this course, the most important Python patterns are:</p>
-<ul>
-<li>assign meaningful names to objects</li>
-<li>read dictionaries with keys</li>
-<li>loop over lists of records</li>
-<li>build lists of row dictionaries</li>
-<li>convert rows to DataFrames</li>
-<li>distinguish raw responses from processed tables</li>
-<li>save outputs deliberately</li>
-<li>read error messages as clues</li>
-</ul>
-<p>You do not need to memorize everything. You need to recognize the patterns when they appear in the scripts.</p>
+<h2 id="Key-Takeaway">Key Takeaway<a class="anchor-link" href="#Key-Takeaway">¶</a></h2><p>Dynamic scraping is not just Selenium. It is diagnosis, waiting, evidence, stopping rules, debugging, and compliance.</p>
 </div>
 </div>
 </div>

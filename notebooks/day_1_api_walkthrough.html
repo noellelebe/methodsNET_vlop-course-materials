@@ -7312,7 +7312,6 @@ a.anchor-link {
                     processEnvironments: true
                 },
                 displayAlign: 'center',
-                messageStyle: 'none',
                 CommonHTML: {
                     linebreaks: {
                     automatic: true
@@ -7332,12 +7331,7 @@ a.anchor-link {
     if (!diagrams.length) {
       return;
     }
-    const mermaid = (await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.0/mermaid.esm.min.mjs")).default;
-    const elkUrl = "https://cdnjs.cloudflare.com/ajax/libs/mermaid-layout-elk/0.1.9/mermaid-layout-elk.esm.min.mjs";
-    if(elkUrl) {
-      const elkLayouts = (await import(elkUrl)).default;
-      mermaid.registerLayoutLoaders(elkLayouts);
-    }
+    const mermaid = (await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.esm.min.mjs")).default;
     const parser = new DOMParser();
 
     mermaid.initialize({
@@ -7434,8 +7428,7 @@ a.anchor-link {
      * Post-process to ensure mermaid diagrams contain only valid SVG and XHTML.
      */
     function cleanMermaidSvg(svg) {
-      svg = svg.replace(RE_VOID_ELEMENT, replaceVoidElement);
-      return `${SVG_XML_HEADER}${svg}`;
+      return svg.replace(RE_VOID_ELEMENT, replaceVoidElement);
     }
 
 
@@ -7461,285 +7454,6 @@ a.anchor-link {
       }
       return `<${tag} ${rest}>`;
     }
-
-
-  /**
-   * Named HTML entities with their decimal equivalent codes.
-   *
-   * @see https://www.w3.org/TR/WD-html40-970708/sgml/entities.html
-   * */
-  const HTML_ENTITIES = `<!ENTITY Aacute "&#193;">
-<!ENTITY aacute "&#225;">
-<!ENTITY Acirc "&#194;">
-<!ENTITY acirc "&#226;">
-<!ENTITY acute "&#180;">
-<!ENTITY AElig "&#198;">
-<!ENTITY aelig "&#230;">
-<!ENTITY Agrave "&#192;">
-<!ENTITY agrave "&#224;">
-<!ENTITY alefsym "&#8501;">
-<!ENTITY Alpha "&#913;">
-<!ENTITY alpha "&#945;">
-<!ENTITY amp "&#38;">
-<!ENTITY and "&#8869;">
-<!ENTITY ang "&#8736;">
-<!ENTITY Aring "&#197;">
-<!ENTITY aring "&#229;">
-<!ENTITY asymp "&#8776;">
-<!ENTITY Atilde "&#195;">
-<!ENTITY atilde "&#227;">
-<!ENTITY Auml "&#196;">
-<!ENTITY auml "&#228;">
-<!ENTITY bdquo "&#8222;">
-<!ENTITY Beta "&#914;">
-<!ENTITY beta "&#946;">
-<!ENTITY brvbar "&#166;">
-<!ENTITY bull "&#8226;">
-<!ENTITY cap "&#8745;">
-<!ENTITY Ccedil "&#199;">
-<!ENTITY ccedil "&#231;">
-<!ENTITY cedil "&#184;">
-<!ENTITY cent "&#162;">
-<!ENTITY Chi "&#935;">
-<!ENTITY chi "&#967;">
-<!ENTITY circ "&#710;">
-<!ENTITY clubs "&#9827;">
-<!ENTITY cong "&#8773;">
-<!ENTITY copy "&#169;">
-<!ENTITY crarr "&#8629;">
-<!ENTITY cup "&#8746;">
-<!ENTITY curren "&#164;">
-<!ENTITY dagger "&#8224;">
-<!ENTITY Dagger "&#8225;">
-<!ENTITY darr "&#8595;">
-<!ENTITY dArr "&#8659;">
-<!ENTITY deg "&#176;">
-<!ENTITY Delta "&#916;">
-<!ENTITY delta "&#948;">
-<!ENTITY diams "&#9830;">
-<!ENTITY divide "&#247;">
-<!ENTITY Eacute "&#201;">
-<!ENTITY eacute "&#233;">
-<!ENTITY Ecirc "&#202;">
-<!ENTITY ecirc "&#234;">
-<!ENTITY Egrave "&#200;">
-<!ENTITY egrave "&#232;">
-<!ENTITY empty "&#8709;">
-<!ENTITY emsp "&#8195;">
-<!ENTITY ensp "&#8194;">
-<!ENTITY epsilon "&#949;">
-<!ENTITY Epsilon "&#917;">
-<!ENTITY equiv "&#8801;">
-<!ENTITY Eta "&#919;">
-<!ENTITY eta "&#951;">
-<!ENTITY ETH "&#208;">
-<!ENTITY eth "&#240;">
-<!ENTITY Euml "&#203;">
-<!ENTITY euml "&#235;">
-<!ENTITY exist "&#8707;">
-<!ENTITY fnof "&#402;">
-<!ENTITY forall "&#8704;">
-<!ENTITY frac12 "&#189;">
-<!ENTITY frac14 "&#188;">
-<!ENTITY frac34 "&#190;">
-<!ENTITY frasl "&#8260;">
-<!ENTITY Gamma "&#915;">
-<!ENTITY gamma "&#947;">
-<!ENTITY ge "&#8805;">
-<!ENTITY gt "&#62;">
-<!ENTITY harr "&#8596;">
-<!ENTITY hArr "&#8660;">
-<!ENTITY hearts "&#9829;">
-<!ENTITY hellip "&#8230;">
-<!ENTITY Iacute "&#205;">
-<!ENTITY iacute "&#237;">
-<!ENTITY Icirc "&#206;">
-<!ENTITY icirc "&#238;">
-<!ENTITY iexcl "&#161;">
-<!ENTITY Igrave "&#204;">
-<!ENTITY igrave "&#236;">
-<!ENTITY image "&#8465;">
-<!ENTITY infin "&#8734;">
-<!ENTITY int "&#8747;">
-<!ENTITY Iota "&#921;">
-<!ENTITY iota "&#953;">
-<!ENTITY iquest "&#191;">
-<!ENTITY isin "&#8712;">
-<!ENTITY Iuml "&#207;">
-<!ENTITY iuml "&#239;">
-<!ENTITY Kappa "&#922;">
-<!ENTITY kappa "&#954;">
-<!ENTITY Lambda "&#923;">
-<!ENTITY lambda "&#955;">
-<!ENTITY lang "&#9001;">
-<!ENTITY laquo "&#171;">
-<!ENTITY larr "&#8592;">
-<!ENTITY lArr "&#8656;">
-<!ENTITY lceil "&#8968;">
-<!ENTITY ldquo "&#8220;">
-<!ENTITY le "&#8804;">
-<!ENTITY lfloor "&#8970;">
-<!ENTITY lowast "&#8727;">
-<!ENTITY loz "&#9674;">
-<!ENTITY lrm "&#8206;">
-<!ENTITY lsaquo "&#8249;">
-<!ENTITY lsquo "&#8216;">
-<!ENTITY lt "&#60;">
-<!ENTITY macr "&#175;">
-<!ENTITY mdash "&#8212;">
-<!ENTITY micro "&#181;">
-<!ENTITY middot "&#183;">
-<!ENTITY minus "&#8722;">
-<!ENTITY Mu "&#924;">
-<!ENTITY mu "&#956;">
-<!ENTITY nabla "&#8711;">
-<!ENTITY nbsp "&#160;">
-<!ENTITY ndash "&#8211;">
-<!ENTITY ne "&#8800;">
-<!ENTITY ni "&#8715;">
-<!ENTITY not "&#172;">
-<!ENTITY notin "&#8713;">
-<!ENTITY nsub "&#8836;">
-<!ENTITY Ntilde "&#209;">
-<!ENTITY ntilde "&#241;">
-<!ENTITY Nu "&#925;">
-<!ENTITY nu "&#957;">
-<!ENTITY Oacute "&#211;">
-<!ENTITY oacute "&#243;">
-<!ENTITY Ocirc "&#212;">
-<!ENTITY ocirc "&#244;">
-<!ENTITY OElig "&#338;">
-<!ENTITY oelig "&#339;">
-<!ENTITY Ograve "&#210;">
-<!ENTITY ograve "&#242;">
-<!ENTITY oline "&#8254;">
-<!ENTITY Omega "&#937;">
-<!ENTITY omega "&#969;">
-<!ENTITY Omicron "&#927;">
-<!ENTITY omicron "&#959;">
-<!ENTITY oplus "&#8853;">
-<!ENTITY or "&#8870;">
-<!ENTITY ordf "&#170;">
-<!ENTITY ordm "&#186;">
-<!ENTITY Oslash "&#216;">
-<!ENTITY oslash "&#248;">
-<!ENTITY Otilde "&#213;">
-<!ENTITY otilde "&#245;">
-<!ENTITY otimes "&#8855;">
-<!ENTITY Ouml "&#214;">
-<!ENTITY ouml "&#246;">
-<!ENTITY para "&#182;">
-<!ENTITY part "&#8706;">
-<!ENTITY permil "&#8240;">
-<!ENTITY perp "&#8869;">
-<!ENTITY Phi "&#934;">
-<!ENTITY phi "&#966;">
-<!ENTITY Pi "&#928;">
-<!ENTITY pi "&#960;">
-<!ENTITY piv "&#982;">
-<!ENTITY plusmn "&#177;">
-<!ENTITY pound "&#163;">
-<!ENTITY prime "&#8242;">
-<!ENTITY Prime "&#8243;">
-<!ENTITY prod "&#8719;">
-<!ENTITY prop "&#8733;">
-<!ENTITY Psi "&#936;">
-<!ENTITY psi "&#968;">
-<!ENTITY quot "&#34;">
-<!ENTITY radic "&#8730;">
-<!ENTITY rang "&#9002;">
-<!ENTITY raquo "&#187;">
-<!ENTITY rarr "&#8594;">
-<!ENTITY rArr "&#8658;">
-<!ENTITY rceil "&#8969;">
-<!ENTITY rdquo "&#8221;">
-<!ENTITY real "&#8476;">
-<!ENTITY reg "&#174;">
-<!ENTITY rfloor "&#8971;">
-<!ENTITY Rho "&#929;">
-<!ENTITY rho "&#961;">
-<!ENTITY rlm "&#8207;">
-<!ENTITY rsaquo "&#8250;">
-<!ENTITY rsquo "&#8217;">
-<!ENTITY sbquo "&#8218;">
-<!ENTITY Scaron "&#352;">
-<!ENTITY scaron "&#353;">
-<!ENTITY sdot "&#8901;">
-<!ENTITY sect "&#167;">
-<!ENTITY shy "&#173;">
-<!ENTITY Sigma "&#931;">
-<!ENTITY sigma "&#963;">
-<!ENTITY sigmaf "&#962;">
-<!ENTITY sim "&#8764;">
-<!ENTITY spades "&#9824;">
-<!ENTITY sub "&#8834;">
-<!ENTITY sube "&#8838;">
-<!ENTITY sum "&#8721;">
-<!ENTITY sup "&#8835;">
-<!ENTITY sup1 "&#185;">
-<!ENTITY sup2 "&#178;">
-<!ENTITY sup3 "&#179;">
-<!ENTITY supe "&#8839;">
-<!ENTITY szlig "&#223;">
-<!ENTITY Tau "&#932;">
-<!ENTITY tau "&#964;">
-<!ENTITY there4 "&#8756;">
-<!ENTITY Theta "&#920;">
-<!ENTITY theta "&#952;">
-<!ENTITY thetasym "&#977;">
-<!ENTITY thinsp "&#8201;">
-<!ENTITY THORN "&#222;">
-<!ENTITY thorn "&#254;">
-<!ENTITY tilde "&#732;">
-<!ENTITY times "&#215;">
-<!ENTITY trade "&#8482;">
-<!ENTITY Uacute "&#218;">
-<!ENTITY uacute "&#250;">
-<!ENTITY uarr "&#8593;">
-<!ENTITY uArr "&#8657;">
-<!ENTITY Ucirc "&#219;">
-<!ENTITY ucirc "&#251;">
-<!ENTITY Ugrave "&#217;">
-<!ENTITY ugrave "&#249;">
-<!ENTITY uml "&#168;">
-<!ENTITY upsih "&#978;">
-<!ENTITY Upsilon "&#933;">
-<!ENTITY upsilon "&#965;">
-<!ENTITY Uuml "&#220;">
-<!ENTITY uuml "&#252;">
-<!ENTITY weierp "&#8472;">
-<!ENTITY Xi "&#926;">
-<!ENTITY xi "&#958;">
-<!ENTITY Yacute "&#221;">
-<!ENTITY yacute "&#253;">
-<!ENTITY yen "&#165;">
-<!ENTITY Yuml "&#376;">
-<!ENTITY yuml "&#255;">
-<!ENTITY Zeta "&#918;">
-<!ENTITY zeta "&#950;">
-<!ENTITY zwj "&#8205;">
-<!ENTITY zwnj "&#8204;">`.replace(/\n/g, ' ');
-
-  /**
-   * A reasonably strict xml declaration.
-   */
-  const XML_DECL = '<?xml version="1.0" standalone="no"?>';
-
-  /**
-   * The beginning of the XML doctype declaration.
-   */
-  const DOCTYPE_START = `<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [`;
-
-  /**
-   * The end of the XML docype declaration.
-   */
-  const DOCTYPE_END = ']>';
-
-  /**
-   * A full header for an SVG XML document.
-   */
-  const SVG_XML_HEADER = `${XML_DECL}
-    ${DOCTYPE_START}${HTML_ENTITIES}${DOCTYPE_END}`;
 
     void Promise.all([...diagrams].map(renderOneMarmaid));
   });
@@ -7796,7 +7510,7 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5a422806">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c0b2ddf5">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7826,27 +7540,51 @@ written as a readable handout.
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d4531971">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e32fa21a">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Packages-Used-in-This-Notebook">Packages Used in This Notebook<a class="anchor-link" href="#Packages-Used-in-This-Notebook">¶</a></h2><p>This walkthrough uses:</p>
+<ul>
+<li><code>requests</code> to send HTTP requests to the MediaWiki API</li>
+<li><code>pandas</code> to turn extracted rows into tables and save CSV files</li>
+<li><code>Path</code> from <code>pathlib</code> to create file and folder paths safely</li>
+<li><code>pprint</code> to print nested JSON in a readable way</li>
+<li><code>time</code> to pause between repeated requests</li>
+</ul>
+<p>The important distinction is that <code>requests</code> collects data, while <code>pandas</code> structures the data after collection.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f93e8b23">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Path helps create file and folder paths in a way that works across operating systems.</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="c1"># pprint prints nested dictionaries/lists more readably than plain print().</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="c1"># time lets us pause between requests, which is important for respectful collection.</span>
+<span class="kn">import</span> <span class="nn">time</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="c1"># pandas is used after collection to make tables and save CSV files.</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="c1"># requests sends HTTP requests to APIs and web pages.</span>
+<span class="kn">import</span> <span class="nn">requests</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=87fbc9db">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1b9207a8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7860,12 +7598,66 @@ require login credentials for basic queries.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=94e7ce15">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e3c0e1b7">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="API-Concepts-Before-the-First-Request">API Concepts Before the First Request<a class="anchor-link" href="#API-Concepts-Before-the-First-Request">¶</a></h2><p>Before reading the code, keep these distinctions in mind:</p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Meaning in this walkthrough</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>endpoint</td>
+<td>the API address where the request is sent</td>
+</tr>
+<tr>
+<td>parameters</td>
+<td>the settings that define what we ask for</td>
+</tr>
+<tr>
+<td>headers</td>
+<td>metadata about the request, such as the User-Agent</td>
+</tr>
+<tr>
+<td>response object</td>
+<td>the HTTP-level object returned by <code>requests.get()</code></td>
+</tr>
+<tr>
+<td>payload</td>
+<td>the parsed data inside the response, usually JSON</td>
+</tr>
+<tr>
+<td>search result</td>
+<td>a record saying that a page matched the query</td>
+</tr>
+<tr>
+<td>page-level request</td>
+<td>a second request asking for details about one known page</td>
+</tr>
+<tr>
+<td>pagination</td>
+<td>collecting results in batches rather than all at once</td>
+</tr>
+</tbody>
+</table>
+<p>These are methodological choices, not just technical details. The endpoint, parameters, page size, and stopping rule shape the dataset.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f9d1da7c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">API_URL</span> <span class="o">=</span> <span class="s2">"https://en.wikipedia.org/w/api.php"</span>
@@ -7875,7 +7667,7 @@ require login credentials for basic queries.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dadbc87c">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2e381120">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7888,12 +7680,12 @@ what the API should do and what kind of data can come back.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=63ca2db8">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2fa72aa0">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [23]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
@@ -7909,7 +7701,7 @@ what the API should do and what kind of data can come back.</p>
 
     <span class="c1"># srlimit is the number of search results requested per API response.</span>
     <span class="c1"># It is the batch size, not necessarily the total collection size.</span>
-    <span class="s2">"srlimit"</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="s2">"srlimit"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
 
     <span class="c1"># format="json" asks for machine-readable JSON.</span>
     <span class="s2">"format"</span><span class="p">:</span> <span class="s2">"json"</span><span class="p">,</span>
@@ -7923,7 +7715,7 @@ what the API should do and what kind of data can come back.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1bbb874d">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a020a0e8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7934,12 +7726,12 @@ APIs expect automated requests to identify themselves.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=b25a5575">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d47b71c0">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
@@ -7951,7 +7743,7 @@ APIs expect automated requests to identify themselves.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=95af734c">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1c3d8d2c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7961,22 +7753,23 @@ APIs expect automated requests to identify themselves.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=63fbdab4">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=759ae471">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [24]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">API_URL</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># requests.get() sends an HTTP GET request. For APIs, params become query-string fields; for web pages, it fetches HTML.</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">API_URL</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2365042c">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9de3d994">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7988,24 +7781,40 @@ response object.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=90f4b983">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f0cb4fe6">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">)</span>
+<span class="c1"># .get() safely asks for a dictionary key or HTML attribute; if it is missing, Python returns None instead of crashing.</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"content-type"</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=52cbc59f">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>https://en.wikipedia.org/w/api.php?action=query&amp;list=search&amp;srsearch=digital+services+act&amp;srlimit=50&amp;format=json&amp;formatversion=2
+200
+application/json; charset=utf-8
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=81d6d18e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8021,22 +7830,23 @@ metadata about the HTTP response.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c3af8ad6">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=23da080c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [25]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">payload</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># .json() parses a JSON response into Python dictionaries and lists. Use it only when the response actually contains JSON.</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=6dca84a8">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c491f7db">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8046,12 +7856,12 @@ metadata about the HTTP response.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=28b811b2">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1b6808b5">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
@@ -8060,8 +7870,769 @@ metadata about the HTTP response.</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c80264a6">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>{'batchcomplete': True,
+ 'continue': {'continue': '-||', 'sroffset': 50},
+ 'query': {'search': [{'ns': 0,
+                       'pageid': 65193550,
+                       'size': 86121,
+                       'snippet': 'The &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; (DSA) is an '
+                                  'EU regulation that entered into force in '
+                                  '2022, establishing a comprehensive legal '
+                                  'framework for &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt; '
+                                  'accountability',
+                       'timestamp': '2026-06-20T03:14:50Z',
+                       'title': 'Digital Services Act',
+                       'wordcount': 7420},
+                      {'ns': 0,
+                       'pageid': 66230371,
+                       'size': 123787,
+                       'snippet': 'The &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; Markets '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; (DMA) '
+                                  'is an EU regulation that aims to make the '
+                                  '&lt;span class="searchmatch"&gt;digital&lt;/span&gt; '
+                                  'economy fairer and more contestable. The '
+                                  'regulation entered into force',
+                       'timestamp': '2026-06-11T19:50:04Z',
+                       'title': 'Digital Markets Act',
+                       'wordcount': 12016},
+                      {'ns': 0,
+                       'pageid': 295668,
+                       'size': 33298,
+                       'snippet': '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Services&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; '
+                                  '(DSA)&amp;quot;. European Commission. Retrieved '
+                                  '23 September 2025. &amp;quot;Out-of-court '
+                                  'dispute settlement bodies under the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;',
+                       'timestamp': '2026-06-23T23:47:33Z',
+                       'title': 'Content moderation',
+                       'wordcount': 3516},
+                      {'ns': 0,
+                       'pageid': 67646530,
+                       'size': 64016,
+                       'snippet': 'through &amp;quot;&lt;span '
+                                  'class="searchmatch"&gt;service&lt;/span&gt; '
+                                  'restriction orders&amp;quot;, requirements on '
+                                  'ancillary &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt; which '
+                                  'facilitate the provision of the regulated '
+                                  '&lt;span class="searchmatch"&gt;services&lt;/span&gt;. '
+                                  'The &lt;span class="searchmatch"&gt;act&lt;/span&gt; '
+                                  'lists in section',
+                       'timestamp': '2026-06-24T12:39:02Z',
+                       'title': 'Online Safety Act 2023',
+                       'wordcount': 5945},
+                      {'ns': 0,
+                       'pageid': 47652080,
+                       'size': 45948,
+                       'snippet': 'Market For &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; (&lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;) and '
+                                  'amending Directive 2000/31/EC European '
+                                  'Commission (16 April 2021). &amp;quot;The &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; '
+                                  'package&amp;quot;',
+                       'timestamp': '2026-06-22T19:07:06Z',
+                       'title': 'Digital Single Market',
+                       'wordcount': 6123},
+                      {'ns': 0,
+                       'pageid': 25286840,
+                       'size': 49430,
+                       'snippet': 'for a fee. The taxation of &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; goods '
+                                  'and/or &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt;, '
+                                  'sometimes referred to as &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; tax '
+                                  'and/or a &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt; tax, is '
+                                  'gaining popularity across',
+                       'timestamp': '2026-05-26T16:07:06Z',
+                       'title': 'Taxation of digital goods',
+                       'wordcount': 5918},
+                      {'ns': 0,
+                       'pageid': 20648089,
+                       'size': 117647,
+                       'snippet': 'The &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  'Millennium Copyright &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; (DMCA) is a '
+                                  '1998 United States copyright law that '
+                                  'implements two 1996 treaties of the World '
+                                  'Intellectual Property',
+                       'timestamp': '2026-06-12T04:50:30Z',
+                       'title': 'Digital Millennium Copyright Act',
+                       'wordcount': 12592},
+                      {'ns': 0,
+                       'pageid': 70137000,
+                       'size': 15306,
+                       'snippet': 'using automated content moderation to '
+                                  'remove legal speech. The EU &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;, passed in '
+                                  '2022, compels online platforms to remove '
+                                  'illegal content',
+                       'timestamp': '2026-04-30T05:29:35Z',
+                       'title': 'Censorship in the European Union',
+                       'wordcount': 1603},
+                      {'ns': 0,
+                       'pageid': 18935388,
+                       'size': 39565,
+                       'snippet': 'Artificial Intelligence &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; Markets '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; Cyber '
+                                  'Resilience &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; Data '
+                                  'Governance &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; (proposed) '
+                                  '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  'Fairness &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; (proposed) '
+                                  'As of',
+                       'timestamp': '2025-12-08T10:04:58Z',
+                       'title': 'Information technology law',
+                       'wordcount': 4956},
+                      {'ns': 0,
+                       'pageid': 34092671,
+                       'size': 31846,
+                       'snippet': 'platform denied a &lt;span '
+                                  'class="searchmatch"&gt;service&lt;/span&gt; for no '
+                                  'disclosed reason, and hence being in breach '
+                                  'of contract. In the European Union, the '
+                                  '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Services&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; (DSA) '
+                                  'contains',
+                       'timestamp': '2026-05-24T11:05:52Z',
+                       'title': 'Shadow banning',
+                       'wordcount': 3318},
+                      {'ns': 0,
+                       'pageid': 68882246,
+                       'size': 49847,
+                       'snippet': '(whistleblower) – former Facebook data '
+                                  'analyst and whistleblower &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; Online '
+                                  'Safety &lt;span class="searchmatch"&gt;Act&lt;/span&gt; '
+                                  '2023 Mac, Ryan (October 5, 2021). &amp;quot;Who '
+                                  'is Frances Haugen',
+                       'timestamp': '2026-06-18T03:44:52Z',
+                       'title': 'Frances Haugen',
+                       'wordcount': 4474},
+                      {'ns': 0,
+                       'pageid': 9933471,
+                       'size': 52126,
+                       'snippet': 'products and &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt;. It has '
+                                  'significantly transformed how brands and '
+                                  'businesses use technology for marketing '
+                                  'since the 1990s and 2000s. As &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; '
+                                  'platforms',
+                       'timestamp': '2026-06-05T02:06:43Z',
+                       'title': 'Digital marketing',
+                       'wordcount': 5526},
+                      {'ns': 0,
+                       'pageid': 39922603,
+                       'size': 8132,
+                       'snippet': 'under the brand name &amp;quot;&lt;span '
+                                  'class="searchmatch"&gt;ACT&lt;/span&gt; '
+                                  'Fibernet&amp;quot; and &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; '
+                                  'television &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt; under '
+                                  'the &amp;quot;&lt;span '
+                                  'class="searchmatch"&gt;ACT&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt;&amp;quot; '
+                                  'brand. The company provides &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt; in '
+                                  'Tamil Nadu, Telangana',
+                       'timestamp': '2026-06-05T06:28:31Z',
+                       'title': 'Atria Convergence Technologies',
+                       'wordcount': 638},
+                      {'ns': 0,
+                       'pageid': 54174510,
+                       'size': 34177,
+                       'snippet': '19 October 2022 on a Single Market For '
+                                  '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Services&lt;/span&gt; '
+                                  'and amending Directive 2000/31/EC (&lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;). OJ L 277, '
+                                  '27.10.2022, p. 1–102. Pál,',
+                       'timestamp': '2026-06-18T13:57:42Z',
+                       'title': 'Dark pattern',
+                       'wordcount': 3455},
+                      {'ns': 0,
+                       'pageid': 1305348,
+                       'size': 39035,
+                       'snippet': 'Union enabled several strict internet '
+                                  'regulations. For instance, the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; mandates '
+                                  'greater transparency and accountability to '
+                                  'platforms in',
+                       'timestamp': '2026-05-22T23:28:54Z',
+                       'title': 'Vlog',
+                       'wordcount': 4145},
+                      {'ns': 0,
+                       'pageid': 22757963,
+                       'size': 7903,
+                       'snippet': 'Other Measures) &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; 2023, which '
+                                  'prohibited the use of credit cards, '
+                                  'credit-related products and &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; currency '
+                                  'for online wagering. The &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; is '
+                                  'administered',
+                       'timestamp': '2026-05-28T10:23:32Z',
+                       'title': 'Interactive Gambling Act 2001',
+                       'wordcount': 743},
+                      {'ns': 0,
+                       'pageid': 708000,
+                       'size': 7686,
+                       'snippet': 'the EU increasingly uses the term '
+                                  '&amp;quot;&lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;&amp;quot; in the '
+                                  'short titles of many of its Regulations '
+                                  '(e.g. the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;). The '
+                                  'description of regulations can',
+                       'timestamp': '2026-04-10T21:35:29Z',
+                       'title': 'Regulation (European Union)',
+                       'wordcount': 715},
+                      {'ns': 0,
+                       'pageid': 76980362,
+                       'size': 6814,
+                       'snippet': 'The &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  'Operational Resilience &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; (DORA), '
+                                  'officially Regulation (EU) 2022/2554 is a '
+                                  'European Union regulation. It requires '
+                                  'financial entities to improve',
+                       'timestamp': '2025-11-18T14:12:23Z',
+                       'title': 'Digital Operational Resilience Act',
+                       'wordcount': 553},
+                      {'ns': 0,
+                       'pageid': 79397333,
+                       'size': 25458,
+                       'snippet': 'Canada&amp;#039;s &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt; tax '
+                                  '(DST) was a 3% tax on Canadian-source &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt; revenue '
+                                  '(i.e., &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt; that '
+                                  'rely on engagement, data, and content',
+                       'timestamp': '2026-05-21T21:47:04Z',
+                       'title': 'Digital Services Tax Act (Canada)',
+                       'wordcount': 2412},
+                      {'ns': 0,
+                       'pageid': 77946617,
+                       'size': 10011,
+                       'snippet': 'The &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; Fairness '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; (DFA) '
+                                  'is a legislative proposal by the European '
+                                  'Commission. Michael McGrath, EU '
+                                  'Commissioner for Democracy, Justice, the '
+                                  'Rule',
+                       'timestamp': '2026-02-01T20:17:49Z',
+                       'title': 'Digital Fairness Act',
+                       'wordcount': 763},
+                      {'ns': 0,
+                       'pageid': 80542801,
+                       'size': 8699,
+                       'snippet': 'advertising across all EU member states. '
+                                  'The regulation complements the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;, General '
+                                  'Data Protection Regulation (GDPR), and the '
+                                  'EU Code of Practice',
+                       'timestamp': '2026-05-25T02:58:57Z',
+                       'title': 'Transparency and Targeting of Political '
+                                'Advertising Regulation',
+                       'wordcount': 779},
+                      {'ns': 0,
+                       'pageid': 68692470,
+                       'size': 30263,
+                       'snippet': 'the &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; world, '
+                                  'supply chain resilience, the global trade '
+                                  'order and the EU&amp;#039;s developing '
+                                  'regulatory agenda like &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;, Data &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; and Cloud',
+                       'timestamp': '2026-06-16T08:16:38Z',
+                       'title': 'Trade and Technology Council',
+                       'wordcount': 2157},
+                      {'ns': 0,
+                       'pageid': 68294262,
+                       'size': 8830,
+                       'snippet': 'data. Data Governance &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; General Data '
+                                  'Protection Regulation Artificial '
+                                  'Intelligence &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; Markets '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; '
+                                  'European Health Data',
+                       'timestamp': '2026-02-01T20:13:21Z',
+                       'title': 'Data Act (European Union)',
+                       'wordcount': 638},
+                      {'ns': 0,
+                       'pageid': 67032801,
+                       'size': 13737,
+                       'snippet': 'these platforms have. Laws such as the '
+                                  '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Services&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; have '
+                                  'been put in place to regulate and ensure '
+                                  '&lt;span class="searchmatch"&gt;digital&lt;/span&gt; '
+                                  'programmes are abiding by content '
+                                  'moderation',
+                       'timestamp': '2026-03-25T22:10:30Z',
+                       'title': 'Digital platform (infrastructure)',
+                       'wordcount': 1489},
+                      {'ns': 0,
+                       'pageid': 5897742,
+                       'size': 195590,
+                       'snippet': 'the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;&amp;quot;. '
+                                  'Politics and Governance. 11 (3). '
+                                  'doi:10.17645/pag.v11i3.6735. &amp;quot;The '
+                                  '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Services&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; '
+                                  'package | Shaping Europe&amp;#039;s &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; '
+                                  'future&amp;quot;',
+                       'timestamp': '2026-06-23T01:01:11Z',
+                       'title': 'Social media',
+                       'wordcount': 22455},
+                      {'ns': 0,
+                       'pageid': 47262459,
+                       'size': 16823,
+                       'snippet': 'purchase of &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; content. '
+                                  'The &lt;span class="searchmatch"&gt;Act&lt;/span&gt; is '
+                                  'split into three parts: Part 1 concerns '
+                                  'consumer contracts for goods, &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; content '
+                                  'and &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt;. Part 2 '
+                                  'concerns',
+                       'timestamp': '2026-06-23T17:30:29Z',
+                       'title': 'Consumer Rights Act 2015',
+                       'wordcount': 1751},
+                      {'ns': 0,
+                       'pageid': 17728747,
+                       'size': 34947,
+                       'snippet': 'revise this directive which finally '
+                                  'happened with the adoption of the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; 2022. In the '
+                                  '1990s, when the general public started '
+                                  'using the internet',
+                       'timestamp': '2026-03-20T22:08:18Z',
+                       'title': 'Electronic Commerce Directive 2000',
+                       'wordcount': 3949},
+                      {'ns': 0,
+                       'pageid': 82337203,
+                       'size': 71413,
+                       'snippet': '1007/s41109-024-00668-6. &amp;quot;The &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; '
+                                  'package&amp;quot;. European Commission. '
+                                  'Retrieved 4 March 2026. &amp;quot;Action '
+                                  'Recommended: How the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; Addresses '
+                                  'Platform',
+                       'timestamp': '2026-06-10T15:23:54Z',
+                       'title': 'Algorithmic amplification',
+                       'wordcount': 7996},
+                      {'ns': 0,
+                       'pageid': 1649105,
+                       'size': 53512,
+                       'snippet': 'facilitating automated access to &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt;, '
+                                  'confirming one&amp;#039;s identity on the '
+                                  'internet, and allowing &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; systems '
+                                  'to manage interactions between',
+                       'timestamp': '2026-06-22T19:36:18Z',
+                       'title': 'Digital identity',
+                       'wordcount': 6126},
+                      {'ns': 0,
+                       'pageid': 61481948,
+                       'size': 4721,
+                       'snippet': 'transfer &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt;, (4) '
+                                  'merchant acquisition, (5) electronic money '
+                                  'issuance, (6) &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; payment '
+                                  'token &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt; and (7) '
+                                  'money-changing &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt;. The PS '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; does',
+                       'timestamp': '2025-09-18T15:40:35Z',
+                       'title': 'Payment Services Act 2019',
+                       'wordcount': 229},
+                      {'ns': 0,
+                       'pageid': 37082149,
+                       'size': 19984,
+                       'snippet': 'provision of online public &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt;. It was '
+                                  'formed in April 2011 by David '
+                                  'Cameron&amp;#039;s Conservative government to '
+                                  'implement the &amp;quot;&lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; by '
+                                  'Default&amp;quot; strategy proposed',
+                       'timestamp': '2026-03-10T08:45:20Z',
+                       'title': 'Government Digital Service',
+                       'wordcount': 1705},
+                      {'ns': 0,
+                       'pageid': 51024759,
+                       'size': 36102,
+                       'snippet': '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  'Economy &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; 2017 (c. 30) '
+                                  'is an &lt;span class="searchmatch"&gt;act&lt;/span&gt; '
+                                  'of the Parliament of the United Kingdom. It '
+                                  'is substantially different from, and '
+                                  'shorter than, the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt;',
+                       'timestamp': '2026-05-02T22:38:34Z',
+                       'title': 'Digital Economy Act 2017',
+                       'wordcount': 3205},
+                      {'ns': 0,
+                       'pageid': 67241140,
+                       'size': 2324,
+                       'snippet': 'The &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  'Copyright &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; (DCA) is a '
+                                  'proposed United States copyright law that '
+                                  'amends revision of &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  'Millennium Copyright &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; (DMCA). The '
+                                  'proposed',
+                       'timestamp': '2025-06-05T06:01:55Z',
+                       'title': 'Digital Copyright Act',
+                       'wordcount': 209},
+                      {'ns': 0,
+                       'pageid': 63451675,
+                       'size': 169861,
+                       'snippet': 'of &lt;span class="searchmatch"&gt;digital&lt;/span&gt; '
+                                  'technology through the GDPR, &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;, and the '
+                                  '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  'Markets &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;. For AI in '
+                                  'particular, the Artificial intelligence '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; was',
+                       'timestamp': '2026-06-25T03:46:48Z',
+                       'title': 'Regulation of artificial intelligence',
+                       'wordcount': 16339},
+                      {'ns': 0,
+                       'pageid': 57174306,
+                       'size': 143967,
+                       'snippet': 'targeting gender, race, religion, and '
+                                  'childhood. Both the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; Markets '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; and '
+                                  '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Services&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; were '
+                                  'enacted by the EU in July 2022. The EU '
+                                  'defined Alphabet',
+                       'timestamp': '2026-06-25T07:44:08Z',
+                       'title': 'Big Tech',
+                       'wordcount': 12910},
+                      {'ns': 0,
+                       'pageid': 4075736,
+                       'size': 92258,
+                       'snippet': 'to Big Tech on &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;&amp;quot; (PDF). '
+                                  'FCC.gov. Mukherjee, Supantha (March 3, '
+                                  '2025). &amp;quot;US FCC chair says EU &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; is threat to '
+                                  'free',
+                       'timestamp': '2026-06-11T01:07:57Z',
+                       'title': 'European Union–United States relations',
+                       'wordcount': 8952},
+                      {'ns': 0,
+                       'pageid': 68774383,
+                       'size': 43748,
+                       'snippet': 'self-determinedly) use and control tangible '
+                                  'and intangible assets and &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt; that '
+                                  'significantly impact democracy, the economy '
+                                  'and society The German',
+                       'timestamp': '2026-06-25T13:22:22Z',
+                       'title': 'Digital sovereignty',
+                       'wordcount': 4760},
+                      {'ns': 0,
+                       'pageid': 56846326,
+                       'size': 48011,
+                       'snippet': ' the Commission proposed two key '
+                                  'regulations: the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; and the '
+                                  '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  'Markets &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;, aimed at '
+                                  'increasing accountability and competition',
+                       'timestamp': '2026-05-20T12:26:50Z',
+                       'title': 'Platform economy',
+                       'wordcount': 5159},
+                      {'ns': 0,
+                       'pageid': 73295318,
+                       'size': 9725,
+                       'snippet': 'as &lt;span class="searchmatch"&gt;digital&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;services&lt;/span&gt; '
+                                  'commissioner Coimisiún na Meán is the '
+                                  'designated &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; '
+                                  'Coordinator for Ireland under the EU&amp;#039;s '
+                                  '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Services&lt;/span&gt; '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt;. On',
+                       'timestamp': '2026-05-15T19:10:17Z',
+                       'title': 'Coimisiún na Meán',
+                       'wordcount': 762},
+                      {'ns': 0,
+                       'pageid': 59750806,
+                       'size': 3152,
+                       'snippet': 'she has been her parliamentary group&amp;#039;s '
+                                  'shadow rapporteur on the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; (DSA). In '
+                                  'addition to her committee assignments, '
+                                  'Kokalari is a member',
+                       'timestamp': '2026-05-14T21:27:45Z',
+                       'title': 'Arba Kokalari',
+                       'wordcount': 169},
+                      {'ns': 0,
+                       'pageid': 70232481,
+                       'size': 12592,
+                       'snippet': 'The &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; and '
+                                  'Intelligence &lt;span '
+                                  'class="searchmatch"&gt;Service&lt;/span&gt; (DIS) is '
+                                  'the &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;service&lt;/span&gt; branch '
+                                  'of the Singapore Armed Forces (SAF) '
+                                  'responsible for providing military '
+                                  'intelligence',
+                       'timestamp': '2026-04-05T04:50:01Z',
+                       'title': 'Digital and Intelligence Service',
+                       'wordcount': 929},
+                      {'ns': 0,
+                       'pageid': 58250,
+                       'size': 52676,
+                       'snippet': 'Planning and &lt;span '
+                                  'class="searchmatch"&gt;Service&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; PL 89-749 '
+                                  '1970: Community Mental Health &lt;span '
+                                  'class="searchmatch"&gt;Service&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; PL 91-211 '
+                                  '1970: Family Planning &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; and '
+                                  'Population Research &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; PL 91-572',
+                       'timestamp': '2026-06-01T14:52:58Z',
+                       'title': 'United States Department of Health and Human '
+                                'Services',
+                       'wordcount': 4733},
+                      {'ns': 0,
+                       'pageid': 74540504,
+                       'size': 33660,
+                       'snippet': 'The &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; Personal '
+                                  'Data Protection &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;, 2023 (also '
+                                  'known as DPDP &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; or '
+                                  'DPDPA-2023) is an &lt;span '
+                                  'class="searchmatch"&gt;act&lt;/span&gt; of the '
+                                  'Parliament of India to provide for the '
+                                  'processing',
+                       'timestamp': '2026-05-26T22:41:58Z',
+                       'title': 'Digital Personal Data Protection Act, 2023',
+                       'wordcount': 2840},
+                      {'ns': 0,
+                       'pageid': 81103527,
+                       'size': 25320,
+                       'snippet': 'addition, Very Large Online Platforms under '
+                                  'the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; and '
+                                  '“gatekeepers” under the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; Markets '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt; must '
+                                  'recognise the wallet for user '
+                                  'authentication',
+                       'timestamp': '2026-02-14T16:23:02Z',
+                       'title': 'EU Digital Identity Wallet',
+                       'wordcount': 2460},
+                      {'ns': 0,
+                       'pageid': 83149340,
+                       'size': 19384,
+                       'snippet': 'public &lt;span '
+                                  'class="searchmatch"&gt;service&lt;/span&gt; must '
+                                  'accept the EUDI Wallet as a valid means of '
+                                  'identification. Very Large Online Platforms '
+                                  'designated under the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;, such',
+                       'timestamp': '2026-05-18T03:46:55Z',
+                       'title': 'Regulation (EU) 2024/1183',
+                       'wordcount': 1887},
+                      {'ns': 0,
+                       'pageid': 73236747,
+                       'size': 35919,
+                       'snippet': 'requests under laws like the &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  'Millennium Copyright &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; (DMCA), '
+                                  'implementing requirements under the '
+                                  'EU&amp;#039;s &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; (DSA), and '
+                                  'responding to',
+                       'timestamp': '2026-06-23T09:11:59Z',
+                       'title': 'Trust and safety',
+                       'wordcount': 3313},
+                      {'ns': 0,
+                       'pageid': 43921488,
+                       'size': 30216,
+                       'snippet': 'knowledge economy&amp;quot; by expanding &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; '
+                                  'infrastructure, promoting e‑governance, and '
+                                  'enabling &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; delivery '
+                                  'of public &lt;span '
+                                  'class="searchmatch"&gt;services&lt;/span&gt;. The '
+                                  'programme was launched',
+                       'timestamp': '2026-05-26T08:28:32Z',
+                       'title': 'Digital India',
+                       'wordcount': 2963},
+                      {'ns': 0,
+                       'pageid': 18934863,
+                       'size': 54857,
+                       'snippet': 'A &lt;span class="searchmatch"&gt;digital&lt;/span&gt; '
+                                  'library, also referred to as an online '
+                                  'library, an internet library, a &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; '
+                                  'repository, a library without walls, or a '
+                                  '&lt;span class="searchmatch"&gt;digital&lt;/span&gt; '
+                                  'collection,',
+                       'timestamp': '2026-06-25T07:52:56Z',
+                       'title': 'Digital library',
+                       'wordcount': 6294},
+                      {'ns': 0,
+                       'pageid': 59463,
+                       'size': 2871,
+                       'snippet': 'Nevada, United States &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; Security '
+                                  '&lt;span class="searchmatch"&gt;Act&lt;/span&gt;, 2018 '
+                                  '(Bangladesh) &lt;span '
+                                  'class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;, a European '
+                                  'Union regulation on &lt;span '
+                                  'class="searchmatch"&gt;digital&lt;/span&gt; content '
+                                  '&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; '
+                                  'subtraction angiography',
+                       'timestamp': '2026-06-17T06:01:31Z',
+                       'title': 'DSA',
+                       'wordcount': 417},
+                      {'ns': 0,
+                       'pageid': 331302,
+                       'size': 64297,
+                       'snippet': 'Immigration and Nationality &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; of 1965, '
+                                  'also known as the Hart–Celler &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt; and more '
+                                  'recently as the 1965 Immigration &lt;span '
+                                  'class="searchmatch"&gt;Act&lt;/span&gt;, was a '
+                                  'federal law passed by',
+                       'timestamp': '2026-06-23T00:59:15Z',
+                       'title': 'Immigration and Nationality Act of 1965',
+                       'wordcount': 6323}],
+           'searchinfo': {'totalhits': 40408}}}
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0448e5ed">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8077,15 +8648,16 @@ metadata about the HTTP response.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=91e26255">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=14c2a925">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [26]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">search_results</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"search"</span><span class="p">]</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># payload["query"]["search"] walks through nested JSON: payload -&gt; query -&gt; search-result list.</span>
+<span class="n">search_results</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"search"</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">search_results</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">search_results</span><span class="p">))</span>
 </pre></div>
@@ -8093,8 +8665,22 @@ metadata about the HTTP response.</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=872b9470">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>&lt;class 'list'&gt;
+5
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=144b27fb">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8104,7 +8690,7 @@ metadata about the HTTP response.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=19e61275">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a85c6d96">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8112,14 +8698,38 @@ metadata about the HTTP response.</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">search_results</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">search_results</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># 0 because python starts counting from 0, not 1</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=067755f5">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>{'ns': 0,
+ 'pageid': 65193550,
+ 'size': 86121,
+ 'snippet': 'The &lt;span class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span '
+            'class="searchmatch"&gt;Services&lt;/span&gt; &lt;span '
+            'class="searchmatch"&gt;Act&lt;/span&gt; (DSA) is an EU regulation that '
+            'entered into force in 2022, establishing a comprehensive legal '
+            'framework for &lt;span class="searchmatch"&gt;digital&lt;/span&gt; &lt;span '
+            'class="searchmatch"&gt;services&lt;/span&gt; accountability',
+ 'timestamp': '2026-06-20T03:14:50Z',
+ 'title': 'Digital Services Act',
+ 'wordcount': 7420}
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=639fdc0d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8127,17 +8737,17 @@ metadata about the HTTP response.</p>
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Search results are not full Wikipedia articles. They are records about pages
 that matched the search query.</p>
-<h1 id="Inspect-Available-Fields">Inspect Available Fields<a class="anchor-link" href="#Inspect-Available-Fields">¶</a></h1><p>Before choosing columns for a table, inspect the fields available in the search
+<h1 id="Inspect-Available-Fields">Inspect Available Fields<a class="anchor-link" href="#Inspect-Available-Fields">¶</a></h1><p>Before choosing columns to save in for a table/data frame, inspect the fields available in the search
 result records.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=7fcb367b">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=fb834686">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">search_results</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>
@@ -8147,8 +8757,23 @@ result records.</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e5835171">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>dict_keys(['ns', 'title', 'pageid', 'size', 'wordcount', 'snippet', 'timestamp'])
+dict_keys(['ns', 'title', 'pageid', 'size', 'wordcount', 'snippet', 'timestamp'])
+dict_keys(['ns', 'title', 'pageid', 'size', 'wordcount', 'snippet', 'timestamp'])
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d12318c0">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8158,12 +8783,12 @@ result records.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=dc0a194c">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ceaa8c69">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [27]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">all_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">search_results</span><span class="p">))</span>
@@ -8173,17 +8798,26 @@ result records.</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dc5f36f2">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>{'snippet', 'timestamp', 'wordcount', 'size', 'pageid', 'title', 'ns'}
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cf95ee5f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>::: {.callout-question}
-Which of these fields would you keep for your own research question? Which ones
-would you drop?
-:::</p>
 <h1 id="Flatten-Search-Results-Into-a-Table">Flatten Search Results Into a Table<a class="anchor-link" href="#Flatten-Search-Results-Into-a-Table">¶</a></h1><p>APIs often return nested data. For analysis, we often turn selected fields into
 a rectangular table.</p>
 <p>This is useful, but it is also lossy: the table contains only the fields we
@@ -8191,12 +8825,12 @@ decide to keep.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=deb4249f">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=979545b3">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [28]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
@@ -8204,6 +8838,7 @@ decide to keep.</p>
 <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">search_results</span><span class="p">:</span>
     <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
         <span class="c1"># MediaWiki's stable numeric page identifier.</span>
+        <span class="c1"># .get() safely asks for a dictionary key or HTML attribute; if it is missing, Python returns None instead of crashing.</span>
         <span class="s2">"pageid"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pageid"</span><span class="p">),</span>
 
         <span class="c1"># Human-readable page title.</span>
@@ -8225,7 +8860,7 @@ decide to keep.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=635bcb65">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=89115e1f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8235,23 +8870,104 @@ decide to keep.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=62e6ae6b">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=88900887">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># pd.DataFrame(...) turns a list of row dictionaries into a rectangular table.</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=210c1c0e">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[14]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>pageid</th>
+<th>title</th>
+<th>timestamp</th>
+<th>wordcount</th>
+<th>snippet</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>65193550</td>
+<td>Digital Services Act</td>
+<td>2026-06-20T03:14:50Z</td>
+<td>7420</td>
+<td>The &lt;span class="searchmatch"&gt;Digital&lt;/span&gt; &lt;...</td>
+</tr>
+<tr>
+<th>1</th>
+<td>66230371</td>
+<td>Digital Markets Act</td>
+<td>2026-06-11T19:50:04Z</td>
+<td>12016</td>
+<td>The &lt;span class="searchmatch"&gt;Digital&lt;/span&gt; M...</td>
+</tr>
+<tr>
+<th>2</th>
+<td>295668</td>
+<td>Content moderation</td>
+<td>2026-06-23T23:47:33Z</td>
+<td>3516</td>
+<td>&lt;span class="searchmatch"&gt;Digital&lt;/span&gt; &lt;span...</td>
+</tr>
+<tr>
+<th>3</th>
+<td>67646530</td>
+<td>Online Safety Act 2023</td>
+<td>2026-06-24T12:39:02Z</td>
+<td>5945</td>
+<td>through &amp;quot;&lt;span class="searchmatch"&gt;servic...</td>
+</tr>
+<tr>
+<th>4</th>
+<td>47652080</td>
+<td>Digital Single Market</td>
+<td>2026-06-22T19:07:06Z</td>
+<td>6123</td>
+<td>Market For &lt;span class="searchmatch"&gt;Digital&lt;/...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7899c57a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8261,12 +8977,12 @@ decide to keep.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=563c21e9">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0de2286a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">snippet</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s2">"snippet"</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">():</span>
@@ -8277,8 +8993,28 @@ decide to keep.</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=96c45b61">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[2], line 1</span>
+<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> snippet <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> <span class="ansi-yellow-bg">df</span>[<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">snippet</span><span style="color: rgb(175,0,0)">"</span>]<span style="color: rgb(98,98,98)">.</span>head():
+<span class="ansi-green-intense-fg ansi-bold">      2</span>     <span style="color: rgb(0,135,0)">print</span>(snippet)
+<span class="ansi-green-intense-fg ansi-bold">      3</span>     <span style="color: rgb(0,135,0)">print</span>()
+
+<span class="ansi-red-fg">NameError</span>: name 'df' is not defined</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fb5ad3ce">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8294,12 +9030,12 @@ information about the page.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=586ee5d8">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f12116b2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [29]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">first_result</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -8314,8 +9050,22 @@ information about the page.</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b3e0bba8">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>pageid: 65193550
+title: Digital Services Act
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4e7e96fc">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8325,12 +9075,12 @@ information about the page.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=7aa04c3d">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=42ac3f56">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [30]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">page_browser_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"https://en.wikipedia.org/?curid=</span><span class="si">{</span><span class="n">page_id</span><span class="si">}</span><span class="s2">"</span>
@@ -8340,8 +9090,21 @@ information about the page.</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4a3e0f98">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>https://en.wikipedia.org/?curid=65193550
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0c3d6a9e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8359,12 +9122,12 @@ page.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=fa23f3ab">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=952b622e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [31]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">page_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -8397,7 +9160,7 @@ page.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=25056dd1">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a1d67645">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8407,7 +9170,7 @@ page.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=663fab07">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=6bd18bda">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8415,8 +9178,11 @@ page.</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">page_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">API_URL</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">page_params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># requests.get() sends an HTTP GET request. For APIs, params become query-string fields; for web pages, it fetches HTML.</span>
+<span class="n">page_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">API_URL</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">page_params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="c1"># raise_for_status() turns HTTP error responses (such as 403, 404, or 429) into visible Python errors.</span>
 <span class="n">page_response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+<span class="c1"># .json() parses a JSON response into Python dictionaries and lists. Use it only when the response actually contains JSON.</span>
 <span class="n">page_payload</span> <span class="o">=</span> <span class="n">page_response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -8424,7 +9190,7 @@ page.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d83aa1f6">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=177a3d11">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8435,7 +9201,7 @@ page, the first list element is the page record we need.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e28317c7">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=6a7e91d5">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8453,7 +9219,7 @@ page, the first list element is the page record we need.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c96ae4aa">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=051bf2fe">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8463,7 +9229,7 @@ page, the first list element is the page record we need.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=edeb9acf">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=63192ee0">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8471,7 +9237,8 @@ page, the first list element is the page record we need.</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Title:"</span><span class="p">,</span> <span class="n">page_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">))</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># .get() safely asks for a dictionary key or HTML attribute; if it is missing, Python returns None instead of crashing.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Title:"</span><span class="p">,</span> <span class="n">page_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"URL:"</span><span class="p">,</span> <span class="n">page_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"fullurl"</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">page_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"extract"</span><span class="p">))</span>
@@ -8481,7 +9248,7 @@ page, the first list element is the page record we need.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4ae7e798">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=45fe6712">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8503,23 +9270,37 @@ time.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=9d65b058">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ba049074">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">continuation</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"continue"</span><span class="p">,</span> <span class="p">{})</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># .get() safely asks for a dictionary key or HTML attribute; if it is missing, Python returns None instead of crashing.</span>
+<span class="n">continuation</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"continue"</span><span class="p">,</span> <span class="p">{})</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">continuation</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=6c900da4">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>{'sroffset': 50, 'continue': '-||'}
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=64b6d3a7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8530,7 +9311,7 @@ parameters.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=53e403bc">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=89c20a4d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8538,20 +9319,35 @@ parameters.</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">params_page_2</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">params</span><span class="p">,</span> <span class="o">**</span><span class="n">continuation</span><span class="p">}</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># **continuation unpacks the API continuation fields into the request parameters for the next batch.</span>
+<span class="n">params_page_2</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">params</span><span class="p">,</span> <span class="o">**</span><span class="n">continuation</span><span class="p">}</span>
 
+<span class="c1"># requests.get() sends an HTTP GET request. For APIs, params become query-string fields; for web pages, it fetches HTML.</span>
 <span class="n">response_2</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">API_URL</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params_page_2</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="c1"># raise_for_status() turns HTTP error responses (such as 403, 404, or 429) into visible Python errors.</span>
 <span class="n">response_2</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+<span class="c1"># .json() parses a JSON response into Python dictionaries and lists. Use it only when the response actually contains JSON.</span>
 <span class="n">payload_2</span> <span class="o">=</span> <span class="n">response_2</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">response_2</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7fba78cb">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>https://en.wikipedia.org/w/api.php?action=query&amp;list=search&amp;srsearch=digital+services+act&amp;srlimit=50&amp;format=json&amp;formatversion=2&amp;sroffset=50&amp;continue=-%7C%7C
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a775325a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8561,27 +9357,46 @@ parameters.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e8af6784">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a69f6ab8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [22]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">page_1_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">"pageid"</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"search"</span><span class="p">]]</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># payload["query"]["search"] walks through nested JSON: payload -&gt; query -&gt; search-result list.</span>
+<span class="n">page_1_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">"pageid"</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"search"</span><span class="p">]]</span>
 <span class="n">page_2_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">"pageid"</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">payload_2</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"search"</span><span class="p">]]</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Page 1 IDs:"</span><span class="p">,</span> <span class="n">page_1_ids</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Page 2 IDs:"</span><span class="p">,</span> <span class="n">page_2_ids</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Overlap:"</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">page_1_ids</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">page_2_ids</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">page_1_ids</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=20c41a69">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Page 1 IDs: [65193550, 66230371, 295668, 67646530, 47652080, 25286840, 20648089, 70137000, 18935388, 34092671]
+Page 2 IDs: [57837019, 18581669, 67576350, 73917911, 331302, 41501305, 38104075, 64134773, 77813882, 196010]
+Overlap: {331302}
+[65193550, 66230371, 295668, 67646530, 47652080, 25286840, 20648089, 70137000, 18935388, 34092671, 68882246, 9933471, 39922603, 54174510, 1305348, 22757963, 708000, 76980362, 79397333, 77946617, 80542801, 68692470, 68294262, 67032801, 5897742, 47262459, 17728747, 82337203, 1649105, 61481948, 37082149, 51024759, 67241140, 63451675, 57174306, 4075736, 68774383, 56846326, 73295318, 59750806, 70232481, 58250, 74540504, 81103527, 83149340, 73236747, 43921488, 18934863, 59463, 331302]
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d0d9480d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8599,7 +9414,7 @@ stopping rule explicit.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d3def43f">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=588146ec">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8607,7 +9422,7 @@ stopping rule explicit.</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">collect_wikipedia_search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">max_pages</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">pause_seconds</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">collect_wikipedia_search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">max_pages</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">pause_seconds</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Collect several batches of MediaWiki search results."""</span>
 
     <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
@@ -8622,9 +9437,11 @@ stopping rule explicit.</p>
             <span class="s2">"srlimit"</span><span class="p">:</span> <span class="n">page_size</span><span class="p">,</span>
             <span class="s2">"format"</span><span class="p">:</span> <span class="s2">"json"</span><span class="p">,</span>
             <span class="s2">"formatversion"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="c1"># **continuation unpacks the API continuation fields into the request parameters for the next batch.</span>
             <span class="o">**</span><span class="n">continuation</span><span class="p">,</span>
         <span class="p">}</span>
 
+        <span class="c1"># requests.get() sends an HTTP GET request. For APIs, params become query-string fields; for web pages, it fetches HTML.</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="n">API_URL</span><span class="p">,</span>
             <span class="n">params</span><span class="o">=</span><span class="n">request_params</span><span class="p">,</span>
@@ -8632,7 +9449,9 @@ stopping rule explicit.</p>
             <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
         <span class="p">)</span>
 
+        <span class="c1"># raise_for_status() turns HTTP error responses (such as 403, 404, or 429) into visible Python errors.</span>
         <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+        <span class="c1"># .json() parses a JSON response into Python dictionaries and lists. Use it only when the response actually contains JSON.</span>
         <span class="n">page_payload</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 
         <span class="n">raw_pages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -8644,6 +9463,7 @@ stopping rule explicit.</p>
             <span class="p">}</span>
         <span class="p">)</span>
 
+        <span class="c1"># .get() safely asks for a dictionary key or HTML attribute; if it is missing, Python returns None instead of crashing.</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">page_payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"query"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"search"</span><span class="p">,</span> <span class="p">[]):</span>
             <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="p">{</span>
@@ -8663,6 +9483,7 @@ stopping rule explicit.</p>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">continuation</span><span class="p">:</span>
             <span class="k">break</span>
 
+        <span class="c1"># time.sleep(...) pauses between requests so the script does not make rapid-fire calls to a server.</span>
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">pause_seconds</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">rows</span><span class="p">,</span> <span class="n">raw_pages</span>
@@ -8672,7 +9493,7 @@ stopping rule explicit.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=93fda73c">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b64c0865">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8682,7 +9503,7 @@ stopping rule explicit.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f8defed8">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e3512da6">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8696,6 +9517,7 @@ stopping rule explicit.</p>
     <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="c1"># pd.DataFrame(...) turns a list of row dictionaries into a rectangular table.</span>
 <span class="n">search_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">search_rows</span><span class="p">)</span>
 <span class="n">search_df</span><span class="p">[[</span><span class="s2">"page_number"</span><span class="p">,</span> <span class="s2">"pageid"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">,</span> <span class="s2">"wordcount"</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
@@ -8704,7 +9526,7 @@ stopping rule explicit.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5b3efdc8">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9d6521aa">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8721,7 +9543,7 @@ content, we request each page by <code>pageid</code>.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=8b5af114">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=1c78c3dc">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8729,7 +9551,7 @@ content, we request each page by <code>pageid</code>.</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_page_extract</span><span class="p">(</span><span class="n">pageid</span><span class="p">,</span> <span class="n">extract_chars</span><span class="o">=</span><span class="mi">1200</span><span class="p">):</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_page_extract</span><span class="p">(</span><span class="n">pageid</span><span class="p">,</span> <span class="n">extract_chars</span><span class="o">=</span><span class="mi">1200</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Request page URL and plain-text extract for one Wikipedia page."""</span>
 
     <span class="n">page_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -8743,8 +9565,11 @@ content, we request each page by <code>pageid</code>.</p>
         <span class="s2">"formatversion"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
     <span class="p">}</span>
 
+    <span class="c1"># requests.get() sends an HTTP GET request. For APIs, params become query-string fields; for web pages, it fetches HTML.</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">API_URL</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">page_params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="c1"># raise_for_status() turns HTTP error responses (such as 403, 404, or 429) into visible Python errors.</span>
     <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="c1"># .json() parses a JSON response into Python dictionaries and lists. Use it only when the response actually contains JSON.</span>
     <span class="n">page_payload</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">page_payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"pages"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -8754,7 +9579,7 @@ content, we request each page by <code>pageid</code>.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9c470d34">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=94cc0c14">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8764,7 +9589,7 @@ content, we request each page by <code>pageid</code>.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=cd17de63">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=21153d92">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8779,6 +9604,7 @@ content, we request each page by <code>pageid</code>.</p>
 
     <span class="n">page_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="p">{</span>
+            <span class="c1"># .get() safely asks for a dictionary key or HTML attribute; if it is missing, Python returns None instead of crashing.</span>
             <span class="s2">"pageid"</span><span class="p">:</span> <span class="n">page_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pageid"</span><span class="p">),</span>
             <span class="s2">"title"</span><span class="p">:</span> <span class="n">page_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">),</span>
             <span class="s2">"fullurl"</span><span class="p">:</span> <span class="n">page_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"fullurl"</span><span class="p">),</span>
@@ -8786,8 +9612,10 @@ content, we request each page by <code>pageid</code>.</p>
         <span class="p">}</span>
     <span class="p">)</span>
 
+    <span class="c1"># time.sleep(...) pauses between requests so the script does not make rapid-fire calls to a server.</span>
     <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
+<span class="c1"># pd.DataFrame(...) turns a list of row dictionaries into a rectangular table.</span>
 <span class="n">pages_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">page_rows</span><span class="p">)</span>
 <span class="n">pages_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
@@ -8796,7 +9624,7 @@ content, we request each page by <code>pageid</code>.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a1434d05">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=32e25299">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8808,7 +9636,7 @@ content.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f3c17413">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=4740c0a9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8825,13 +9653,16 @@ content.</p>
     <span class="s2">"formatversion"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
 <span class="p">}</span>
 
+<span class="c1"># requests.get() sends an HTTP GET request. For APIs, params become query-string fields; for web pages, it fetches HTML.</span>
 <span class="n">external_links_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
     <span class="n">API_URL</span><span class="p">,</span>
     <span class="n">params</span><span class="o">=</span><span class="n">external_links_params</span><span class="p">,</span>
     <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="c1"># raise_for_status() turns HTTP error responses (such as 403, 404, or 429) into visible Python errors.</span>
 <span class="n">external_links_response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+<span class="c1"># .json() parses a JSON response into Python dictionaries and lists. Use it only when the response actually contains JSON.</span>
 <span class="n">external_links_payload</span> <span class="o">=</span> <span class="n">external_links_response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -8839,7 +9670,7 @@ content.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f4e2fb32">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=eb285503">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8849,7 +9680,7 @@ content.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=fe85ac28">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=5861479e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8858,6 +9689,7 @@ content.</p>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">external_links_record</span> <span class="o">=</span> <span class="n">external_links_payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"pages"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1"># .get() safely asks for a dictionary key or HTML attribute; if it is missing, Python returns None instead of crashing.</span>
 <span class="n">external_links</span> <span class="o">=</span> <span class="n">external_links_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"extlinks"</span><span class="p">,</span> <span class="p">[])</span>
 
 <span class="n">external_urls</span> <span class="o">=</span> <span class="p">[</span>
@@ -8873,6 +9705,7 @@ content.</p>
     <span class="s2">"external_link_count"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">external_urls</span><span class="p">),</span>
 <span class="p">}</span>
 
+<span class="c1"># pd.DataFrame(...) turns a list of row dictionaries into a rectangular table.</span>
 <span class="n">external_links_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">external_links_row</span><span class="p">])</span>
 <span class="n">external_links_df</span>
 </pre></div>
@@ -8881,7 +9714,7 @@ content.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c593be81">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=06adfe2b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8894,7 +9727,7 @@ of URLs.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=0ccec10d">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=0e81d616">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8911,11 +9744,15 @@ of URLs.</p>
     <span class="s2">"formatversion"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
 <span class="p">}</span>
 
+<span class="c1"># requests.get() sends an HTTP GET request. For APIs, params become query-string fields; for web pages, it fetches HTML.</span>
 <span class="n">image_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">API_URL</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">image_params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="c1"># raise_for_status() turns HTTP error responses (such as 403, 404, or 429) into visible Python errors.</span>
 <span class="n">image_response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+<span class="c1"># .json() parses a JSON response into Python dictionaries and lists. Use it only when the response actually contains JSON.</span>
 <span class="n">image_payload</span> <span class="o">=</span> <span class="n">image_response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 
 <span class="n">image_record</span> <span class="o">=</span> <span class="n">image_payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"pages"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1"># .get() safely asks for a dictionary key or HTML attribute; if it is missing, Python returns None instead of crashing.</span>
 <span class="n">images</span> <span class="o">=</span> <span class="n">image_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"images"</span><span class="p">,</span> <span class="p">[])</span>
 <span class="n">image_titles</span> <span class="o">=</span> <span class="p">[</span><span class="n">image</span><span class="p">[</span><span class="s2">"title"</span><span class="p">]</span> <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">images</span><span class="p">]</span>
 
@@ -8926,7 +9763,7 @@ of URLs.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=da5b4ba7">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8c3c12d7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8936,7 +9773,7 @@ of URLs.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=7abd2716">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=6eb11deb">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8954,18 +9791,22 @@ of URLs.</p>
         <span class="s2">"formatversion"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
     <span class="p">}</span>
 
+    <span class="c1"># requests.get() sends an HTTP GET request. For APIs, params become query-string fields; for web pages, it fetches HTML.</span>
     <span class="n">image_info_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
         <span class="n">API_URL</span><span class="p">,</span>
         <span class="n">params</span><span class="o">=</span><span class="n">image_info_params</span><span class="p">,</span>
         <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="c1"># raise_for_status() turns HTTP error responses (such as 403, 404, or 429) into visible Python errors.</span>
     <span class="n">image_info_response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="c1"># .json() parses a JSON response into Python dictionaries and lists. Use it only when the response actually contains JSON.</span>
     <span class="n">image_info_payload</span> <span class="o">=</span> <span class="n">image_info_response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 
     <span class="n">image_rows</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">file_page</span> <span class="ow">in</span> <span class="n">image_info_payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"pages"</span><span class="p">]:</span>
+        <span class="c1"># .get() safely asks for a dictionary key or HTML attribute; if it is missing, Python returns None instead of crashing.</span>
         <span class="n">info</span> <span class="o">=</span> <span class="n">file_page</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"imageinfo"</span><span class="p">,</span> <span class="p">[{}])[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">image_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="p">{</span>
@@ -8978,6 +9819,7 @@ of URLs.</p>
             <span class="p">}</span>
         <span class="p">)</span>
 
+    <span class="c1"># pd.DataFrame(...) turns a list of row dictionaries into a rectangular table.</span>
     <span class="n">image_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">image_rows</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="n">image_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
@@ -8991,7 +9833,7 @@ of URLs.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=bf837109">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=32b7793c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9012,7 +9854,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=3e4bca0b">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c076f11c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9025,6 +9867,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 <span class="n">processed_dir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="s2">"processed"</span>
 <span class="n">reports_dir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="s2">"reports"</span>
 
+<span class="c1"># mkdir(..., parents=True, exist_ok=True) creates the folder and any missing parent folders, without failing if it already exists.</span>
 <span class="n">raw_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">processed_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">reports_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -9034,7 +9877,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=69164cb5">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=34ec175a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9044,7 +9887,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=24bca93c">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=43596b77">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9062,7 +9905,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2152adc1">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cb4115ce">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9072,7 +9915,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=069d2742">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2a63f007">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9080,7 +9923,9 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">raw_pages</span><span class="p">)</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">raw_path</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">"values"</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># to_json(...) saves structured data as JSON, which is useful for raw API responses and provenance records.</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">raw_pages</span><span class="p">)</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">raw_path</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">"values"</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># to_csv(..., index=False) saves a DataFrame as a CSV file without adding pandas row numbers as a fake column.</span>
 <span class="n">search_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">search_processed_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">pages_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">pages_processed_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
@@ -9089,7 +9934,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=403f76ef">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a97721a9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9099,7 +9944,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c07cf793">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=6f0f79f6">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9122,6 +9967,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
     <span class="p">),</span>
 <span class="p">}</span>
 
+<span class="c1"># to_json(...) saves structured data as JSON, which is useful for raw API responses and provenance records.</span>
 <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">provenance</span><span class="p">)</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">provenance_path</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -9129,7 +9975,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=723a0ebd">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1d4ce882">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9139,7 +9985,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=cbb1af4d">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=ce8ef998">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9157,7 +10003,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b10dcd0b">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ccd697b9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
