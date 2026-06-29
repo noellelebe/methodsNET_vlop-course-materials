@@ -1,24 +1,22 @@
 # Notebook-Style Teaching Materials
 
-This folder contains student-facing notebook versions of the teaching
-walkthroughs.
+This folder contains the student-facing notebook versions of the course
+materials. The `.ipynb` files combine explanation, runnable code cells,
+discussion prompts, and small exercises.
 
-The `.ipynb` files are Jupyter notebooks. They combine explanation, runnable
-code cells, discussion prompts, and small exercises. They are meant to sit
-between the live coding scripts in `scripts/teaching_walkthroughs/` and the
-fully reusable command-line workflows in `scripts/runnable_workflows/`.
-
-The `.qmd` files contain the same notebook-style material in Quarto format.
-They are optional and mainly useful if the instructor wants to render polished
-HTML or PDF handouts with Quarto.
+The notebooks are the main teaching layer. The reusable command-line scripts are
+in `../scripts/runnable_workflows/`.
 
 ## Recommended Use
 
-- Teach from the `.ipynb` file if you want students to run notebook cells.
-- Use the matching `.py` file when live coding in VS Code, Spyder, PyCharm, or
-  another Python editor.
-- Use the runnable workflow scripts later, once students have seen how the
-  pieces fit together.
+- Use `python_basics_for_course_scripts.ipynb` as a preparatory or support
+  notebook for students who need a refresher.
+- Teach from the day-specific `.ipynb` notebooks when students should run cells
+  with you.
+- Use the runnable workflow scripts after students have seen the concepts in
+  the notebooks.
+- Keep solution notebooks instructor-only until students have tried the
+  exercises.
 
 ## Available Notebooks
 
@@ -27,25 +25,37 @@ HTML or PDF handouts with Quarto.
 - `day_1_api_walkthrough.ipynb`
 - `day_2_static_scraping_walkthrough.ipynb`
 - `day_2_beautifulsoup_extraction_patterns.ipynb`
+- `day_2_beautifulsoup_extraction_patterns_solutions.ipynb`
 - `day_3_dynamic_browser_walkthrough.ipynb`
 - `day_4_dsa_transparency_walkthrough.ipynb`
 - `day_4_data_quality_audit.ipynb`
 - `day_5_ai_assisted_collection.ipynb`
+- `day_5_practical_collection_workflows.ipynb`
 - `day_5_reproducible_project.ipynb`
+- `in_class_exercise_solutions.ipynb`
 
-## Optional Quarto Rendering
+## Rendered HTML
 
-If Quarto is installed, render a notebook with:
+Some notebooks also have pre-rendered `.html` files in this folder. These are
+useful for reading in a browser, but the `.ipynb` files are the editable and
+runnable source materials.
+
+To render one notebook to HTML:
 
 ```bash
-quarto render notebooks/day_1_api_walkthrough.qmd --to html
+jupyter nbconvert --to html notebooks/day_1_api_walkthrough.ipynb
 ```
 
-For PDF output:
+To render all notebooks from the repository root:
 
 ```bash
-quarto render notebooks/day_1_api_walkthrough.qmd --to pdf
+jupyter nbconvert --to html notebooks/*.ipynb
 ```
 
-PDF rendering may require a LaTeX installation. HTML is usually the easiest
-format for course handouts.
+## Instructor-Only Files
+
+These files contain worked answers and should generally not be released before
+the in-class exercises:
+
+- `day_2_beautifulsoup_extraction_patterns_solutions.ipynb`
+- `in_class_exercise_solutions.ipynb`

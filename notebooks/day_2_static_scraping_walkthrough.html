@@ -7516,8 +7516,13 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="What-This-Walkthrough-Does">What This Walkthrough Does<a class="anchor-link" href="#What-This-Walkthrough-Does">¶</a></h1><p>This walkthrough introduces static web scraping with <code>requests</code> and
-<code>BeautifulSoup</code>.</p>
+<h1 id="What-This-Walkthrough-Does">What This Walkthrough Does<a class="anchor-link" href="#What-This-Walkthrough-Does">¶</a></h1><p>This walkthrough introduces static web scraping with <code>requests</code> and <code>BeautifulSoup</code>.</p>
+<p>The main first example is the same substantive source used on Day 1: a Wikipedia page about the Digital Services Act. This keeps the object constant while the access route changes:</p>
+<ul>
+<li>Day 1: MediaWiki API returns structured JSON.</li>
+<li>Day 2: the Wikipedia website returns HTML.</li>
+</ul>
+<p>After that, we keep <code>quotes.toscrape.com</code> as a deliberately clean practice page for repeated records, and then move to the MethodsNET exercise separately.</p>
 <p>By the end, you should understand how to:</p>
 <ul>
 <li>check <code>robots.txt</code> as a first access signal</li>
@@ -7525,13 +7530,12 @@ a.anchor-link {
 <li>save raw HTML before parsing</li>
 <li>inspect page structure</li>
 <li>use CSS selectors</li>
-<li>extract repeated records</li>
+<li>extract document text, headings, and links</li>
+<li>extract repeated records from a clean practice page</li>
 <li>resolve relative URLs</li>
 <li>save processed tables</li>
 </ul>
-<p>The classroom example is <a href="https://quotes.toscrape.com/">https://quotes.toscrape.com/</a>, a practice site made
-for scraping exercises.</p>
-<h1 id="Imports-and-Classroom-URL">Imports and Classroom URL<a class="anchor-link" href="#Imports-and-Classroom-URL">¶</a></h1>
+<h1 id="Imports-and-Shared-Setup">Imports and Shared Setup<a class="anchor-link" href="#Imports-and-Shared-Setup">¶</a></h1>
 </div>
 </div>
 </div>
@@ -7583,7 +7587,441 @@ for scraping exercises.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f1a284a4">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=afbf159c">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># All examples in this notebook write into the same teaching data folder.</span>
+<span class="n">outdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"data"</span><span class="p">)</span>
+<span class="n">raw_dir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="s2">"raw"</span>
+<span class="n">processed_dir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="s2">"processed"</span>
+
+<span class="c1"># mkdir(..., parents=True, exist_ok=True) creates folders and does not fail if they already exist.</span>
+<span class="n">raw_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">processed_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dd716400">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="First-Static-Workflow:-Wikipedia-Article">First Static Workflow: Wikipedia Article<a class="anchor-link" href="#First-Static-Workflow:-Wikipedia-Article">¶</a></h1><p>We start with Wikipedia because Day 1 used the MediaWiki API. This makes the comparison clear: same object, different access route.</p>
+<p>With the API, we asked for structured JSON. With static scraping, we ask the website for HTML and then decide which elements to extract.</p>
+<p>This example is useful because a Wikipedia article is not a list of neat cards. It has article text, headings, links, references, navigation, sidebars, and page metadata. That forces a methodological question:</p>
+<blockquote>
+<p>Which parts of the page count as the data we want?</p>
+</blockquote>
+<p>For Wikipedia, the API is often better for reproducible article extraction. Here we use HTML scraping because Day 2 is about understanding web page structure.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d46291b7">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Why-Not-Start-with-a-News-Outlet?">Why Not Start with a News Outlet?<a class="anchor-link" href="#Why-Not-Start-with-a-News-Outlet?">¶</a></h2><p>News pages are realistic, but they are often difficult first classroom examples:</p>
+<ul>
+<li>paywalls and consent banners can block access</li>
+<li>HTML structures change frequently</li>
+<li>article text may be loaded dynamically</li>
+<li>pages contain advertising, tracking, and recommendation modules</li>
+<li>terms and <code>robots.txt</code> rules vary by outlet</li>
+<li>copying/exporting full article text can raise copyright concerns</li>
+</ul>
+<p>The same inspection logic applies to news pages, but Wikipedia is a safer bridge before moving to more fragile sites.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9d9730ef">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Fetch-the-Wikipedia-Page">Fetch the Wikipedia Page<a class="anchor-link" href="#Fetch-the-Wikipedia-Page">¶</a></h2><p>This is the static-scraping equivalent of Day 1's API request: send an HTTP request and receive text back.</p>
+<p>The difference is the response format. The API returned JSON; the website returns HTML.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=744b95d3">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">wikipedia_url</span> <span class="o">=</span> <span class="s2">"https://en.wikipedia.org/wiki/Digital_Services_Act"</span>
+
+<span class="n">wikipedia_headers</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"User-Agent"</span><span class="p">:</span> <span class="s2">"methodsNET-VLOP-course/1.0 static scraping Wikipedia example"</span>
+<span class="p">}</span>
+
+<span class="c1"># requests.get() fetches the raw browser-page HTML.</span>
+<span class="n">wiki_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">wikipedia_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">wikipedia_headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="c1"># raise_for_status() stops the workflow if the server returns an HTTP error.</span>
+<span class="n">wiki_response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+<span class="n">wiki_html</span> <span class="o">=</span> <span class="n">wiki_response</span><span class="o">.</span><span class="n">text</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Status:"</span><span class="p">,</span> <span class="n">wiki_response</span><span class="o">.</span><span class="n">status_code</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Characters of HTML:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wiki_html</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">wiki_html</span><span class="p">[:</span><span class="mi">500</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7c1baa7f">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Save-the-Raw-Wikipedia-HTML">Save the Raw Wikipedia HTML<a class="anchor-link" href="#Save-the-Raw-Wikipedia-HTML">¶</a></h2><p>Raw HTML is evidence. It lets us rerun parsing code without repeatedly contacting the website, and it preserves what the scraper saw at collection time.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=09526acd">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">wiki_raw_path</span> <span class="o">=</span> <span class="n">raw_dir</span> <span class="o">/</span> <span class="s2">"notebook_wikipedia_dsa_raw.html"</span>
+<span class="n">wiki_raw_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">wiki_html</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">wiki_response</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">or</span> <span class="s2">"utf-8"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Saved raw Wikipedia HTML:"</span><span class="p">,</span> <span class="n">wiki_raw_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f1742ccc">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Parse-and-Inspect-the-Wikipedia-Page">Parse and Inspect the Wikipedia Page<a class="anchor-link" href="#Parse-and-Inspect-the-Wikipedia-Page">¶</a></h2><p>A Wikipedia article page contains far more than article text. Before extracting, inspect broad structure: the title, main heading, paragraphs, headings, and links.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=33031482">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Parse the raw Wikipedia HTML into a searchable tree.</span>
+<span class="n">wiki_soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">wiki_html</span><span class="p">,</span> <span class="s2">"html.parser"</span><span class="p">)</span>
+
+<span class="c1"># The HTML &lt;title&gt; is the browser-tab title. It is not always identical to the article heading.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"HTML title:"</span><span class="p">,</span> <span class="n">wiki_soup</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+<span class="c1"># h1 is usually the visible article title.</span>
+<span class="n">main_heading</span> <span class="o">=</span> <span class="n">wiki_soup</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">"h1"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Main heading:"</span><span class="p">,</span> <span class="n">main_heading</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">main_heading</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+
+<span class="c1"># These broad counts include article content plus some non-article page elements.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Paragraph elements:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wiki_soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"p"</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Links:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wiki_soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"a[href]"</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"h2/h3 headings:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wiki_soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"h2, h3"</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=84082bd5">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Identify-the-Main-Content-Area">Identify the Main Content Area<a class="anchor-link" href="#Identify-the-Main-Content-Area">¶</a></h2><p>If we select all paragraphs from the whole page, we may capture navigation, footers, sidebars, or other non-article material.</p>
+<p>A better first choice is to restrict extraction to the article content area. On Wikipedia, the parsed article body is usually inside <code>.mw-parser-output</code>.</p>
+<p>This is a selector choice and should be documented. If Wikipedia changes its HTML structure, this selector might need revision.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=16ed6bda">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Select the main parsed article content area.</span>
+<span class="n">content</span> <span class="o">=</span> <span class="n">wiki_soup</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".mw-parser-output"</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Could not find article content area. Inspect the page structure again."</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Found article content area"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=308e7f28">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Extract-Article-Paragraphs">Extract Article Paragraphs<a class="anchor-link" href="#Extract-Article-Paragraphs">¶</a></h2><p>Here the unit is not a repeated card. The page is a document, so we extract paragraphs from the main content area.</p>
+<p>We also filter very short paragraphs. That filtering rule is a methodological choice: it changes what becomes part of the processed dataset.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=83bb738e">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">paragraph_rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># "p" selects paragraph elements inside the article content area.</span>
+    <span class="k">for</span> <span class="n">paragraph_number</span><span class="p">,</span> <span class="n">paragraph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"p"</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># get_text(" ", strip=True) extracts readable paragraph text.</span>
+        <span class="n">paragraph_text</span> <span class="o">=</span> <span class="n">paragraph</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Skip empty or very short paragraphs in this teaching example.</span>
+        <span class="c1"># In a real project, this filtering rule should be documented.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">paragraph_text</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">40</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">paragraph_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"source_url"</span><span class="p">:</span> <span class="n">wikipedia_url</span><span class="p">,</span>
+                <span class="s2">"paragraph_number"</span><span class="p">:</span> <span class="n">paragraph_number</span><span class="p">,</span>
+                <span class="s2">"text"</span><span class="p">:</span> <span class="n">paragraph_text</span><span class="p">,</span>
+                <span class="s2">"n_characters"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">paragraph_text</span><span class="p">),</span>
+                <span class="s2">"n_words"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">paragraph_text</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+<span class="n">wiki_paragraphs_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">paragraph_rows</span><span class="p">)</span>
+<span class="n">wiki_paragraphs_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=17df1acc">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Extract-Headings-as-Document-Structure">Extract Headings as Document Structure<a class="anchor-link" href="#Extract-Headings-as-Document-Structure">¶</a></h2><p>Headings give a rough map of the article. This is different from extracting paragraph text; it tells us how the document is organized.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e9d1d8a2">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">heading_rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">heading</span> <span class="ow">in</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"h2, h3"</span><span class="p">):</span>
+        <span class="n">heading_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"source_url"</span><span class="p">:</span> <span class="n">wikipedia_url</span><span class="p">,</span>
+                <span class="s2">"level"</span><span class="p">:</span> <span class="n">heading</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s2">"heading"</span><span class="p">:</span> <span class="n">heading</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+<span class="n">wiki_headings_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">heading_rows</span><span class="p">)</span>
+<span class="n">wiki_headings_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0077b382">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Extract-and-Classify-Links">Extract and Classify Links<a class="anchor-link" href="#Extract-and-Classify-Links">¶</a></h2><p>Links are analytically different from paragraphs. They can point to other Wikipedia pages, external sources, same-page anchors, files, or other resources.</p>
+<p>We classify links because those types should not be interpreted as the same thing.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e03b5a01">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">wiki_link_rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"a[href]"</span><span class="p">):</span>
+        <span class="n">href_raw</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"href"</span><span class="p">)</span>
+        <span class="n">link_text</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Skip empty links or links without readable anchor text.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">href_raw</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">link_text</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># urljoin turns relative Wikipedia links into absolute URLs.</span>
+        <span class="n">href_absolute</span> <span class="o">=</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">wikipedia_url</span><span class="p">,</span> <span class="n">href_raw</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">href_raw</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/wiki/"</span><span class="p">):</span>
+            <span class="n">link_type</span> <span class="o">=</span> <span class="s2">"internal_wikipedia_link"</span>
+        <span class="k">elif</span> <span class="n">href_raw</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"http"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">href_raw</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"//"</span><span class="p">):</span>
+            <span class="n">link_type</span> <span class="o">=</span> <span class="s2">"external_link"</span>
+        <span class="k">elif</span> <span class="n">href_raw</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">):</span>
+            <span class="n">link_type</span> <span class="o">=</span> <span class="s2">"same_page_anchor"</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">link_type</span> <span class="o">=</span> <span class="s2">"other"</span>
+
+        <span class="n">wiki_link_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"source_url"</span><span class="p">:</span> <span class="n">wikipedia_url</span><span class="p">,</span>
+                <span class="s2">"link_text"</span><span class="p">:</span> <span class="n">link_text</span><span class="p">,</span>
+                <span class="s2">"href_raw"</span><span class="p">:</span> <span class="n">href_raw</span><span class="p">,</span>
+                <span class="s2">"href_absolute"</span><span class="p">:</span> <span class="n">href_absolute</span><span class="p">,</span>
+                <span class="s2">"link_type"</span><span class="p">:</span> <span class="n">link_type</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+<span class="n">wiki_links_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">wiki_link_rows</span><span class="p">)</span>
+<span class="n">wiki_links_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e1ac2d03">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Quick audit: how many links of each type did we collect?</span>
+<span class="n">wiki_links_df</span><span class="p">[</span><span class="s2">"link_type"</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d097500a">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Save-the-Wikipedia-Processed-Outputs">Save the Wikipedia Processed Outputs<a class="anchor-link" href="#Save-the-Wikipedia-Processed-Outputs">¶</a></h2><p>The Wikipedia example produces several processed tables because the page has several possible units:</p>
+<ul>
+<li>one row per paragraph</li>
+<li>one row per heading</li>
+<li>one row per link</li>
+</ul>
+<p>This is different from the Quotes example, where the main output was one row per quote.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f32e2cba">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">wiki_paragraphs_path</span> <span class="o">=</span> <span class="n">processed_dir</span> <span class="o">/</span> <span class="s2">"notebook_wikipedia_dsa_paragraphs.csv"</span>
+<span class="n">wiki_headings_path</span> <span class="o">=</span> <span class="n">processed_dir</span> <span class="o">/</span> <span class="s2">"notebook_wikipedia_dsa_headings.csv"</span>
+<span class="n">wiki_links_path</span> <span class="o">=</span> <span class="n">processed_dir</span> <span class="o">/</span> <span class="s2">"notebook_wikipedia_dsa_links.csv"</span>
+
+<span class="n">wiki_paragraphs_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">wiki_paragraphs_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">wiki_headings_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">wiki_headings_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">wiki_links_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">wiki_links_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">wiki_paragraphs_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">wiki_headings_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">wiki_links_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b4d9b8ff">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="What-the-Wikipedia-Example-Adds">What the Wikipedia Example Adds<a class="anchor-link" href="#What-the-Wikipedia-Example-Adds">¶</a></h2><p>The Wikipedia API example from Day 1 taught structured API responses: endpoint, parameters, JSON, IDs, pagination, and page-level requests.</p>
+<p>The Wikipedia HTML example teaches page-structure extraction: a page may contain multiple possible units of analysis.</p>
+<p>For a document-like page, ask:</p>
+<ul>
+<li>Do I want paragraphs, headings, links, tables, references, or images?</li>
+<li>What selector defines the main content area?</li>
+<li>What page elements should be excluded?</li>
+<li>Which filtering rules did I apply?</li>
+<li>Would an API be more stable and reproducible than scraping the page HTML?</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f1a284a4">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="Clean-Practice-Page:-Quotes-to-Scrape">Clean Practice Page: Quotes to Scrape<a class="anchor-link" href="#Clean-Practice-Page:-Quotes-to-Scrape">¶</a></h1><p>Wikipedia is useful for continuity, but it is a document page. Many scraping tasks instead involve repeated records: cards, list items, products, posts, search results, or course rows.</p>
+<p><code>quotes.toscrape.com</code> is a small practice site designed for this. We keep it because it makes the repeated-record pattern easy to see before the MethodsNET exercise.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=5af38e00">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7693,12 +8131,7 @@ contacting the site again and preserves evidence of what the scraper saw.</p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">outdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"data"</span><span class="p">)</span>
-<span class="n">raw_dir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="s2">"raw"</span>
-<span class="c1"># mkdir(..., parents=True, exist_ok=True) creates the folder and any missing parent folders, without failing if it already exists.</span>
-<span class="n">raw_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="n">raw_html_path</span> <span class="o">=</span> <span class="n">raw_dir</span> <span class="o">/</span> <span class="s2">"notebook_quotes_raw.html"</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">raw_html_path</span> <span class="o">=</span> <span class="n">raw_dir</span> <span class="o">/</span> <span class="s2">"notebook_quotes_raw.html"</span>
 <span class="n">raw_html_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">or</span> <span class="s2">"utf-8"</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Saved raw HTML:"</span><span class="p">,</span> <span class="n">raw_html_path</span><span class="p">)</span>
@@ -8070,11 +8503,7 @@ quote block.
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">processed_dir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="s2">"processed"</span>
-<span class="c1"># mkdir(..., parents=True, exist_ok=True) creates the folder and any missing parent folders, without failing if it already exists.</span>
-<span class="n">processed_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="n">quotes_path</span> <span class="o">=</span> <span class="n">processed_dir</span> <span class="o">/</span> <span class="s2">"notebook_quotes.csv"</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">quotes_path</span> <span class="o">=</span> <span class="n">processed_dir</span> <span class="o">/</span> <span class="s2">"notebook_quotes.csv"</span>
 <span class="n">links_path</span> <span class="o">=</span> <span class="n">processed_dir</span> <span class="o">/</span> <span class="s2">"notebook_quote_links.csv"</span>
 <span class="n">tags_path</span> <span class="o">=</span> <span class="n">processed_dir</span> <span class="o">/</span> <span class="s2">"notebook_quote_tags.csv"</span>
 
@@ -8092,414 +8521,22 @@ quote block.
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dd716400">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Second-Real-Page-Workflow:-Wikipedia-Article">Second Real-Page Workflow: Wikipedia Article<a class="anchor-link" href="#Second-Real-Page-Workflow:-Wikipedia-Article">¶</a></h1><p>The first workflow used <code>quotes.toscrape.com</code>, which is deliberately clean and built for scraping practice.</p>
-<p>Now we repeat the same workflow on a real document-like page: a Wikipedia article.</p>
-<p>This example is useful because it is not a list of neat cards. It has article text, headings, links, references, navigation, sidebars, and page metadata. That forces a different methodological question:</p>
-<blockquote>
-<p>Which parts of the page count as the data we want?</p>
-</blockquote>
-<p>For Wikipedia, the API is often better for reproducible article extraction. Here we use HTML scraping because Day 2 is about understanding web page structure.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d46291b7">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Why-Not-Start-with-a-News-Outlet?">Why Not Start with a News Outlet?<a class="anchor-link" href="#Why-Not-Start-with-a-News-Outlet?">¶</a></h2><p>News pages are realistic, but they are often difficult first classroom examples:</p>
-<ul>
-<li>paywalls and consent banners can block access</li>
-<li>HTML structures change frequently</li>
-<li>article text may be loaded dynamically</li>
-<li>pages contain advertising, tracking, and recommendation modules</li>
-<li>terms and <code>robots.txt</code> rules vary by outlet</li>
-<li>copying/exporting full article text can raise copyright concerns</li>
-</ul>
-<p>The same inspection logic applies to news pages, but Wikipedia is a safer bridge before moving to more fragile sites.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9d9730ef">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Fetch-the-Wikipedia-Page">Fetch the Wikipedia Page<a class="anchor-link" href="#Fetch-the-Wikipedia-Page">¶</a></h2><p>This is the same first step as before: send a request and receive raw HTML.</p>
-<p>We use a separate URL and separate output filenames so the Wikipedia example does not overwrite the Quotes example.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=744b95d3">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">wikipedia_url</span> <span class="o">=</span> <span class="s2">"https://en.wikipedia.org/wiki/Digital_Services_Act"</span>
-
-<span class="n">wikipedia_headers</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"User-Agent"</span><span class="p">:</span> <span class="s2">"methodsNET-VLOP-course/1.0 static scraping Wikipedia example"</span>
-<span class="p">}</span>
-
-<span class="c1"># requests.get() fetches the raw browser-page HTML.</span>
-<span class="n">wiki_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">wikipedia_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">wikipedia_headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-<span class="c1"># raise_for_status() stops the workflow if the server returns an HTTP error.</span>
-<span class="n">wiki_response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
-
-<span class="n">wiki_html</span> <span class="o">=</span> <span class="n">wiki_response</span><span class="o">.</span><span class="n">text</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Status:"</span><span class="p">,</span> <span class="n">wiki_response</span><span class="o">.</span><span class="n">status_code</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Characters of HTML:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wiki_html</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">wiki_html</span><span class="p">[:</span><span class="mi">500</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7c1baa7f">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Save-the-Raw-Wikipedia-HTML">Save the Raw Wikipedia HTML<a class="anchor-link" href="#Save-the-Raw-Wikipedia-HTML">¶</a></h2><p>As before, raw HTML is evidence. It lets us rerun parsing code without repeatedly contacting the website.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=09526acd">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">wiki_raw_path</span> <span class="o">=</span> <span class="n">raw_dir</span> <span class="o">/</span> <span class="s2">"notebook_wikipedia_dsa_raw.html"</span>
-<span class="n">wiki_raw_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">wiki_html</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">wiki_response</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">or</span> <span class="s2">"utf-8"</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Saved raw Wikipedia HTML:"</span><span class="p">,</span> <span class="n">wiki_raw_path</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f1742ccc">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Parse-and-Inspect-the-Wikipedia-Page">Parse and Inspect the Wikipedia Page<a class="anchor-link" href="#Parse-and-Inspect-the-Wikipedia-Page">¶</a></h2><p>A Wikipedia article page contains far more than article text. Before extracting, inspect broad structure: the title, main heading, paragraphs, headings, and links.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=33031482">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Parse the raw Wikipedia HTML into a searchable tree.</span>
-<span class="n">wiki_soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">wiki_html</span><span class="p">,</span> <span class="s2">"html.parser"</span><span class="p">)</span>
-
-<span class="c1"># The HTML &lt;title&gt; is the browser-tab title. It is not always identical to the article heading.</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"HTML title:"</span><span class="p">,</span> <span class="n">wiki_soup</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-
-<span class="c1"># h1 is usually the visible article title.</span>
-<span class="n">main_heading</span> <span class="o">=</span> <span class="n">wiki_soup</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">"h1"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Main heading:"</span><span class="p">,</span> <span class="n">main_heading</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">main_heading</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
-
-<span class="c1"># These broad counts include article content plus some non-article page elements.</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Paragraph elements:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wiki_soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"p"</span><span class="p">)))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Links:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wiki_soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"a[href]"</span><span class="p">)))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"h2/h3 headings:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wiki_soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"h2, h3"</span><span class="p">)))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=84082bd5">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Identify-the-Main-Content-Area">Identify the Main Content Area<a class="anchor-link" href="#Identify-the-Main-Content-Area">¶</a></h2><p>If we select all paragraphs from the whole page, we may capture navigation, footers, sidebars, or other non-article material.</p>
-<p>A better first choice is to restrict extraction to the article content area. On Wikipedia, the parsed article body is usually inside <code>.mw-parser-output</code>.</p>
-<p>This is a selector choice and should be documented. If Wikipedia changes its HTML structure, this selector might need revision.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=16ed6bda">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Select the main parsed article content area.</span>
-<span class="n">content</span> <span class="o">=</span> <span class="n">wiki_soup</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s2">".mw-parser-output"</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Could not find article content area. Inspect the page structure again."</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Found article content area"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=308e7f28">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Extract-Article-Paragraphs">Extract Article Paragraphs<a class="anchor-link" href="#Extract-Article-Paragraphs">¶</a></h2><p>Here the unit is not a repeated card. The page is a document, so we extract paragraphs from the main content area.</p>
-<p>We also filter very short paragraphs. That filtering rule is a methodological choice: it changes what becomes part of the processed dataset.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=83bb738e">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">paragraph_rows</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="c1"># "p" selects paragraph elements inside the article content area.</span>
-    <span class="k">for</span> <span class="n">paragraph_number</span><span class="p">,</span> <span class="n">paragraph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"p"</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="c1"># get_text(" ", strip=True) extracts readable paragraph text.</span>
-        <span class="n">paragraph_text</span> <span class="o">=</span> <span class="n">paragraph</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="c1"># Skip empty or very short paragraphs in this teaching example.</span>
-        <span class="c1"># In a real project, this filtering rule should be documented.</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">paragraph_text</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">40</span><span class="p">:</span>
-            <span class="k">continue</span>
-
-        <span class="n">paragraph_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">"source_url"</span><span class="p">:</span> <span class="n">wikipedia_url</span><span class="p">,</span>
-                <span class="s2">"paragraph_number"</span><span class="p">:</span> <span class="n">paragraph_number</span><span class="p">,</span>
-                <span class="s2">"text"</span><span class="p">:</span> <span class="n">paragraph_text</span><span class="p">,</span>
-                <span class="s2">"n_characters"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">paragraph_text</span><span class="p">),</span>
-                <span class="s2">"n_words"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">paragraph_text</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-
-<span class="n">wiki_paragraphs_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">paragraph_rows</span><span class="p">)</span>
-<span class="n">wiki_paragraphs_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=17df1acc">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Extract-Headings-as-Document-Structure">Extract Headings as Document Structure<a class="anchor-link" href="#Extract-Headings-as-Document-Structure">¶</a></h2><p>Headings give a rough map of the article. This is different from extracting paragraph text; it tells us how the document is organized.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e9d1d8a2">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">heading_rows</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">heading</span> <span class="ow">in</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"h2, h3"</span><span class="p">):</span>
-        <span class="n">heading_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">"source_url"</span><span class="p">:</span> <span class="n">wikipedia_url</span><span class="p">,</span>
-                <span class="s2">"level"</span><span class="p">:</span> <span class="n">heading</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                <span class="s2">"heading"</span><span class="p">:</span> <span class="n">heading</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-
-<span class="n">wiki_headings_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">heading_rows</span><span class="p">)</span>
-<span class="n">wiki_headings_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0077b382">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Extract-and-Classify-Links">Extract and Classify Links<a class="anchor-link" href="#Extract-and-Classify-Links">¶</a></h2><p>Links are analytically different from paragraphs. They can point to other Wikipedia pages, external sources, same-page anchors, files, or other resources.</p>
-<p>We classify links because those types should not be interpreted as the same thing.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e03b5a01">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">wiki_link_rows</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"a[href]"</span><span class="p">):</span>
-        <span class="n">href_raw</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"href"</span><span class="p">)</span>
-        <span class="n">link_text</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="c1"># Skip empty links or links without readable anchor text.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">href_raw</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">link_text</span><span class="p">:</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># urljoin turns relative Wikipedia links into absolute URLs.</span>
-        <span class="n">href_absolute</span> <span class="o">=</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">wikipedia_url</span><span class="p">,</span> <span class="n">href_raw</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">href_raw</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/wiki/"</span><span class="p">):</span>
-            <span class="n">link_type</span> <span class="o">=</span> <span class="s2">"internal_wikipedia_link"</span>
-        <span class="k">elif</span> <span class="n">href_raw</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"http"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">href_raw</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"//"</span><span class="p">):</span>
-            <span class="n">link_type</span> <span class="o">=</span> <span class="s2">"external_link"</span>
-        <span class="k">elif</span> <span class="n">href_raw</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">):</span>
-            <span class="n">link_type</span> <span class="o">=</span> <span class="s2">"same_page_anchor"</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">link_type</span> <span class="o">=</span> <span class="s2">"other"</span>
-
-        <span class="n">wiki_link_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">"source_url"</span><span class="p">:</span> <span class="n">wikipedia_url</span><span class="p">,</span>
-                <span class="s2">"link_text"</span><span class="p">:</span> <span class="n">link_text</span><span class="p">,</span>
-                <span class="s2">"href_raw"</span><span class="p">:</span> <span class="n">href_raw</span><span class="p">,</span>
-                <span class="s2">"href_absolute"</span><span class="p">:</span> <span class="n">href_absolute</span><span class="p">,</span>
-                <span class="s2">"link_type"</span><span class="p">:</span> <span class="n">link_type</span><span class="p">,</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-
-<span class="n">wiki_links_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">wiki_link_rows</span><span class="p">)</span>
-<span class="n">wiki_links_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e1ac2d03">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Quick audit: how many links of each type did we collect?</span>
-<span class="n">wiki_links_df</span><span class="p">[</span><span class="s2">"link_type"</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d097500a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Save-the-Wikipedia-Processed-Outputs">Save the Wikipedia Processed Outputs<a class="anchor-link" href="#Save-the-Wikipedia-Processed-Outputs">¶</a></h2><p>The Wikipedia example produces several processed tables because the page has several possible units:</p>
-<ul>
-<li>one row per paragraph</li>
-<li>one row per heading</li>
-<li>one row per link</li>
-</ul>
-<p>This is different from the Quotes example, where the main output was one row per quote.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f32e2cba">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">wiki_paragraphs_path</span> <span class="o">=</span> <span class="n">processed_dir</span> <span class="o">/</span> <span class="s2">"notebook_wikipedia_dsa_paragraphs.csv"</span>
-<span class="n">wiki_headings_path</span> <span class="o">=</span> <span class="n">processed_dir</span> <span class="o">/</span> <span class="s2">"notebook_wikipedia_dsa_headings.csv"</span>
-<span class="n">wiki_links_path</span> <span class="o">=</span> <span class="n">processed_dir</span> <span class="o">/</span> <span class="s2">"notebook_wikipedia_dsa_links.csv"</span>
-
-<span class="n">wiki_paragraphs_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">wiki_paragraphs_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">wiki_headings_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">wiki_headings_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">wiki_links_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">wiki_links_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">wiki_paragraphs_path</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">wiki_headings_path</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">wiki_links_path</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b4d9b8ff">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="What-This-Example-Adds">What This Example Adds<a class="anchor-link" href="#What-This-Example-Adds">¶</a></h2><p>The Quotes example teaches repeated records: one quote block becomes one row.</p>
-<p>The Wikipedia example teaches document extraction: a page may contain multiple possible units of analysis.</p>
-<p>For a document-like page, ask:</p>
-<ul>
-<li>Do I want paragraphs, headings, links, tables, references, or images?</li>
-<li>What selector defines the main content area?</li>
-<li>What page elements should be excluded?</li>
-<li>Which filtering rules did I apply?</li>
-<li>Would an API be more stable and reproducible than scraping the page HTML?</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b3fa16fa">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Exercise">Exercise<a class="anchor-link" href="#Exercise">¶</a></h1><p>Adapt the scraper in one way:</p>
+<h1 id="Exercise">Exercise<a class="anchor-link" href="#Exercise">¶</a></h1><p>For a short individual/pair exercise, use the MethodsNET course-list/detail example in <code>day_2_beautifulsoup_extraction_patterns.ipynb</code>.</p>
+<p>The goal is to transfer the same static-scraping logic to a more realistic course website:</p>
+<ol>
+<li>inspect the HTML before extracting;</li>
+<li>identify the repeated record container;</li>
+<li>extract links and visible text;</li>
+<li>document which selectors assume a stable table or page structure;</li>
+<li>compare the scaffolded exercise with the solution notebook after trying it.</li>
+</ol>
+<p>Optional warm-up using the quotes page:</p>
 <ol>
 <li>Extract the author profile URLs.</li>
 <li>Extract the next-page URL.</li>
@@ -8508,8 +8545,7 @@ quote block.
 <li>Save a short provenance note explaining the URL, selectors, and date.</li>
 </ol>
 <h1 id="Key-Takeaway">Key Takeaway<a class="anchor-link" href="#Key-Takeaway">¶</a></h1><p>Scraping is not just "getting what is on a page".</p>
-<p>It involves choices about access, selectors, units of analysis, missing data,
-raw evidence, and documentation.</p>
+<p>It involves choices about access, selectors, units of analysis, missing data, raw evidence, and documentation.</p>
 </div>
 </div>
 </div>

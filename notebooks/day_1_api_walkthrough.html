@@ -7680,6 +7680,27 @@ what the API should do and what kind of data can come back.</p>
 </div>
 </div>
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7bebb03c">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Where-the-MediaWiki-API-Parameters-Are-Documented">Where the MediaWiki API Parameters Are Documented<a class="anchor-link" href="#Where-the-MediaWiki-API-Parameters-Are-Documented">¶</a></h2><p>The parameters in this notebook are not invented by us. They come from the official MediaWiki API documentation.</p>
+<p>Useful starting points:</p>
+<ul>
+<li><a href="https://www.mediawiki.org/wiki/API:Main_page">MediaWiki API main page</a>: overview of the API and general concepts.</li>
+<li><a href="https://www.mediawiki.org/wiki/API:Query">API:Query</a>: documentation for <code>action=query</code>, which is the main read-data action used here.</li>
+<li><a href="https://www.mediawiki.org/wiki/API:Search">API:Search</a>: documentation for <code>list=search</code>, including parameters such as <code>srsearch</code>, <code>srlimit</code>, and <code>sroffset</code>.</li>
+<li><a href="https://www.mediawiki.org/wiki/API:Continue">API:Continue</a>: explains continuation and pagination, including why APIs return tokens or offsets instead of all results at once.</li>
+<li><a href="https://www.mediawiki.org/wiki/Extension:TextExtracts#API">Extension:TextExtracts</a>: documentation for <code>prop=extracts</code>, including <code>exintro</code>, <code>explaintext</code>, and <code>exchars</code>.</li>
+<li><a href="https://en.wikipedia.org/w/api.php?action=help">API help endpoint</a>: machine-generated help from the live Wikipedia API.</li>
+</ul>
+<p>When adapting this script, first look up the relevant module in the documentation, then decide which parameters fit the research question. Parameters are not just technical settings: they define what can enter the dataset.</p>
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2fa72aa0">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
