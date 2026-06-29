@@ -36,17 +36,25 @@ FIELDNAMES = {
 
 def write_table(path: str | Path, rows: list[dict], fieldnames: list[str]) -> Path:
     """Write a CSV with stable headers, even when rows is empty."""
+    # Convert strings to Path objects so the rest of the function can use Path
+    # methods such as .parent and .open().
     path = Path(path)
+    # Create the output folder if it does not yet exist.
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
+        # DictWriter writes dictionaries as CSV rows using the fixed field order.
         writer = csv.DictWriter(f, fieldnames=fieldnames)
+        # Write headers even for empty tables so students can see the intended
+        # data structure.
         writer.writeheader()
+        # Write all extracted rows.
         writer.writerows(rows)
     return path
 
 
 def classify_link(href: str) -> str:
     """Classify common classroom-page link roles from their URL path."""
+    # startswith() is a simple rule-based classifier for known URL patterns.
     if href.startswith("/author/"):
         return "author_profile"
     if href.startswith("/tag/"):
@@ -64,6 +72,8 @@ def parse_page(url: str, html: str) -> dict[str, object]:
     # It will not see content that is added later by JavaScript in the browser.
     soup = BeautifulSoup(html, "html.parser")
 
+    # select_one returns the first matching element or None. Here we look for a
+    # metadata tag such as <meta name="description" content="...">.
     meta_description = soup.select_one("meta[name='description']")
 
     # The summary is intentionally modest. In a first scraping exercise, students
@@ -81,7 +91,10 @@ def parse_page(url: str, html: str) -> dict[str, object]:
 
     headings = []
     for level in ["h1", "h2", "h3"]:
+        # Loop over heading levels so one piece of code can extract h1, h2, h3.
         for heading in soup.select(level):
+            # get_text(" ", strip=True) extracts visible text, joins internal
+            # whitespace with spaces, and trims leading/trailing whitespace.
             headings.append(
                 {
                     "source_url": url,
@@ -96,7 +109,10 @@ def parse_page(url: str, html: str) -> dict[str, object]:
         # attribute. urljoin converts relative links such as /about into full
         # URLs, which makes the output easier to audit later.
         text = a.get_text(" ", strip=True)
+        # Square brackets access a required attribute. This is safe here because
+        # the selector a[href] only selected links with an href attribute.
         href_raw = a["href"]
+        # urljoin handles both absolute URLs and relative paths.
         href = urljoin(url, href_raw)
         links.append(
             {
@@ -122,12 +138,14 @@ def parse_page(url: str, html: str) -> dict[str, object]:
         tags = [tag.get_text(" ", strip=True) for tag in tag_links]
         quote_text = text.get_text(" ", strip=True) if text else None
 
+        # One quote row keeps the main record in one table.
         quote_rows.append(
             {
                 "source_url": url,
                 "quote_number": quote_number,
                 "quote": quote_text,
                 "author": author.get_text(" ", strip=True) if author else None,
+                # If the author link is missing, store None instead of crashing.
                 "author_href": urljoin(url, author_link.get("href")) if author_link else None,
                 "tags": "|".join(tags),
                 "tag_count": len(tags),
@@ -135,6 +153,8 @@ def parse_page(url: str, html: str) -> dict[str, object]:
         )
 
         for tag_link in tag_links:
+            # A second tags table uses one row per quote-tag pair. This is better
+            # for counting/filtering tags than storing all tags in one cell.
             tag_rows.append(
                 {
                     "source_url": url,
@@ -147,6 +167,7 @@ def parse_page(url: str, html: str) -> dict[str, object]:
 
     pagination = []
     for a in soup.select("li.next a[href], .pager a[href]"):
+        # The comma in a CSS selector means OR: match either selector pattern.
         pagination.append(
             {
                 "source_url": url,
@@ -158,6 +179,8 @@ def parse_page(url: str, html: str) -> dict[str, object]:
 
     images = []
     for image in soup.select("img[src]"):
+        # Image URLs often appear as relative paths, so we again store both the
+        # raw attribute and the absolute URL.
         images.append(
             {
                 "source_url": url,
@@ -179,6 +202,8 @@ def parse_page(url: str, html: str) -> dict[str, object]:
 
 
 def main() -> None:
+    # Command-line arguments let the same scraper run against different allowed
+    # pages without editing the Python file.
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", required=True)
     parser.add_argument("--outdir", default="data")
@@ -202,11 +227,15 @@ def main() -> None:
     # scraper development safer: students can refine selectors without repeatedly
     # hitting the website.
     response = polite_get(args.url, delay_seconds=1.5)
+    # For static pages, response.text is the HTML source we will parse.
     html = response.text
+    # parse_page turns the raw HTML into several structured tables.
     parsed_page = parse_page(args.url, html)
+    # The summary dictionary is used both for JSON output and status printing.
     summary = parsed_page["summary"]
 
     outdir = Path(args.outdir)
+    # Build a filesystem-safe filename stem from the URL.
     safe_name = args.url.replace("https://", "").replace("http://", "")
     safe_name = "".join(c if c.isalnum() else "_" for c in safe_name)[:80]
 
@@ -223,7 +252,10 @@ def main() -> None:
     report_path = outdir / "reports" / f"scrape_{safe_name}_provenance.json"
 
     html_path.parent.mkdir(parents=True, exist_ok=True)
+    # Use the server-provided encoding if available, otherwise default to UTF-8.
     html_path.write_text(html, encoding=response.encoding or "utf-8")
+    # The following writes separate output tables so each extraction type can be
+    # inspected independently.
     write_json(summary_path, summary)
     write_table(headings_path, parsed_page["headings"], FIELDNAMES["headings"])
     write_table(links_path, parsed_page["links"], FIELDNAMES["links"])
@@ -265,3 +297,41 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------------------
+# How to run this script from the command line
+# ---------------------------------------------------------------------------
+#
+# Run a Wikipedia static-HTML comparison from the repository root:
+#
+#     python scripts/runnable_workflows/03_static_scraper.py \
+#       --url https://en.wikipedia.org/wiki/Digital_Services_Act \
+#       --outdir data
+#
+# Run the clean repeated-record practice page:
+#
+#     python scripts/runnable_workflows/03_static_scraper.py \
+#       --url https://quotes.toscrape.com/ \
+#       --outdir data
+#
+# Optional controlled classroom override:
+#
+#     python scripts/runnable_workflows/03_static_scraper.py \
+#       --url https://quotes.toscrape.com/ \
+#       --outdir data \
+#       --ignore-robots
+#
+# What each part means:
+#
+# - --url
+#   The web page to fetch and parse. For Wikipedia, the generic heading/link/image
+#   outputs are useful. For quotes.toscrape.com, quote-specific outputs are also
+#   populated.
+#
+# - --outdir
+#   The folder where raw HTML, processed CSV files, and provenance are saved.
+#
+# - --ignore-robots
+#   Overrides the robots.txt block in a controlled teaching demo. Do not use
+#   this casually; robots.txt is one access signal that should be taken seriously.

@@ -18,6 +18,8 @@ API_URL = "https://en.wikipedia.org/w/api.php"
 
 def chunked(items: list[Any], size: int) -> list[list[Any]]:
     """Split a list into same-sized chunks, keeping the final shorter chunk."""
+    # range(0, len(items), size) creates starting positions such as 0, 10, 20.
+    # items[start : start + size] then slices one batch from that start position.
     return [items[start : start + size] for start in range(0, len(items), size)]
 
 
@@ -56,6 +58,8 @@ def collect_search(query: str, pages: int, page_size: int) -> tuple[list[dict], 
         # failed HTTP statuses. In real projects, you would also log rate-limit
         # headers and retry behavior.
         response = polite_get(API_URL, params=params)
+        # .json() parses the response body from JSON text into Python dictionaries
+        # and lists. This only works if the server really returned JSON.
         payload = response.json()
 
         # Store the full payload, not only the fields we currently care about.
@@ -88,6 +92,8 @@ def collect_search(query: str, pages: int, page_size: int) -> tuple[list[dict], 
 
         # If the API returns no continuation token, we have reached the last page
         # of available results for this query.
+        # MediaWiki tells us the next offset in payload["continue"]. If that key
+        # is absent, there is no next page to request.
         continuation = payload.get("continue", {})
         if not continuation:
             break
@@ -114,6 +120,8 @@ def collect_article_extracts(
     pageids = []
     seen_pageids = set()
     for row in search_rows:
+        # Each search row came from the first API step. We pull out the pageid
+        # because pageids are the stable bridge to the second API step.
         pageid = row.get("pageid")
         if pageid and pageid not in seen_pageids:
             pageids.append(pageid)
@@ -123,6 +131,8 @@ def collect_article_extracts(
     raw_pages: list[dict[str, Any]] = []
 
     for batch_number, pageid_batch in enumerate(chunked(pageids, batch_size), start=1):
+        # enumerate(..., start=1) gives us a human-readable batch counter for
+        # provenance while we loop over batches of page IDs.
         params = {
             "action": "query",
             # prop="info|extracts" asks for page-level metadata and text extracts.
@@ -153,6 +163,7 @@ def collect_article_extracts(
             params["exchars"] = extract_chars
 
         response = polite_get(API_URL, params=params)
+        # Again, this turns the API's JSON response into normal Python objects.
         payload = response.json()
 
         raw_pages.append(
@@ -167,6 +178,8 @@ def collect_article_extracts(
         )
 
         for page in payload.get("query", {}).get("pages", []):
+            # formatversion=2 returns pages as a list. We keep one article row per
+            # page so it can later be merged back to the search table by pageid.
             article_rows.append(
                 {
                     "pageid": page.get("pageid"),
@@ -188,11 +201,17 @@ def merge_search_and_articles(
 
     # The page-level API response may come back in a different order from the
     # search results, so we merge by pageid rather than position.
+    # Build a lookup dictionary: pageid -> article row. This makes each merge
+    # below a direct lookup instead of a slow nested loop.
     articles_by_pageid = {row.get("pageid"): row for row in article_rows}
 
     merged_rows = []
     for search_row in search_rows:
+        # If an article request failed or returned no matching page, .get(..., {})
+        # keeps the search row and leaves article fields blank.
         article_row = articles_by_pageid.get(search_row.get("pageid"), {})
+        # {**search_row, **article_row} combines both dictionaries. If both have
+        # the same key, the article value wins.
         merged_rows.append({**search_row, **article_row})
 
     return merged_rows
@@ -215,13 +234,17 @@ def main() -> None:
     parser.add_argument("--outdir", default="data")
     args = parser.parse_args()
 
+    # stem becomes a readable, short filename component based on the query.
     stem = args.query.lower().replace(" ", "_")[:60]
     outdir = Path(args.outdir)
+    # Step 1: collect search-result records.
     search_rows, raw_search_pages = collect_search(args.query, args.pages, args.page_size)
+    # Step 2: use search result pageids to collect article URLs and extracts.
     article_rows, raw_article_pages = collect_article_extracts(
         search_rows,
         extract_chars=args.extract_chars,
     )
+    # Step 3: combine the search table and article table into one CSV-ready table.
     rows = merge_search_and_articles(search_rows, article_rows)
 
     # A simple but durable directory convention:
@@ -235,10 +258,14 @@ def main() -> None:
     write_jsonl(
         raw_path,
         [
+            # The star expands the generated search records into the surrounding
+            # list, so search and article raw records end up in one JSONL file.
             *(
                 {"request_type": "search", **raw_page}
                 for raw_page in raw_search_pages
             ),
+            # raw_article_pages is already a list of dictionaries, so this star
+            # expands those dictionaries into the same output list.
             *raw_article_pages,
         ],
     )
@@ -267,3 +294,44 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------------------
+# How to run this script from the command line
+# ---------------------------------------------------------------------------
+#
+# Run from the repository root:
+#
+#     python scripts/runnable_workflows/01_api_wikipedia.py \
+#       --query "digital services act" \
+#       --pages 1 \
+#       --page-size 2 \
+#       --extract-chars 300 \
+#       --outdir /tmp/methodsnet_api_test
+#
+# What each part means:
+#
+# - python
+#   Starts Python from your current environment.
+#
+# - scripts/runnable_workflows/01_api_wikipedia.py
+#   The path to this Wikipedia API workflow script.
+#
+# - --query "digital services act"
+#   The search string sent to the MediaWiki API. Changing this changes the
+#   population of records that can enter the dataset.
+#
+# - --pages 1
+#   The number of search-result batches to request. This is the script's
+#   stopping rule.
+#
+# - --page-size 2
+#   The number of search results requested per batch. In MediaWiki this maps to
+#   the srlimit parameter.
+#
+# - --extract-chars 300
+#   The maximum number of article-extract characters to request per page. Use 0
+#   for full extracts.
+#
+# - --outdir /tmp/methodsnet_api_test
+#   The folder where raw JSONL, processed CSV, and provenance files are saved.
