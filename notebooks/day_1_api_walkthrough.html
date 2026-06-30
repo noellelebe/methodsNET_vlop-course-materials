@@ -7681,7 +7681,7 @@ what the API should do and what kind of data can come back.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7bebb03c">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b120d888">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9440,7 +9440,7 @@ stopping rule explicit.</p>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [98]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">collect_wikipedia_search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">max_pages</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">pause_seconds</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
@@ -9524,12 +9524,12 @@ stopping rule explicit.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e3512da6">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=e3512da6">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [102]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">search_rows</span><span class="p">,</span> <span class="n">raw_pages</span> <span class="o">=</span> <span class="n">collect_wikipedia_search</span><span class="p">(</span>
@@ -9541,7 +9541,28 @@ stopping rule explicit.</p>
 <span class="c1"># pd.DataFrame(...) turns a list of row dictionaries into a rectangular table.</span>
 <span class="n">search_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">search_rows</span><span class="p">)</span>
 <span class="n">search_df</span><span class="p">[[</span><span class="s2">"page_number"</span><span class="p">,</span> <span class="s2">"pageid"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">,</span> <span class="s2">"wordcount"</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">search_df</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Collected so far: 25
+Collected so far: 50
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[102]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>50</pre>
 </div>
 </div>
 </div>
@@ -9569,7 +9590,7 @@ content, we request each page by <code>pageid</code>.</p>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [104]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_page_extract</span><span class="p">(</span><span class="n">pageid</span><span class="p">,</span> <span class="n">extract_chars</span><span class="o">=</span><span class="mi">1200</span><span class="p">):</span>
@@ -9610,12 +9631,12 @@ content, we request each page by <code>pageid</code>.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=21153d92">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=21153d92">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [105]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">page_rows</span> <span class="o">=</span> <span class="p">[]</span>
@@ -9644,6 +9665,80 @@ content, we request each page by <code>pageid</code>.</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[105]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>pageid</th>
+<th>title</th>
+<th>fullurl</th>
+<th>extract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>65193550</td>
+<td>Digital Services Act</td>
+<td>https://en.wikipedia.org/wiki/Digital_Services...</td>
+<td>The Digital Services Act (DSA) is an EU regula...</td>
+</tr>
+<tr>
+<th>1</th>
+<td>66230371</td>
+<td>Digital Markets Act</td>
+<td>https://en.wikipedia.org/wiki/Digital_Markets_Act</td>
+<td>The Digital Markets Act (DMA) is an EU regulat...</td>
+</tr>
+<tr>
+<th>2</th>
+<td>25286840</td>
+<td>Taxation of digital goods</td>
+<td>https://en.wikipedia.org/wiki/Taxation_of_digi...</td>
+<td>Digital goods are software programs, music, vi...</td>
+</tr>
+<tr>
+<th>3</th>
+<td>295668</td>
+<td>Content moderation</td>
+<td>https://en.wikipedia.org/wiki/Content_moderation</td>
+<td>Content moderation, in the context of websites...</td>
+</tr>
+<tr>
+<th>4</th>
+<td>67646530</td>
+<td>Online Safety Act 2023</td>
+<td>https://en.wikipedia.org/wiki/Online_Safety_Ac...</td>
+<td>The Online Safety Act 2023 (OSA) (c. 50) is an...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=32e25299">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -9662,7 +9757,7 @@ content.</p>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [107]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">external_links_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -9701,12 +9796,12 @@ content.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=5861479e">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=5861479e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [108]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">external_links_record</span> <span class="o">=</span> <span class="n">external_links_payload</span><span class="p">[</span><span class="s2">"query"</span><span class="p">][</span><span class="s2">"pages"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -9734,6 +9829,52 @@ content.</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[108]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>pageid</th>
+<th>page_title</th>
+<th>external_links</th>
+<th>external_link_count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>74652</td>
+<td>Sarasota County, Florida</td>
+<td>[http://www.heraldtribune.com/apps/pbcs.dll/se...</td>
+<td>109</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=06adfe2b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -9748,12 +9889,12 @@ of URLs.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=0e81d616">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0e81d616">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [109]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">image_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -9783,6 +9924,27 @@ of URLs.</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[109]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>['File:Black-necked Stilt - Myakka River State Park.jpg',
+ "File:Ca' d'Zan Ringling Campus.JPG",
+ 'File:Flag of Florida.svg',
+ 'File:Flag of the United States.svg',
+ 'File:Florida 681.svg',
+ 'File:Florida 72.svg',
+ 'File:Florida 758.svg',
+ 'File:Florida 776.svg',
+ 'File:Florida 777.svg',
+ 'File:Florida 780.svg']</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8c3c12d7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -9794,12 +9956,12 @@ of URLs.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=6eb11deb">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=6eb11deb">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [110]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="n">image_titles</span><span class="p">:</span>
@@ -9853,6 +10015,177 @@ of URLs.</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[110]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>file_title</th>
+<th>image_url</th>
+<th>mime</th>
+<th>width</th>
+<th>height</th>
+<th>size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>File:Venice Beach.jpg</td>
+<td>https://upload.wikimedia.org/wikipedia/commons...</td>
+<td>image/jpeg</td>
+<td>960</td>
+<td>720</td>
+<td>131802</td>
+</tr>
+<tr>
+<th>1</th>
+<td>File:US 41.svg</td>
+<td>https://upload.wikimedia.org/wikipedia/commons...</td>
+<td>image/svg+xml</td>
+<td>600</td>
+<td>600</td>
+<td>3563</td>
+</tr>
+<tr>
+<th>2</th>
+<td>File:US 301.svg</td>
+<td>https://upload.wikimedia.org/wikipedia/commons...</td>
+<td>image/svg+xml</td>
+<td>750</td>
+<td>600</td>
+<td>6734</td>
+</tr>
+<tr>
+<th>3</th>
+<td>File:Seal of Sarasota County.png</td>
+<td>https://upload.wikimedia.org/wikipedia/commons...</td>
+<td>image/png</td>
+<td>200</td>
+<td>200</td>
+<td>41120</td>
+</tr>
+<tr>
+<th>4</th>
+<td>File:Sarasota Skyline.jpeg</td>
+<td>https://upload.wikimedia.org/wikipedia/commons...</td>
+<td>image/jpeg</td>
+<td>4032</td>
+<td>3024</td>
+<td>3023443</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bd12fbf6">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [111]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Download image</span>
+
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlparse</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># Downloading image bytes is a different step from collecting image metadata.</span>
+<span class="c1"># It creates larger files, may raise licensing questions, and should be done only</span>
+<span class="c1"># if the research question actually needs image content.</span>
+<span class="n">image_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"data/raw/images"</span><span class="p">)</span>
+<span class="n">image_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">image_rows</span><span class="p">:</span>
+    <span class="n">image_url</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">"image_url"</span><span class="p">]</span>
+
+    <span class="c1"># Some file records may not have a direct URL. Skip those cleanly.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">image_url</span><span class="p">:</span>
+        <span class="k">continue</span>
+
+    <span class="c1"># The filename is taken from the URL path, for example something.jpg.</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">urlparse</span><span class="p">(</span><span class="n">image_url</span><span class="p">)</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">output_path</span> <span class="o">=</span> <span class="n">image_dir</span> <span class="o">/</span> <span class="n">filename</span>
+
+    <span class="c1"># This request downloads the binary image content, not JSON.</span>
+    <span class="n">image_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">image_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">image_response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+    <span class="c1"># write_bytes is used for binary files such as images. write_text would be</span>
+    <span class="c1"># wrong here because image files are not plain text.</span>
+    <span class="n">output_path</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">image_response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Saved:"</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
+
+    <span class="c1"># Pause between file downloads so the script does not make rapid-fire</span>
+    <span class="c1"># requests to Wikimedia file servers.</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Saved: data/raw/images/Venice_Beach.jpg
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">HTTPError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[111], line 25</span>
+<span class="ansi-green-intense-fg ansi-bold">     23</span> <span style="color: rgb(95,135,135)"># This request downloads the binary image content, not JSON.</span>
+<span class="ansi-green-intense-fg ansi-bold">     24</span> image_response <span style="color: rgb(98,98,98)">=</span> requests<span style="color: rgb(98,98,98)">.</span>get(image_url, headers<span style="color: rgb(98,98,98)">=</span>headers, timeout<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">30</span>)
+<span class="ansi-green-fg">---&gt; 25</span> <span class="ansi-yellow-bg">image_response</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">raise_for_status</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     27</span> <span style="color: rgb(95,135,135)"># write_bytes is used for binary files such as images. write_text would be</span>
+<span class="ansi-green-intense-fg ansi-bold">     28</span> <span style="color: rgb(95,135,135)"># wrong here because image files are not plain text.</span>
+<span class="ansi-green-intense-fg ansi-bold">     29</span> output_path<span style="color: rgb(98,98,98)">.</span>write_bytes(image_response<span style="color: rgb(98,98,98)">.</span>content)
+
+File <span class="ansi-green-fg">/opt/anaconda3/envs/noelle/lib/python3.9/site-packages/requests/models.py:1024</span>, in <span class="ansi-cyan-fg">Response.raise_for_status</span><span class="ansi-blue-fg">(self)</span>
+<span class="ansi-green-intense-fg ansi-bold">   1019</span>     http_error_msg <span style="color: rgb(98,98,98)">=</span> (
+<span class="ansi-green-intense-fg ansi-bold">   1020</span>         <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">"</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>status_code<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> Server Error: </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>reason<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> for url: </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>url<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)">"</span>
+<span class="ansi-green-intense-fg ansi-bold">   1021</span>     )
+<span class="ansi-green-intense-fg ansi-bold">   1023</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> http_error_msg:
+<span class="ansi-green-fg">-&gt; 1024</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> HTTPError(http_error_msg, response<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(0,135,0)">self</span>)
+
+<span class="ansi-red-fg">HTTPError</span>: 429 Client Error: Too Many Requests (015d12c) for url: https://upload.wikimedia.org/wikipedia/commons/d/d4/US_41.svg</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=32b7793c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -9880,7 +10213,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [112]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">outdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"data"</span><span class="p">)</span>
@@ -9913,7 +10246,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [113]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">raw_path</span> <span class="o">=</span> <span class="n">raw_dir</span> <span class="o">/</span> <span class="s2">"notebook_wikipedia_raw.json"</span>
@@ -9941,7 +10274,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [114]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># to_json(...) saves structured data as JSON, which is useful for raw API responses and provenance records.</span>
@@ -9970,7 +10303,7 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [115]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">provenance</span> <span class="o">=</span> <span class="p">{</span>
@@ -10006,12 +10339,12 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=ce8ef998">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ce8ef998">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [116]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">raw_path</span><span class="p">)</span>
@@ -10019,6 +10352,22 @@ For Day 1, metadata and URLs are enough unless there is extra time.
 <span class="nb">print</span><span class="p">(</span><span class="n">pages_processed_path</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">provenance_path</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>data/raw/notebook_wikipedia_raw.json
+data/processed/notebook_wikipedia_search_results.csv
+data/processed/notebook_wikipedia_page_extracts.csv
+data/reports/notebook_wikipedia_provenance.json
+</pre>
 </div>
 </div>
 </div>
